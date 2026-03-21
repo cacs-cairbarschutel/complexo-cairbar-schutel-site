@@ -1,20 +1,116 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+
 <head>
-
-<meta charset="utf-8">
-
-<title>Admin</title>
-
-<script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Blog - CACS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" type="image/x-icon" href="https://cacs-cairbarschutel.org.br/wp-content/uploads/2024/09/fav-1.png">
 </head>
 
-<body>
+<body class="admin-page">
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <img src="https://cacs-cairbarschutel.org.br/wp-content/uploads/2023/01/Logo-Cairbar-Branco.png" alt="CACS Logo">
+                </a>
+            </div>
 
-<h1>Painel do Blog</h1>
+            <nav class="main-nav admin-nav">
+                <ul>
+                    <li><a href="../index.html">Voltar para a home</a></li>
+                    <li><a href="../blog.html">Abrir blog público</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
+    <main class="admin-main">
+        <section class="admin-hero">
+            <div class="container admin-hero__content fade-in-up">
+                <span class="blog-kicker">Painel interno</span>
+                <h1>Gerencie os posts do blog</h1>
+                <p>Crie, edite e exclua publicações salvas no localStorage. Os posts publicados aparecem automaticamente na home e na página do blog.</p>
+                <div class="admin-hero__actions">
+                    <a href="../index.html#blog" class="btn btn-primary">Ver seção do blog</a>
+                    <a href="../blog.html" class="btn btn-secondary">Abrir blog público</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-dashboard">
+            <div class="container admin-grid">
+                <section class="admin-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <span class="panel-eyebrow">Novo conteúdo</span>
+                            <h2>Criar ou editar post</h2>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-small" id="cancel-edit" hidden>Cancelar edição</button>
+                    </div>
+
+                    <form id="blog-form" class="admin-form">
+                        <div class="form-grid">
+                            <label class="field">
+                                <span>Título</span>
+                                <input type="text" name="title" placeholder="Título do post" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Autor</span>
+                                <input type="text" name="author" placeholder="Nome do autor" required>
+                            </label>
+
+                            <label class="field field--full">
+                                <span>Descrição</span>
+                                <textarea name="description" rows="3" placeholder="Resumo curto para os cards" required></textarea>
+                            </label>
+
+                            <label class="field field--full">
+                                <span>URL da imagem</span>
+                                <input type="text" name="image" placeholder="Fotos/minha-imagem.jpg" required>
+                            </label>
+
+                            <label class="field field--full">
+                                <span>Conteúdo</span>
+                                <textarea name="content" rows="8" placeholder="Texto completo do post" required></textarea>
+                            </label>
+
+                            <label class="field">
+                                <span>Status</span>
+                                <select name="status" required>
+                                    <option value="draft">Rascunho</option>
+                                    <option value="published">Publicado</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Publicar post</button>
+                        </div>
+                    </form>
+                </section>
+
+                <aside class="admin-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <span class="panel-eyebrow">Publicações</span>
+                            <h2>Posts cadastrados</h2>
+                        </div>
+                    </div>
+
+                    <div id="posts-list" class="admin-posts-list"></div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <script src="../script.js"></script>
 </body>
+
 </html>

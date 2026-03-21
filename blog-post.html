@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - CACS</title>
+    <title>Post do Blog - CACS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -31,11 +31,8 @@
             <nav class="main-nav">
                 <ul>
                     <li><a href="index.html#impacto">SOBRE NÓS</a></li>
-                    <li><a href="index.html#sobre">PROGRAMAS SOCIAIS</a></li>
-                    <li><a href="index.html#brecho">BRECHÓ</a></li>
-                    <li><a href="index.html#eventos">EVENTOS</a></li>
                     <li><a href="index.html#blog">BLOG</a></li>
-                    <li><a href="index.html#contato">CONTATO</a></li>
+                    <li><a href="blog.html">TODOS OS POSTS</a></li>
                     <li><a href="doacao.html" class="btn btn-primary" style="padding: 8px 24px; font-size: 0.9rem; color: var(--secondary-color);">DOE AGORA</a></li>
                 </ul>
             </nav>
@@ -43,18 +40,8 @@
     </header>
 
     <main>
-        <section class="page-header page-header--blog">
-            <div class="container fade-in-up">
-                <span class="blog-kicker">Blog do CACS</span>
-                <h1>Publicações recentes</h1>
-                <p>Os posts publicados no painel admin aparecem aqui automaticamente a partir do localStorage.</p>
-            </div>
-        </section>
-
-        <section class="blog-index-section">
-            <div class="container">
-                <div id="blog-posts" class="blog-grid"></div>
-            </div>
+        <section class="blog-detail-section">
+            <div class="container" id="post-detail"></div>
         </section>
     </main>
 
