@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doe Agora - CACS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="https://cacs-cairbarschutel.org.br/wp-content/uploads/2024/09/fav-1.png">
+</head>
+
+<body>
+    <!-- Cabeçalho / Navegação -->
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="https://cacs-cairbarschutel.org.br/wp-content/uploads/2023/01/Logo-Cairbar-Branco.png"
+                        alt="CACS Logo">
+                </a>
+            </div>
+
+            <input type="checkbox" id="nav-toggle" class="nav-toggle-input">
+            <label for="nav-toggle" class="menu-toggle" aria-label="Abrir Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html#impacto">SOBRE NÓS</a></li>
+                    <li><a href="index.html#sobre">PROGRAMAS SOCIAIS</a></li>
+                    <li><a href="index.html">BRECHÓ</a></li>
+                    <li><a href="index.html">EVENTOS</a></li>
+                    <li><a href="index.html#faca-parte">COMO APOIAR</a></li>
+                    <li><a href="index.html#contato">CONTATO</a></li>
+                    <li><a href="doacao.html" class="btn btn-primary"
+                            style="padding: 8px 24px; font-size: 0.9rem; color: var(--secondary-color);">DOE AGORA</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-header"
+            style="background-color: var(--secondary-color); color: #fff; padding: 60px 0; text-align: center;">
+            <div class="container fade-in-up">
+                <h1 style="font-size: 3rem; margin-bottom: 10px; color: var(--primary-color);">Faça a Diferença</h1>
+                <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto;">Sua doação ajuda a transformar vidas e
+                    construir um futuro melhor para milhares de famílias.</p>
+            </div>
+        </section>
+
+        <!-- Tópicos de Doação -->
+        <section class="donation-options" style="padding: 60px 0;">
+            <div class="container">
+                <div class="stats-grid" style="align-items: stretch;">
+                    <!-- Opção 1: PIX/Financeiro -->
+                    <div class="stat-card fade-in-up"
+                        style="border: 1px solid #eee; text-align: left; display: flex; flex-direction: column; height: 100%;">
+                        <h3 style="color: var(--secondary-color); margin-bottom: 15px; font-size: 1.5rem;">Doação
+                            Financeira via PIX</h3>
+                        <p style="color: #555; margin-bottom: 20px; flex-grow: 1;">Contribua com qualquer valor para
+                            apoiar a
+                            manutenção dos nossos projetos diários.</p>
+                        <div
+                            style="background: var(--bg-light); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                            <strong>Chave PIX (CNPJ):</strong><br>
+                            <span style="color: var(--secondary-color); font-size: 1.1rem;">12.345.678/0001-90</span>
+                        </div>
+                        <a href="#" class="btn btn-primary"
+                            style="display: block; text-align: center; width: 100%; margin-top: auto;">Copiar Chave
+                            PIX</a>
+                    </div>
+
+                    <!-- Opção 2: Alimentos / Roupas -->
+                    <div class="stat-card fade-in-up"
+                        style="transition-delay: 0.1s; border: 1px solid #eee; text-align: left; display: flex; flex-direction: column; height: 100%;">
+                        <h3 style="color: var(--secondary-color); margin-bottom: 15px; font-size: 1.5rem;">Doações
+                            Físicas</h3>
+                        <p style="color: #555; margin-bottom: 20px; flex-grow: 1;">Arrecadamos alimentos não perecíveis,
+                            roupas e
+                            itens de higiene para o brechó e cestas básicas.</p>
+                        <div
+                            style="background: var(--bg-light); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                            <strong>Ponto de Coleta:</strong><br>
+                            Rua Francisco Preto, 213<br>Vila Morse, SP
+                        </div>
+                        <a href="https://maps.google.com/?q=Rua+Francisco+Preto,+213+-+Vila+Morse,+SP" target="_blank"
+                            class="btn btn-secondary"
+                            style="display: block; text-align: center; width: 100%; margin-top: auto;">Ver no Mapa</a>
+                    </div>
+
+                    <!-- Opção 3: Empresa Parceira/Voluntariado -->
+                    <div class="stat-card fade-in-up"
+                        style="transition-delay: 0.2s; border: 1px solid #eee; text-align: left; display: flex; flex-direction: column; height: 100%;">
+                        <h3 style="color: var(--secondary-color); margin-bottom: 15px; font-size: 1.5rem;">Voluntariado
+                            e Parcerias</h3>
+                        <p style="color: #555; margin-bottom: 20px; flex-grow: 1;">Junte-se à nossa equipe como
+                            voluntário ou torne
+                            sua empresa uma parceira transformadora.</p>
+                        <ul style="color: #555; margin-bottom: 20px; padding-left: 20px; list-style-type: disc;">
+                            <li>Apoio pedagógico</li>
+                            <li>Apoio em eventos e logística</li>
+                            <li>Investimento social privado</li>
+                        </ul>
+                        <a href="index.html#contato" class="btn btn-primary"
+                            style="display: block; text-align: center; width: 100%; margin-top: auto;">Fale Conosco</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="social-links">
+                <a href="https://www.facebook.com/cacscairbarschutel/?locale=pt_BR" aria-label="Facebook"
+                    target="_blank">Facebook</a>
+                <a href="https://www.linkedin.com/company/cacs-assistencial/posts/?feedView=all" aria-label="LinkedIn"
+                    target="_blank">LinkedIn</a>
+                <a href="https://www.instagram.com/cacs_cairbarschutel/" aria-label="Instagram"
+                    target="_blank">Instagram</a>
+            </div>
+            <p>&copy; 2026 Complexo Assistencial Cairbar Schutel</p>
+            <a href="#">Política de Privacidade</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

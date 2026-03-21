@@ -1,0 +1,793 @@
+/* Variáveis CSS */
+:root {
+    --primary-color: rgb(252, 234, 32);
+    /* Amarelo */
+    --primary-hover: rgb(220, 200, 20);
+    --secondary-color: rgb(18, 37, 56);
+    /* Azul Escuroo */
+    --secondary-hover: rgb(10, 25, 40);
+    --text-color: #333;
+    --bg-light: #f8f9fa;
+    --bg-white: #ffffff;
+    --transition-speed: 0.3s;
+    --container-width: 1200px;
+    --font-main: 'Roboto', sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Reset e Estilos Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    color: var(--text-color);
+    line-height: 1.6;
+    background-color: var(--bg-light);
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color var(--transition-speed);
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+section {
+    padding: 40px 0;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.3rem;
+    /* Adjusted from 3rem */
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 35px;
+    color: var(--secondary-color);
+    position: relative;
+    padding-bottom: 12px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+}
+
+/* Botões */
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all var(--transition-speed) ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Cabeçalho */
+.site-header {
+    background-color: var(--secondary-color);
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 60px;
+}
+
+.logo img {
+    height: 50px;
+}
+
+.main-nav ul {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.main-nav a {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 5px 0;
+    position: relative;
+}
+
+.main-nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--primary-color);
+    transition: width var(--transition-speed);
+}
+
+.main-nav a:hover::after,
+.main-nav a.active::after {
+    width: 100%;
+}
+
+/* Dropdown Menu */
+.dropdown-wrapper {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(15px);
+    background-color: var(--secondary-color);
+    min-width: 240px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 8px 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.dropdown-wrapper:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(5px);
+}
+
+.dropdown-menu li {
+    width: 100%;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 6px 20px;
+    font-size: 0.9rem;
+    text-align: left;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.dropdown-menu a::after {
+    display: none; /* Removendo o sublinhado animado para os itens do dropdown */
+}
+
+.dropdown-menu a:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: var(--primary-color);
+}
+
+.btn-contact {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 8px 20px !important;
+    border-radius: 20px;
+}
+
+.btn-contact:hover {
+    background-color: var(--primary-color);
+    color: var(--secondary-color) !important;
+}
+
+.nav-toggle-input {
+    display: none;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: #fff;
+    border-radius: 3px;
+    transition: all 0.3s;
+}
+
+/* Seção Hero */
+.hero-section {
+    height: 90vh;
+    /* Background removed - handled by carousel */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    overflow: hidden;
+    /* Ensure images don't overflow */
+}
+
+.hero-carousel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.carousel-slide.active {
+    opacity: 1;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(18, 37, 56, 0.7), rgba(18, 37, 56, 0.5));
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    width: 100%;
+    padding: 0 20px;
+    margin: 0 auto;
+}
+
+.hero-content h1 {
+    font-size: 3.2rem;
+    /* Adjusted from 4rem */
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.hero-content p {
+    font-size: 1.15rem;
+    /* Adjusted from 1.25rem */
+    line-height: 1.6;
+    margin-bottom: 35px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Seção de Impacto */
+.impact-section {
+    background-color: var(--bg-white);
+}
+
+.impact-section .section-title {
+    color: var(--secondary-color);
+}
+
+.impact-section .section-title::after {
+    background-color: var(--primary-color);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    text-align: center;
+}
+
+.stat-card {
+    padding: 40px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: transform var(--transition-speed);
+    border: 1px solid #eee;
+}
+
+.stat-card:hover {
+    transform: translateY(-10px);
+}
+
+@property --num {
+    syntax: "<integer>";
+    initial-value: 0;
+    inherits: false;
+}
+
+@keyframes countUp {
+    from {
+        --num: 0;
+    }
+
+    to {
+        --num: var(--target);
+    }
+}
+
+.stat-number {
+    display: inline-block;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    /* animation moved to .visible state */
+    counter-reset: num var(--num);
+}
+
+.impact-section.visible .stat-number {
+    animation: countUp 4s ease-out forwards;
+}
+
+.stat-number::after {
+    content: counter(num);
+}
+
+.stat-plus {
+    display: inline-block;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin-right: 5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card p {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+/* Layout Dividido (Sobre e CDI) */
+.split-layout {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.split-layout.reverse {
+    flex-direction: row-reverse;
+}
+
+.image-wrapper {
+    flex: 1;
+    position: relative;
+}
+
+.image-wrapper img {
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    transition: transform 0.4s;
+}
+
+.image-wrapper img:hover {
+    transform: scale(1.05);
+}
+
+.text-wrapper {
+    flex: 1;
+    padding: 20px 0;
+}
+
+.text-wrapper h2 {
+    font-size: 2.2rem;
+    /* Adjusted from 2.8rem */
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+}
+
+.text-wrapper p {
+    margin-bottom: 20px;
+    font-size: 1.05rem;
+    /* Adjusted from 1.15rem */
+    font-weight: 400;
+    line-height: 1.6;
+    color: #444;
+}
+
+/* Galeria / CEDESP */
+.gallery-section {
+    background-color: var(--secondary-color);
+    color: #fff;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: center;
+}
+
+.gallery-item img {
+    border-radius: 10px;
+    transition: transform 0.4s;
+}
+
+.gallery-item img:hover {
+    transform: scale(1.05);
+}
+
+.gallery-item.text-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.gallery-item.text-item h3 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+/* Chamada para Ação */
+.cta-section {
+    background-color: transparent;
+    /* Reset to default */
+}
+
+.cta-box {
+    background-color: #fff;
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.cta-box h2 {
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    color: var(--secondary-color);
+}
+
+.links-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+/* Seção de Contato */
+.contact-section {
+    background-color: var(--bg-white);
+}
+
+.info-block {
+    flex: 1;
+    background-color: var(--bg-light);
+    padding: 40px;
+    border-radius: 20px;
+}
+
+.info-block h4 {
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.badges {
+    margin-top: 30px;
+    display: flex;
+    gap: 20px;
+}
+
+.badges img {
+    transition: transform 0.3s;
+}
+
+.badges img:hover {
+    transform: scale(1.1);
+}
+
+.contact-form {
+    flex: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.contact-form input,
+.contact-form textarea {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(252, 234, 32, 0.2);
+}
+
+/* Rodapé */
+.site-footer {
+    background-color: var(--secondary-color);
+    color: #fff;
+    padding: 40px 0;
+    text-align: center;
+    border-top: 5px solid var(--primary-color);
+}
+
+.site-footer p {
+    margin: 20px 0;
+    opacity: 0.8;
+}
+
+.social-links {
+    margin-bottom: 20px;
+}
+
+.social-links a {
+    margin: 0 10px;
+    font-weight: bold;
+}
+
+/* Botões de Ação dos Programas */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+/* Responsividade Mobile */
+@media (max-width: 992px) {
+
+    .split-layout {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .split-layout.reverse {
+        flex-direction: column-reverse;
+        text-align: center;
+    }
+
+    .gallery-grid,
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-block {
+        text-align: center;
+    }
+
+    .badges {
+        justify-content: center;
+    }
+
+    .action-buttons {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: flex;
+        z-index: 1001;
+    }
+
+    .main-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: 100vh;
+        background-color: var(--secondary-color);
+        padding-top: 80px;
+        transition: right 0.4s ease;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .main-nav.active,
+    .nav-toggle-input:checked~.main-nav {
+        right: 0;
+    }
+
+    /* Animação do Hambúrguer ao Selecionar */
+    .nav-toggle-input:checked+.menu-toggle span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 6px);
+    }
+
+    .nav-toggle-input:checked+.menu-toggle span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .nav-toggle-input:checked+.menu-toggle span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -6px);
+    }
+
+    .main-nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .dropdown-wrapper {
+        width: 100%;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dropdown-menu {
+        position: static;
+        transform: none;
+        opacity: 1;
+        visibility: visible;
+        box-shadow: none;
+        background-color: rgba(0,0,0,0.1);
+        width: 100%;
+        display: none;
+        margin-top: 5px;
+        padding: 10px 0;
+    }
+    
+    .dropdown-wrapper:hover .dropdown-menu,
+    .dropdown-wrapper:focus-within .dropdown-menu {
+        display: flex;
+    }
+
+    .dropdown-menu li {
+        width: 100%;
+    }
+
+    .dropdown-menu a {
+        text-align: center;
+        padding: 10px;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+}
+
+/* Animações */
+/* Animações - Fallback Apenas CSS (Executar ao Carregar) */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.fade-in-left {
+    animation: fadeInLeft 0.8s ease-out forwards;
+}
+
+.fade-in-right {
+    animation: fadeInRight 0.8s ease-out forwards;
+}
+
+/* Base state ensuring visibility if animation fails or for simple fallback */
+.fade-in-up,
+.fade-in-left,
+.fade-in-right {
+    opacity: 0;
+    /* Inicia oculto, animação revela */
+}
