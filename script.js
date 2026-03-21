@@ -113,6 +113,93 @@ function formatDate(dateString) {
     }).format(date);
 }
 
+function sanitizeRichText(html) {
+    if (!html) {
+        return '';
+    }
+
+    const allowedTags = new Set(['P', 'BR', 'STRONG', 'B', 'EM', 'I', 'U', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'A', 'IMG', 'SPAN']);
+    const parser = new DOMParser();
+    const documentFragment = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+    const root = documentFragment.body.firstElementChild;
+
+    if (!root) {
+        return '';
+    }
+
+    const sanitizeNode = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            return document.createTextNode(node.textContent || '');
+        }
+
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            return document.createDocumentFragment();
+        }
+
+        const tagName = node.tagName.toUpperCase();
+
+        if (!allowedTags.has(tagName)) {
+            const fragment = document.createDocumentFragment();
+            node.childNodes.forEach((child) => {
+                fragment.appendChild(sanitizeNode(child));
+            });
+            return fragment;
+        }
+
+        const element = document.createElement(tagName.toLowerCase());
+
+        if (tagName === 'A') {
+            const href = node.getAttribute('href') || '#';
+            element.setAttribute('href', href);
+            element.setAttribute('target', '_blank');
+            element.setAttribute('rel', 'noopener noreferrer');
+        }
+
+        if (tagName === 'IMG') {
+            const src = node.getAttribute('src') || '';
+            if (!src) {
+                return document.createDocumentFragment();
+            }
+
+            element.setAttribute('src', src);
+            element.setAttribute('alt', node.getAttribute('alt') || 'Imagem do post');
+        }
+
+        node.childNodes.forEach((child) => {
+            element.appendChild(sanitizeNode(child));
+        });
+
+        return element;
+    };
+
+    const wrapper = document.createElement('div');
+    root.childNodes.forEach((child) => {
+        wrapper.appendChild(sanitizeNode(child));
+    });
+
+    return wrapper.innerHTML;
+}
+
+function renderStoredContent(content) {
+    const value = String(content || '').trim();
+
+    if (!value) {
+        return '';
+    }
+
+    const looksLikeHtml = /<\s*[a-z][\s\S]*>/i.test(value);
+
+    if (looksLikeHtml) {
+        return sanitizeRichText(value);
+    }
+
+    return value
+        .split(/\n+/)
+        .filter(Boolean)
+        .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+        .join('');
+}
+
 function getPublishedPosts(limit) {
     return getPosts()
         .filter((post) => post.status === 'published')
@@ -190,11 +277,7 @@ function renderPostDetail() {
         return;
     }
 
-    const content = String(post.content || '')
-        .split(/\n+/)
-        .filter(Boolean)
-        .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
-        .join('');
+    const content = renderStoredContent(post.content);
 
     container.innerHTML = `
         <article class="blog-detail">
@@ -223,19 +306,189 @@ function renderAdminBlog() {
     const submitButton = form.querySelector('button[type="submit"]');
     const cancelButton = document.getElementById('cancel-edit');
     let editingId = null;
+    const editor = form.querySelector('#content-editor');
+    const imageFileInput = form.querySelector('[name="imageFile"]');
+    const imagePreview = document.getElementById('image-preview');
+    const imagePreviewImg = document.getElementById('image-preview-img');
+    const imagePreviewEmpty = imagePreview ? imagePreview.querySelector('.image-preview__empty') : null;
+    const contentImageInput = document.createElement('input');
+    let selectedImageData = '';
+
+    contentImageInput.type = 'file';
+    contentImageInput.accept = 'image/*';
+    contentImageInput.hidden = true;
+    form.appendChild(contentImageInput);
 
     const fields = {
         title: form.querySelector('[name="title"]'),
         description: form.querySelector('[name="description"]'),
-        image: form.querySelector('[name="image"]'),
         content: form.querySelector('[name="content"]'),
         author: form.querySelector('[name="author"]'),
         status: form.querySelector('[name="status"]')
     };
 
+    const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error('Não foi possível ler a imagem selecionada.'));
+        reader.readAsDataURL(file);
+    });
+
+    const updateCoverPreview = (imageData, label) => {
+        if (!imagePreview || !imagePreviewImg || !imagePreviewEmpty) {
+            return;
+        }
+
+        if (imageData) {
+            imagePreviewImg.src = imageData;
+            imagePreviewImg.alt = label || 'Pré-visualização da imagem do post';
+            imagePreviewImg.hidden = false;
+            imagePreviewEmpty.hidden = true;
+            return;
+        }
+
+        imagePreviewImg.removeAttribute('src');
+        imagePreviewImg.hidden = true;
+        imagePreviewEmpty.hidden = false;
+    };
+
+    const clearCoverSelection = () => {
+        selectedImageData = '';
+
+        if (imageFileInput) {
+            imageFileInput.value = '';
+        }
+
+        updateCoverPreview('', '');
+    };
+
+    const handleCoverImageSelection = async (file) => {
+        if (!file) {
+            return;
+        }
+
+        const dataUrl = await readFileAsDataUrl(file);
+        selectedImageData = dataUrl;
+        updateCoverPreview(dataUrl, file.name);
+    };
+
+    const insertContentImage = async (file) => {
+        if (!editor || !file) {
+            return;
+        }
+
+        const dataUrl = await readFileAsDataUrl(file);
+        editor.focus();
+        document.execCommand('insertImage', false, dataUrl);
+
+        const insertedImage = editor.querySelector(`img[src="${dataUrl}"]`);
+
+        if (insertedImage) {
+            insertedImage.setAttribute('alt', file.name || 'Imagem inserida no conteúdo');
+        }
+
+        syncContentField();
+        focusEditor();
+    };
+
+    const syncContentField = () => {
+        if (!editor || !fields.content) {
+            return;
+        }
+
+        fields.content.value = editor.innerHTML.trim();
+    };
+
+    const setEditorContent = (html) => {
+        if (!editor || !fields.content) {
+            return;
+        }
+
+        editor.innerHTML = html || '';
+        syncContentField();
+    };
+
+    const focusEditor = () => {
+        if (!editor) {
+            return;
+        }
+
+        editor.focus();
+    };
+
+    const applyEditorCommand = (format, value) => {
+        if (!editor) {
+            return;
+        }
+
+        editor.focus();
+
+        if (format === 'formatBlock' && value) {
+            document.execCommand(format, false, value);
+        } else if (format === 'createLink') {
+            const linkUrl = window.prompt('Digite a URL do link:');
+
+            if (!linkUrl) {
+                return;
+            }
+
+            document.execCommand('createLink', false, linkUrl);
+        } else if (format === 'insertImage') {
+            contentImageInput.value = '';
+            contentImageInput.click();
+            return;
+        } else {
+            document.execCommand(format, false, value);
+        }
+
+        syncContentField();
+        focusEditor();
+    };
+
+    if (imageFileInput) {
+        imageFileInput.addEventListener('change', async () => {
+            const file = imageFileInput.files && imageFileInput.files[0];
+
+            try {
+                await handleCoverImageSelection(file);
+            } catch (error) {
+                window.alert(error.message);
+                clearCoverSelection();
+            }
+        });
+    }
+
+    contentImageInput.addEventListener('change', async () => {
+        const file = contentImageInput.files && contentImageInput.files[0];
+
+        try {
+            await insertContentImage(file);
+        } catch (error) {
+            window.alert(error.message);
+        }
+    });
+
+    if (editor) {
+        editor.addEventListener('input', syncContentField);
+        editor.addEventListener('blur', syncContentField);
+        editor.addEventListener('paste', () => {
+            window.setTimeout(syncContentField, 0);
+        });
+    }
+
+    form.querySelectorAll('[data-format]').forEach((button) => {
+        button.addEventListener('click', () => {
+            applyEditorCommand(button.dataset.format, button.dataset.value || undefined);
+        });
+    });
+
     const resetForm = () => {
         form.reset();
         editingId = null;
+
+        setEditorContent('');
+        clearCoverSelection();
 
         if (submitButton) {
             submitButton.textContent = 'Publicar post';
@@ -251,10 +504,15 @@ function renderAdminBlog() {
 
         fields.title.value = post.title || '';
         fields.description.value = post.description || '';
-        fields.image.value = post.image || '';
-        fields.content.value = post.content || '';
         fields.author.value = post.author || '';
         fields.status.value = post.status || 'draft';
+        setEditorContent(post.content || '');
+        selectedImageData = post.image || '';
+        updateCoverPreview(selectedImageData, post.title || 'Pré-visualização da imagem do post');
+
+        if (imageFileInput) {
+            imageFileInput.value = '';
+        }
 
         if (submitButton) {
             submitButton.textContent = 'Atualizar post';
@@ -331,18 +589,22 @@ function renderAdminBlog() {
 
         const title = fields.title.value.trim();
         const description = fields.description.value.trim();
-        const image = fields.image.value.trim();
-        const content = fields.content.value.trim();
         const author = fields.author.value.trim();
         const status = fields.status.value;
+        syncContentField();
+        const content = fields.content.value.trim();
+        const currentPost = editingId !== null ? getPostById(editingId) : null;
+        const image = selectedImageData || (currentPost ? currentPost.image : '');
 
         if (!title || !description || !image || !content || !author) {
+            if (!selectedImageData && !currentPost) {
+                window.alert('Selecione uma imagem do computador para continuar.');
+            }
+
             return;
         }
 
         if (editingId !== null) {
-            const currentPost = getPostById(editingId);
-
             if (!currentPost) {
                 resetForm();
                 return;

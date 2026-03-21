@@ -72,13 +72,36 @@
                             </label>
 
                             <label class="field field--full">
-                                <span>URL da imagem</span>
-                                <input type="text" name="image" placeholder="Fotos/minha-imagem.jpg" required>
+                                <span>Imagem do post</span>
+                                <input type="file" name="imageFile" accept="image/*">
+                                <small class="field-hint">Selecione uma imagem do computador. Ela será salva no navegador junto com o post.</small>
+                                <div class="image-preview" id="image-preview">
+                                    <span class="image-preview__empty">Nenhuma imagem selecionada</span>
+                                    <img id="image-preview-img" alt="Pré-visualização da imagem do post" hidden>
+                                </div>
                             </label>
 
                             <label class="field field--full">
                                 <span>Conteúdo</span>
-                                <textarea name="content" rows="8" placeholder="Texto completo do post" required></textarea>
+                                <div class="rich-editor" data-rich-editor>
+                                    <div class="rich-editor__toolbar" aria-label="Ferramentas de formatação">
+                                        <button type="button" class="rich-editor__button" data-format="bold" title="Negrito"><strong>B</strong></button>
+                                        <button type="button" class="rich-editor__button" data-format="italic" title="Itálico"><em>I</em></button>
+                                        <button type="button" class="rich-editor__button" data-format="underline" title="Sublinhado"><span style="text-decoration: underline;">U</span></button>
+                                        <span class="rich-editor__separator"></span>
+                                        <button type="button" class="rich-editor__button" data-format="formatBlock" data-value="h2" title="Título 2">H2</button>
+                                        <button type="button" class="rich-editor__button" data-format="formatBlock" data-value="h3" title="Título 3">H3</button>
+                                        <button type="button" class="rich-editor__button" data-format="insertUnorderedList" title="Lista com marcadores">• Lista</button>
+                                        <button type="button" class="rich-editor__button" data-format="insertOrderedList" title="Lista numerada">1. Lista</button>
+                                        <button type="button" class="rich-editor__button" data-format="formatBlock" data-value="blockquote" title="Citação">❝</button>
+                                        <span class="rich-editor__separator"></span>
+                                        <button type="button" class="rich-editor__button" data-format="createLink" title="Inserir link">Link</button>
+                                        <button type="button" class="rich-editor__button" data-format="insertImage" title="Inserir imagem">Imagem</button>
+                                        <button type="button" class="rich-editor__button" data-format="removeFormat" title="Limpar formatação">Tx</button>
+                                    </div>
+                                    <div class="rich-editor__content" id="content-editor" contenteditable="true" data-placeholder="Escreva o conteúdo aqui..."></div>
+                                    <textarea name="content" class="rich-editor__source" rows="8" required aria-hidden="true" tabindex="-1"></textarea>
+                                </div>
                             </label>
 
                             <label class="field">
