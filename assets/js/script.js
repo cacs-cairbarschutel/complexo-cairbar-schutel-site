@@ -1,11 +1,41 @@
 const BLOG_STORAGE_KEY = 'posts';
 
+function getPageAssetPrefix() {
+    return window.location.pathname.includes('/pages/') || window.location.pathname.includes('/admin/') || window.location.pathname.includes('/financeiro/') ? '../' : '';
+}
+
+function normalizeImagePath(imagePath) {
+    const value = String(imagePath || '').trim();
+
+    if (!value) {
+        return '';
+    }
+
+    if (/^(data:|https?:\/\/|\/\/)/i.test(value)) {
+        return value;
+    }
+
+    const fileName = value
+        .replace(/^Fotos\//, '')
+        .replace(/^assets\/img\//, '');
+
+    if (!fileName) {
+        return value;
+    }
+
+    return `${getPageAssetPrefix()}assets/img/${fileName}`;
+}
+
+function getBlogRoutePrefix() {
+    return window.location.pathname.includes('/pages/') ? '' : 'pages/';
+}
+
 const DEFAULT_POSTS = [
     {
         id: 2026031101,
         title: 'Ações que Transformam',
         description: 'Saiba como nossas campanhas de arrecadação estão impactando a comunidade local.',
-        image: 'Fotos/WhatsApp Image 2026-02-06 at 12.23.17.jpg',
+        image: 'assets/img/WhatsApp Image 2026-02-06 at 12.23.17.jpg',
         content: 'Saiba como nossas campanhas de arrecadação estão impactando a comunidade local.\n\nCada doação, por menor que seja, tem o poder de transformar a realidade de famílias que se encontram em situação vulnerável.\n\nConvidamos você a continuar apoiando nossos projetos e acompanhar de perto as histórias de superação que nascem a partir do nosso trabalho.',
         author: 'Equipe CACS',
         status: 'published',
@@ -15,7 +45,7 @@ const DEFAULT_POSTS = [
         id: 2025112701,
         title: 'Voluntariado em Foco',
         description: 'Conheça as histórias das pessoas que doam seu tempo e talento para fazer a diferença.',
-        image: 'Fotos/WhatsApp Image 2025-11-27 at 19.04.09.jpg',
+        image: 'assets/img/WhatsApp Image 2025-11-27 at 19.04.09.jpg',
         content: 'Conheça as histórias das pessoas que doam seu tempo e talento para fazer a diferença.\n\nO voluntariado é um dos pilares da nossa instituição, e sem a força dessas pessoas incríveis, não conseguiríamos realizar nem metade de nossos projetos.\n\nVocê já pensou em ser voluntário? Venha conhecer de perto as nossas instalações e se inspirar por aqueles que dedicam a vida por um mundo melhor.',
         author: 'Equipe CACS',
         status: 'published',
@@ -25,7 +55,7 @@ const DEFAULT_POSTS = [
         id: 2025112401,
         title: 'Saúde e Bem-estar no CDI',
         description: 'Acompanhe o dia a dia e as atividades especiais promovidas para os idosos no Centro Dia.',
-        image: 'Fotos/WhatsApp Image 2025-11-24 at 10.33.33 (3).jpg',
+        image: 'assets/img/WhatsApp Image 2025-11-24 at 10.33.33 (3).jpg',
         content: 'Acompanhe o dia a dia e as atividades especiais promovidas para os idosos no Centro Dia.\n\nAtividades recreativas, ginástica adaptada e oficinas de arte são algumas das práticas diárias que auxiliam no processo de convivência e qualidade de vida.\n\nAcreditamos que o envelhecimento deve ser vivido com alegria, autonomia e, acima de tudo, muita dignidade e amor.',
         author: 'Equipe CDI',
         status: 'published',
@@ -217,10 +247,12 @@ function renderPostCards(container, posts) {
         return;
     }
 
+    const routePrefix = getBlogRoutePrefix();
+
     container.innerHTML = posts.map((post) => `
         <article class="blog-card">
-            <a class="blog-card__media" href="blog-post.html?id=${post.id}">
-                <img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}">
+            <a class="blog-card__media" href="${routePrefix}blog-post.html?id=${post.id}">
+                <img src="${escapeHtml(normalizeImagePath(post.image))}" alt="${escapeHtml(post.title)}">
             </a>
             <div class="blog-card__body">
                 <div class="blog-card__meta">
@@ -229,7 +261,7 @@ function renderPostCards(container, posts) {
                 </div>
                 <h3>${escapeHtml(post.title)}</h3>
                 <p>${escapeHtml(post.description)}</p>
-                <a class="blog-card__link" href="blog-post.html?id=${post.id}">Ler artigo →</a>
+                <a class="blog-card__link" href="${routePrefix}blog-post.html?id=${post.id}">Ler artigo →</a>
             </div>
         </article>
     `).join('');
@@ -284,7 +316,7 @@ function renderPostDetail() {
             <p class="blog-detail__eyebrow">${escapeHtml(formatDate(post.createdAt))} · ${escapeHtml(post.author || 'Equipe CACS')}</p>
             <h1>${escapeHtml(post.title)}</h1>
             <p class="blog-detail__description">${escapeHtml(post.description)}</p>
-            <img class="blog-detail__image" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}">
+            <img class="blog-detail__image" src="${escapeHtml(normalizeImagePath(post.image))}" alt="${escapeHtml(post.title)}">
             <div class="blog-detail__content">
                 ${content}
             </div>
@@ -507,7 +539,7 @@ function renderAdminBlog() {
         fields.author.value = post.author || '';
         fields.status.value = post.status || 'draft';
         setEditorContent(post.content || '');
-        selectedImageData = post.image || '';
+        selectedImageData = normalizeImagePath(post.image || '');
         updateCoverPreview(selectedImageData, post.title || 'Pré-visualização da imagem do post');
 
         if (imageFileInput) {
