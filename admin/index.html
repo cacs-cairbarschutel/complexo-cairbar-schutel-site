@@ -1,20 +1,139 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+
 <head>
-
-<meta charset="utf-8">
-
-<title>Admin</title>
-
-<script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Blog - CACS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" type="image/x-icon" href="https://cacs-cairbarschutel.org.br/wp-content/uploads/2024/09/fav-1.png">
 </head>
 
-<body>
+<body class="admin-page">
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <img src="https://cacs-cairbarschutel.org.br/wp-content/uploads/2023/01/Logo-Cairbar-Branco.png" alt="CACS Logo">
+                </a>
+            </div>
 
-<h1>Painel do Blog</h1>
+            <nav class="main-nav admin-nav">
+                <ul>
+                    <li><a href="../index.html">Voltar para a home</a></li>
+                    <li><a href="../blog.html">Abrir blog público</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
+    <main class="admin-main">
+        <section class="admin-hero">
+            <div class="container admin-hero__content fade-in-up">
+                <span class="blog-kicker">Painel interno</span>
+                <h1>Gerencie os posts do blog</h1>
+                <p>Crie, edite e exclua publicações salvas no localStorage. Os posts publicados aparecem automaticamente na home e na página do blog.</p>
+                <div class="admin-hero__actions">
+                    <a href="../index.html#blog" class="btn btn-primary">Ver seção do blog</a>
+                    <a href="../blog.html" class="btn btn-secondary">Abrir blog público</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-dashboard">
+            <div class="container admin-grid">
+                <section class="admin-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <span class="panel-eyebrow">Novo conteúdo</span>
+                            <h2>Criar ou editar post</h2>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-small" id="cancel-edit" hidden>Cancelar edição</button>
+                    </div>
+
+                    <form id="blog-form" class="admin-form">
+                        <div class="form-grid">
+                            <label class="field">
+                                <span>Título</span>
+                                <input type="text" name="title" placeholder="Título do post" required>
+                            </label>
+
+                            <label class="field">
+                                <span>Autor</span>
+                                <input type="text" name="author" placeholder="Nome do autor" required>
+                            </label>
+
+                            <label class="field field--full">
+                                <span>Descrição</span>
+                                <textarea name="description" rows="3" placeholder="Resumo curto para os cards" required></textarea>
+                            </label>
+
+                            <label class="field field--full">
+                                <span>Imagem do post</span>
+                                <input type="file" name="imageFile" accept="image/*">
+                                <small class="field-hint">Selecione uma imagem do computador. Ela será salva no navegador junto com o post.</small>
+                                <div class="image-preview" id="image-preview">
+                                    <span class="image-preview__empty">Nenhuma imagem selecionada</span>
+                                    <img id="image-preview-img" alt="Pré-visualização da imagem do post" hidden>
+                                </div>
+                            </label>
+
+                            <label class="field field--full">
+                                <span>Conteúdo</span>
+                                <div class="rich-editor" data-rich-editor>
+                                    <div class="rich-editor__toolbar" aria-label="Ferramentas de formatação">
+                                        <button type="button" class="rich-editor__button" data-format="bold" title="Negrito"><strong>B</strong></button>
+                                        <button type="button" class="rich-editor__button" data-format="italic" title="Itálico"><em>I</em></button>
+                                        <button type="button" class="rich-editor__button" data-format="underline" title="Sublinhado"><span style="text-decoration: underline;">U</span></button>
+                                        <span class="rich-editor__separator"></span>
+                                        <button type="button" class="rich-editor__button" data-format="formatBlock" data-value="h2" title="Título 2">H2</button>
+                                        <button type="button" class="rich-editor__button" data-format="formatBlock" data-value="h3" title="Título 3">H3</button>
+                                        <button type="button" class="rich-editor__button" data-format="insertUnorderedList" title="Lista com marcadores">• Lista</button>
+                                        <button type="button" class="rich-editor__button" data-format="insertOrderedList" title="Lista numerada">1. Lista</button>
+                                        <button type="button" class="rich-editor__button" data-format="formatBlock" data-value="blockquote" title="Citação">❝</button>
+                                        <span class="rich-editor__separator"></span>
+                                        <button type="button" class="rich-editor__button" data-format="createLink" title="Inserir link">Link</button>
+                                        <button type="button" class="rich-editor__button" data-format="insertImage" title="Inserir imagem">Imagem</button>
+                                        <button type="button" class="rich-editor__button" data-format="removeFormat" title="Limpar formatação">Tx</button>
+                                    </div>
+                                    <div class="rich-editor__content" id="content-editor" contenteditable="true" data-placeholder="Escreva o conteúdo aqui..."></div>
+                                    <textarea name="content" class="rich-editor__source" rows="8" required aria-hidden="true" tabindex="-1"></textarea>
+                                </div>
+                            </label>
+
+                            <label class="field">
+                                <span>Status</span>
+                                <select name="status" required>
+                                    <option value="draft">Rascunho</option>
+                                    <option value="published">Publicado</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Publicar post</button>
+                        </div>
+                    </form>
+                </section>
+
+                <aside class="admin-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <span class="panel-eyebrow">Publicações</span>
+                            <h2>Posts cadastrados</h2>
+                        </div>
+                    </div>
+
+                    <div id="posts-list" class="admin-posts-list"></div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <script src="../script.js"></script>
 </body>
+
 </html>
