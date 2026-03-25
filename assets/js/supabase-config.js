@@ -9,23 +9,21 @@ let SUPABASE_URL = '';
 let SUPABASE_ANON_KEY = '';
 
 // Detectar ambiente e carregar variáveis
-if (typeof import.meta !== 'undefined' && import.meta.env) {
-    // Ambiente Vite
-    SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-    SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-} else if (typeof process !== 'undefined' && process.env) {
-    // Ambiente Node.js
-    SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-    SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
-} else {
-    // Fallback: variáveis globais do window
-    SUPABASE_URL = window.__SUPABASE_URL__ || '';
-    SUPABASE_ANON_KEY = window.__SUPABASE_ANON_KEY__ || '';
+// 1. Primeiro tenta credenciais injetadas no window (para sites estáticos)
+if (window.__SUPABASE_CREDENTIALS__) {
+    SUPABASE_URL = window.__SUPABASE_CREDENTIALS__.url;
+    SUPABASE_ANON_KEY = window.__SUPABASE_CREDENTIALS__.key;
+    console.log('✅ Credenciais carregadas do window');
 }
 
 // Validação
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     console.warn('⚠️ Variáveis de ambiente Supabase não configuradas. Configure .env.local com VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY');
+    console.warn('❌ SUPABASE_URL:', SUPABASE_URL);
+    console.warn('❌ SUPABASE_ANON_KEY:', SUPABASE_ANON_KEY);
+} else {
+    console.log('✅ Supabase URL:', SUPABASE_URL);
+    console.log('✅ Supabase configured');
 }
 
 /**
@@ -38,17 +36,32 @@ let supabaseClient = null;
  * Inicializar cliente Supabase (chamado uma única vez)
  */
 async function initSupabaseClient() {
-    if (supabaseClient) return supabaseClient;
+    console.log('🚀 initSupabaseClient() chamado');
+    
+    if (supabaseClient) {
+        console.log('✅ Cliente Supabase já estava inicializado');
+        return supabaseClient;
+    }
     
     // Carregar biblioteca Supabase dinamicamente
     if (!window.supabase) {
-        // Script já deve estar carregado no HTML: <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest"></script>
-        console.error('❌ Biblioteca Supabase não carregada. Adicione o script no HTML.');
+        console.error('❌ window.supabase não está definido. A biblioteca Supabase não foi carregada no HTML.');
+        console.error('Certifique-se de que há uma tag <script> com a CDN do Supabase ANTES dos outros scripts');
         return null;
     }
 
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    return supabaseClient;
+    console.log('✅ window.supabase encontrado, criando cliente...');
+    console.log('📍 URL:', SUPABASE_URL);
+    console.log('🔑 KEY:', SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 20) + '...' : 'NÃO DEFINIDA');
+
+    try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Cliente Supabase criado com sucesso');
+        return supabaseClient;
+    } catch (error) {
+        console.error('❌ Erro ao criar cliente Supabase:', error);
+        return null;
+    }
 }
 
 /**
@@ -99,7 +112,7 @@ async function logoutSupabase() {
     return true;
 }
 
-// Exportar para uso em outros arquivos
+// Exportar para uso em outros arquivos (window namespace)
 window.supabaseConfig = {
     initSupabaseClient,
     getSupabaseClient,
@@ -110,4 +123,4 @@ window.supabaseConfig = {
     SUPABASE_ANON_KEY
 };
 
-export { initSupabaseClient, getSupabaseClient, isAuthenticated, getCurrentUser, logoutSupabase };
+console.log('✅ supabaseConfig exportado para window');

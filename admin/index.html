@@ -10,6 +10,524 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="https://cacs-cairbarschutel.org.br/wp-content/uploads/2024/09/fav-1.png">
+    
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    
+    <!-- Cropper.js para corte de imagens -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <style>
+        /* Admin Melhorado */
+        .admin-page {
+            background-color: #f5f5f5;
+        }
+
+        .admin-main {
+            min-height: calc(100vh - 80px);
+            padding: 60px 0;
+        }
+
+        .admin-hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px;
+            margin-bottom: 60px;
+        }
+
+        .admin-hero__content {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .admin-hero h1 {
+            font-size: 2.5rem;
+            margin: 20px 0;
+            font-weight: 700;
+        }
+
+        .admin-hero p {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 20px auto;
+            opacity: 0.95;
+        }
+
+        .admin-hero__actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .admin-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .panel-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .panel-heading h2 {
+            margin: 10px 0 0 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .panel-eyebrow {
+            color: var(--secondary-color);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .admin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .field-hint {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Image Preview melhorado */
+        #image-preview {
+            border: 2px dashed var(--primary-color);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #image-preview:hover {
+            background-color: #f0f0f0;
+            border-color: var(--secondary-color);
+        }
+
+        #image-preview--drag-over {
+            background-color: #e8f4f8;
+            border-color: var(--secondary-color);
+        }
+
+        #image-preview-img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-preview__empty {
+            color: #999;
+            font-weight: 500;
+        }
+
+        /* TinyMCE Customização */
+        .ql-container {
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            font-size: 1rem;
+        }
+
+        .ql-editor {
+            min-height: 400px;
+            padding: 15px;
+            line-height: 1.6;
+        }
+
+        .ql-toolbar {
+            border-radius: 8px 8px 0 0;
+            border: 2px solid #e0e0e0;
+            background-color: #f9f9f9;
+        }
+
+        .ql-container.ql-focused,
+        .ql-toolbar:focus-within {
+            border-color: var(--primary-color);
+        }
+
+        .ql-snow .ql-stroke {
+            stroke: #333;
+        }
+
+        .ql-snow .ql-fill,
+        .ql-snow .ql-stroke.ql-fill {
+            fill: #333;
+        }
+
+        .ql-snow.ql-focused .ql-fill,
+        .ql-snow.ql-focused .ql-stroke.ql-fill {
+            fill: var(--primary-color);
+        }
+
+        .ql-snow.ql-focused .ql-stroke {
+            stroke: var(--primary-color);
+        }
+
+        .ql-toolbar.ql-snow .ql-picker-label {
+            color: #333;
+        }
+
+        .ql-toolbar.ql-snow .ql-picker-label:hover,
+        .ql-toolbar.ql-snow .ql-picker-label.ql-active,
+        .ql-toolbar.ql-snow .ql-picker-label.ql-selected {
+            color: var(--primary-color);
+        }
+
+        .ql-container {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .ql-editor.ql-blank::before {
+            color: #ccc;
+            font-style: italic;
+        }
+
+        .ql-toolbar.ql-snow .ql-stroke {
+            stroke: #444;
+        }
+
+        .ql-toolbar.ql-snow .ql-fill {
+            fill: #444;
+        }
+
+        .ql-toolbar.ql-snow button:hover .ql-stroke,
+        .ql-toolbar.ql-snow button:focus .ql-stroke,
+        .ql-toolbar.ql-snow button.ql-active .ql-stroke {
+            stroke: var(--primary-color);
+        }
+
+        .ql-toolbar.ql-snow button:hover .ql-fill,
+        .ql-toolbar.ql-snow button:focus .ql-fill,
+        .ql-toolbar.ql-snow button.ql-active .ql-fill {
+            fill: var(--primary-color);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        /* Posts List */
+        #posts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .post-item {
+            background: #f9f9f9;
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .post-item:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transform: translateX(5px);
+        }
+
+        .post-item__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .post-item h4 {
+            margin: 0;
+            color: #333;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .post-item__status {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .post-item__status--published {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .post-item__status--draft {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .post-item__author {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .post-item__date {
+            font-size: 0.85rem;
+            color: #999;
+            margin: 5px 0 15px 0;
+        }
+
+        .post-item__actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .posts-list__empty {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+
+        /* Cropper Modal */
+        .cropper-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cropper-modal__overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .cropper-modal__content {
+            position: relative;
+            background: white;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .cropper-modal__header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cropper-modal__header h3 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .cropper-modal__close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+        }
+
+        .cropper-modal__close:hover {
+            color: #333;
+        }
+
+        .cropper-modal__body {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #cropper-image {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .cropper-modal__footer {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .cropper-modal__actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Notification */
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            animate: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        #notification.notification--error {
+            background-color: #dc3545;
+        }
+
+        #notification.notification--info {
+            background-color: #17a2b8;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-hero h1 {
+                font-size: 2rem;
+            }
+
+            .panel-heading {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .cropper-modal__footer {
+                flex-direction: column;
+            }
+
+            .cropper-modal__actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+    </style>
 </head>
 
 <body class="admin-page">
@@ -24,7 +542,7 @@
             <nav class="main-nav admin-nav">
                 <ul>
                     <li><a href="../index.html">Voltar para a home</a></li>
-                    <li><a href="../blog.html">Abrir blog público</a></li>
+                    <li><a href="../pages/blog.html">Abrir blog público</a></li>
                 </ul>
             </nav>
         </div>
@@ -35,16 +553,17 @@
             <div class="container admin-hero__content fade-in-up">
                 <span class="blog-kicker">Painel interno</span>
                 <h1>Gerencie os posts do blog</h1>
-                <p>Crie, edite e exclua publicações salvas no localStorage. Os posts publicados aparecem automaticamente na home e na página do blog.</p>
+                <p>Crie, edite e exclua publicações salvas no Supabase. Os posts publicados aparecem automaticamente na home e na página do blog.</p>
                 <div class="admin-hero__actions">
                     <a href="../index.html#blog" class="btn btn-primary">Ver seção do blog</a>
-                    <a href="../blog.html" class="btn btn-secondary">Abrir blog público</a>
+                    <a href="../pages/blog.html" class="btn btn-secondary">Abrir blog público</a>
                 </div>
             </div>
         </section>
 
         <section class="admin-dashboard">
             <div class="container admin-grid">
+                <!-- Painel de Criação/Edição -->
                 <section class="admin-panel">
                     <div class="panel-heading">
                         <div>
@@ -55,62 +574,44 @@
                     </div>
 
                     <form id="blog-form" class="admin-form">
-                        <div class="form-grid">
-                            <label class="field">
-                                <span>Título</span>
-                                <input type="text" name="title" placeholder="Título do post" required>
-                            </label>
+                        <div class="form-group">
+                            <label for="title">Título</label>
+                            <input type="text" id="title" name="title" placeholder="Título do post" required>
+                        </div>
 
-                            <label class="field">
-                                <span>Autor</span>
-                                <input type="text" name="author" placeholder="Nome do autor" required>
-                            </label>
+                        <div class="form-group">
+                            <label for="author">Autor</label>
+                            <input type="text" id="author" name="author" placeholder="Nome do autor" required>
+                        </div>
 
-                            <label class="field field--full">
-                                <span>Descrição</span>
-                                <textarea name="description" rows="3" placeholder="Resumo curto para os cards" required></textarea>
-                            </label>
+                        <div class="form-group">
+                            <label for="description">Descrição</label>
+                            <textarea id="description" name="description" placeholder="Resumo curto para os cards" required></textarea>
+                            <small class="field-hint">Máximo de 160 caracteres para melhor aparência</small>
+                        </div>
 
-                            <label class="field field--full">
-                                <span>Imagem do post</span>
-                                <input type="file" name="imageFile" accept="image/*">
-                                <small class="field-hint">Selecione uma imagem do computador. Ela será salva no navegador junto com o post.</small>
-                                <div class="image-preview" id="image-preview">
-                                    <span class="image-preview__empty">Nenhuma imagem selecionada</span>
-                                    <img id="image-preview-img" alt="Pré-visualização da imagem do post" hidden>
-                                </div>
-                            </label>
+                        <div class="form-group">
+                            <label for="imageFile">Imagem do post</label>
+                            <input type="file" id="imageFile" name="imageFile" accept="image/*">
+                            <small class="field-hint">Clique ou arraste uma imagem. Você poderá ajustá-la após selecionar.</small>
+                            <div id="image-preview" class="image-preview">
+                                <span class="image-preview__empty">📸 Clique ou arraste a imagem aqui</span>
+                                <img id="image-preview-img" alt="Pré-visualização da imagem do post" hidden>
+                            </div>
+                        </div>
 
-                            <label class="field field--full">
-                                <span>Conteúdo</span>
-                                <div class="rich-editor" data-rich-editor>
-                                    <div class="rich-editor__toolbar" aria-label="Ferramentas de formatação">
-                                        <button type="button" class="rich-editor__button" data-format="bold" title="Negrito"><strong>B</strong></button>
-                                        <button type="button" class="rich-editor__button" data-format="italic" title="Itálico"><em>I</em></button>
-                                        <button type="button" class="rich-editor__button" data-format="underline" title="Sublinhado"><span style="text-decoration: underline;">U</span></button>
-                                        <span class="rich-editor__separator"></span>
-                                        <button type="button" class="rich-editor__button" data-format="formatBlock" data-value="h2" title="Título 2">H2</button>
-                                        <button type="button" class="rich-editor__button" data-format="formatBlock" data-value="h3" title="Título 3">H3</button>
-                                        <button type="button" class="rich-editor__button" data-format="insertUnorderedList" title="Lista com marcadores">• Lista</button>
-                                        <button type="button" class="rich-editor__button" data-format="insertOrderedList" title="Lista numerada">1. Lista</button>
-                                        <button type="button" class="rich-editor__button" data-format="formatBlock" data-value="blockquote" title="Citação">❝</button>
-                                        <span class="rich-editor__separator"></span>
-                                        <button type="button" class="rich-editor__button" data-format="createLink" title="Inserir link">Link</button>
-                                        <button type="button" class="rich-editor__button" data-format="insertImage" title="Inserir imagem">Imagem</button>
-                                        <button type="button" class="rich-editor__button" data-format="removeFormat" title="Limpar formatação">Tx</button>
-                                    </div>
-                                    <div class="rich-editor__content" id="content-editor" contenteditable="true" data-placeholder="Escreva o conteúdo aqui..."></div>
-                                    <textarea name="content" class="rich-editor__source" rows="8" required aria-hidden="true" tabindex="-1"></textarea>
-                                </div>
-                            </label>
+                        <div class="form-group">
+                            <label for="content-editor">Conteúdo</label>
+                            <div id="content-editor"></div>
+                            <small class="field-hint">Editor completo com formatação, imagens, listas e muito mais</small>
+                        </div>
 
-                            <label class="field">
-                                <span>Status</span>
-                                <select name="status" required>
-                                    <option value="draft">Rascunho</option>
-                                    <option value="published">Publicado</option>
-                                </select>
-                            </label>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status" required>
+                                <option value="draft">📝 Rascunho</option>
+                                <option value="published">✓ Publicado</option>
+                            </select>
                         </div>
 
                         <div class="form-actions">
@@ -119,6 +620,7 @@
                     </form>
                 </section>
 
+                <!-- Sidebar de Posts -->
                 <aside class="admin-panel">
                     <div class="panel-heading">
                         <div>
@@ -133,7 +635,23 @@
         </section>
     </main>
 
-    <script src="../assets/js/script.js"></script>
+    <!-- Scripts Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest"></script>
+    
+    <!-- Injetar credenciais Supabase (solução para site estático) -->
+    <script>
+        window.__SUPABASE_CREDENTIALS__ = {
+            url: 'https://ylcvwikjelkqgehvaobq.supabase.co',
+            key: 'sb_publishable_KilOBnCNArQ22tGBILNQLQ_-9hZdw4U'
+        };
+        console.log('✅ Credenciais Supabase injetadas:', window.__SUPABASE_CREDENTIALS__);
+    </script>
+    
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="../assets/js/supabase-posts.js"></script>
+    
+    <!-- Script Admin Melhorado -->
+    <script src="../assets/js/admin-improved.js"></script>
 </body>
 
 </html>

@@ -15,35 +15,45 @@ let USE_SUPABASE = false;
  * Inicializar Supabase no carregamento da página
  */
 async function initializeSupabase() {
+    console.log('🚀 initializeSupabase() chamado');
+    
     try {
         // Verificar se os scripts necessários estão carregados
         if (!window.supabase) {
-            console.warn('⚠️ Supabase SDK não carregado. Usando localStorage como fallback.');
+            console.warn('⚠️ window.supabase não carregado. Você viu a CDN do Supabase?');
             USE_SUPABASE = false;
             return false;
         }
+
+        console.log('✅ window.supabase encontrado');
 
         if (!window.supabaseConfig) {
-            console.warn('⚠️ Configuração Supabase não disponível. Usando localStorage como fallback.');
+            console.warn('⚠️ window.supabaseConfig não disponível. supabase-config.js foi carregado?');
             USE_SUPABASE = false;
             return false;
         }
 
+        console.log('✅ window.supabaseConfig encontrado');
+
         // Inicializar cliente
+        console.log('⏳ Chamando initSupabaseClient()...');
         await window.supabaseConfig.initSupabaseClient();
         const client = window.supabaseConfig.getSupabaseClient();
 
         if (!client) {
-            console.warn('⚠️ Cliente Supabase não pôde ser criado. Usando localStorage como fallback.');
+            console.warn('⚠️ Cliente Supabase não pôde ser criado. initSupabaseClient() retornou null.');
             USE_SUPABASE = false;
             return false;
         }
 
+        console.log('✅ Cliente Supabase criado com sucesso');
+
         // Tentar fazer uma query de teste
+        console.log('📡 Testando conexão com banco de dados...');
         const { error } = await client.from('posts').select('count');
 
         if (error) {
-            console.warn('⚠️ Supabase indisponível:', error.message, '. Usando localStorage como fallback.');
+            console.warn('⚠️ Supabase indisponível:', error.message);
             USE_SUPABASE = false;
             return false;
         }
@@ -53,7 +63,8 @@ async function initializeSupabase() {
         console.log('✅ Supabase inicializado com sucesso!');
         return true;
     } catch (error) {
-        console.warn('⚠️ Erro ao inicializar Supabase:', error.message, '. Usando localStorage como fallback.');
+        console.error('❌ Erro ao inicializar Supabase:', error.message);
+        console.error('Stack:', error.stack);
         USE_SUPABASE = false;
         return false;
     }
@@ -156,17 +167,23 @@ function writeStoredPosts(posts) {
  * Obter posts (apenas do Supabase)
  */
 async function getPosts() {
+    console.log('📋 getPosts() chamado');
+    console.log('USE_SUPABASE:', USE_SUPABASE);
+    console.log('window.supabasePosts:', window.supabasePosts);
+    
     if (USE_SUPABASE && window.supabasePosts) {
         try {
+            console.log('🔍 Buscando posts do Supabase...');
             const posts = await window.supabasePosts.fetchAllPosts();
+            console.log('✅ Posts encontrados:', posts?.length || 0);
             return posts;
         } catch (error) {
-            console.error('Erro ao buscar posts do Supabase:', error.message);
+            console.error('❌ Erro ao buscar posts do Supabase:', error.message);
             return [];
         }
     }
 
-    console.warn('Supabase não disponível. Nenhum post carregado.');
+    console.warn('⚠️ Supabase não disponível (USE_SUPABASE=' + USE_SUPABASE + '). Nenhum post carregado.');
     return [];
 }
 
@@ -373,26 +390,61 @@ function renderStoredContent(content) {
 }
 
 async function getPublishedPosts(limit) {
+    console.log('📰 getPublishedPosts(' + limit + ') chamado');
+    
     const posts = await getPosts();
-    return posts
-        .filter((post) => post.status === 'published')
+    console.log('📊 Total de posts recebidos de getPosts():', posts?.length || 0);
+    
+    if (!posts || posts.length === 0) {
+        console.warn('⚠️ getPosts() retornou 0 posts');
+        return [];
+    }
+
+    const filtered = posts
+        .filter((post) => {
+            const isPublished = post.status === 'published';
+            if (!isPublished) {
+                console.log('⏭️  Filtrando post não publicado:', post.title, 'status=' + post.status);
+            }
+            return isPublished;
+        })
         .sort((a, b) => new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt))
         .slice(0, limit);
+
+    console.log('✅ Posts publicados após filtro:', filtered.length);
+    if (filtered.length > 0) {
+        console.log('Posts a renderizar:', filtered.map(p => ({ id: p.id, title: p.title, status: p.status })));
+    }
+    
+    return filtered;
 }
 
 function renderPostCards(container, posts) {
+    console.log('🎨 renderPostCards() chamado com', posts?.length || 0, 'posts');
+    
     if (!container) {
+        console.error('❌ Container é null');
         return;
     }
 
     if (!posts.length) {
+        console.warn('⚠️ Nenhum post para renderizar');
         container.innerHTML = '<p class="blog-empty">Ainda não há posts publicados.</p>';
         return;
     }
 
     const routePrefix = getBlogRoutePrefix();
 
-    container.innerHTML = posts.map((post) => `
+    const html = posts.map((post, index) => {
+        console.log(`📝 Post ${index + 1}:`, {
+            id: post.id,
+            title: post.title,
+            hasImage: !!post.image,
+            imageLength: post.image ? post.image.length : 0,
+            imageStart: post.image ? post.image.substring(0, 50) : 'null'
+        });
+        
+        return `
         <article class="blog-card">
             <a class="blog-card__media" href="${routePrefix}blog-post.html?id=${post.id}">
                 <img src="${escapeHtml(normalizeImagePath(post.image))}" alt="${escapeHtml(post.title)}">
@@ -407,28 +459,44 @@ function renderPostCards(container, posts) {
                 <a class="blog-card__link" href="${routePrefix}blog-post.html?id=${post.id}">Ler artigo →</a>
             </div>
         </article>
-    `).join('');
+    `
+    }).join('');
+    
+    container.innerHTML = html;
+    console.log('✅ HTML renderizado com sucesso');
 }
 
 async function renderHomeBlog() {
+    console.log('🏠 renderHomeBlog() chamado');
+    
     const container = document.getElementById('posts');
 
     if (!container) {
+        console.warn('⚠️ Container #posts não encontrado no DOM da homepage');
         return;
     }
 
+    console.log('📋 Container encontrado, buscando últimos 3 posts...');
     const posts = await getPublishedPosts(3);
+    
+    console.log('🖼️  Renderizando', posts.length, 'posts na homepage...');
     renderPostCards(container, posts);
 }
 
 async function renderBlogIndex() {
+    console.log('🎨 renderBlogIndex() chamado');
+    
     const container = document.getElementById('blog-posts');
 
     if (!container) {
+        console.warn('⚠️ Container #blog-posts não encontrado no DOM');
         return;
     }
 
+    console.log('📋 Container encontrado, buscando posts...');
     const posts = await getPublishedPosts(999);
+    
+    console.log('🖼️  Renderizando', posts.length, 'posts no blog...');
     renderPostCards(container, posts);
 }
 
@@ -919,22 +987,31 @@ function setupImpactObserver() {
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🎯 DOMContentLoaded disparado');
+    
     // Inicializar Supabase
-    await initializeSupabase();
+    console.log('⏳ Inicializando Supabase...');
+    const supabaseReady = await initializeSupabase();
+    console.log('Supabase pronto:', supabaseReady);
 
     // Garantir que há posts padrão
+    console.log('⏳ Executando ensureSeedPosts...');
     await ensureSeedPosts();
 
     // Configurar interações
+    console.log('⏳ Configurando interações...');
     setupSmoothAnchors();
     setupCarousel();
     setupImpactObserver();
 
     // Renderizar conteúdo
+    console.log('⏳ Renderizando conteúdo...');
     await renderHomeBlog();
     await renderBlogIndex();
     await renderPostDetail();
     renderAdminBlog();
+    
+    console.log('✅ Página carregada e renderizada');
 
     // Ouvir mudanças no localStorage (fallback sincronização)
     window.addEventListener('storage', async (event) => {
