@@ -1,0 +1,128 @@
+-- ============================================================================
+-- SCRIPT SQL PARA CRIAR TABELAS NO SUPABASE
+-- ============================================================================
+-- Execute este script no Editor SQL do Supabase Dashboard
+-- Path: SQL Editor > Criar nova query
+-- ============================================================================
+
+-- LIMPAR DADOS ANTIGOS (se tabela existe com problemas)
+DROP TABLE IF EXISTS public.posts CASCADE;
+DROP TABLE IF EXISTS public.authors CASCADE;
+
+-- Criar tabela de Posts
+CREATE TABLE IF NOT EXISTS public.posts (
+  -- Campos básicos
+  id BIGINT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  content TEXT NOT NULL,
+  image TEXT,
+  author TEXT DEFAULT 'Equipe CACS',
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  
+  -- Timestamps
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  published_at TIMESTAMP WITH TIME ZONE,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  
+  -- Metadados
+  slug TEXT UNIQUE,
+  tags TEXT[] DEFAULT ARRAY[]::TEXT[]
+);
+
+-- Criar índices para melhor performance
+CREATE INDEX IF NOT EXISTS posts_status_idx ON public.posts(status);
+CREATE INDEX IF NOT EXISTS posts_created_at_idx ON public.posts(created_at DESC);
+CREATE INDEX IF NOT EXISTS posts_published_at_idx ON public.posts(published_at DESC);
+CREATE INDEX IF NOT EXISTS posts_slug_idx ON public.posts(slug);
+
+-- Criar storage bucket para imagens de posts
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('posts-images', 'posts-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Policies para o storage (público para leitura, privado para escrita)
+CREATE POLICY "Allow public read access" ON storage.objects
+  FOR SELECT TO public
+  USING (bucket_id = 'posts-images');
+
+CREATE POLICY "Allow authenticated write" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'posts-images');
+
+CREATE POLICY "Allow authenticated delete" ON storage.objects
+  FOR DELETE TO authenticated
+  USING (bucket_id = 'posts-images');
+
+-- Policies para a tabela de posts (público para leitura publicados)
+CREATE POLICY "Allow public read published posts" ON public.posts
+  FOR SELECT TO public
+  USING (status = 'published');
+
+CREATE POLICY "Allow authenticated full access" ON public.posts
+  FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- OPCIONAL: Criar tabela de usuários/autores
+CREATE TABLE IF NOT EXISTS public.authors (
+  id UUID PRIMARY KEY DEFAULT auth.uid(),
+  username TEXT NOT NULL UNIQUE,
+  display_name TEXT,
+  email TEXT,
+  role TEXT DEFAULT 'editor' CHECK (role IN ('editor', 'admin')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Criar índice para authors
+CREATE INDEX IF NOT EXISTS authors_role_idx ON public.authors(role);
+
+-- ============================================================================
+-- DADOS INICIAIS (Posts Padrão)
+-- ============================================================================
+
+INSERT INTO public.posts (id, title, description, content, image, author, status, created_at, published_at)
+VALUES
+  (
+    2026031101,
+    'Ações que Transformam',
+    'Saiba como nossas campanhas de arrecadação estão impactando a comunidade local.',
+    'Saiba como nossas campanhas de arrecadação estão impactando a comunidade local.<br><br>Cada doação, por menor que seja, tem o poder de transformar a realidade de famílias que se encontram em situação vulnerável.<br><br>Convidamos você a continuar apoiando nossos projetos e acompanhar de perto as histórias de superação que nascem a partir do nosso trabalho.',
+    'assets/img/WhatsApp Image 2026-02-06 at 12.23.17.jpg',
+    'Equipe CACS',
+    'published',
+    '2026-03-11T12:00:00.000Z',
+    '2026-03-11T12:00:00.000Z'
+  ),
+  (
+    2025112701,
+    'Voluntariado em Foco',
+    'Conheça as histórias das pessoas que doam seu tempo e talento para fazer a diferença.',
+    'Conheça as histórias das pessoas que doam seu tempo e talento para fazer a diferença.<br><br>O voluntariado é um dos pilares da nossa instituição, e sem a força dessas pessoas incríveis, não conseguiríamos realizar nem metade de nossos projetos.<br><br>Você já pensou em ser voluntário? Venha conhecer de perto as nossas instalações e se inspirar por aqueles que dedicam a vida por um mundo melhor.',
+    'assets/img/WhatsApp Image 2025-11-27 at 19.04.09.jpg',
+    'Equipe CACS',
+    'published',
+    '2025-11-27T12:00:00.000Z',
+    '2025-11-27T12:00:00.000Z'
+  ),
+  (
+    2025112401,
+    'Saúde e Bem-estar no CDI',
+    'Acompanhe o dia a dia e as atividades especiais promovidas para os idosos no Centro Dia.',
+    'Acompanhe o dia a dia e as atividades especiais promovidas para os idosos no Centro Dia.<br><br>Atividades recreativas, ginástica adaptada e oficinas de arte são algumas das práticas diárias que auxiliam no processo de convivência e qualidade de vida.<br><br>Acreditamos que o envelhecimento deve ser vivido com alegria, autonomia e, acima de tudo, muita dignidade e amor.',
+    'assets/img/WhatsApp Image 2025-11-24 at 10.33.33 (3).jpg',
+    'Equipe CDI',
+    'published',
+    '2025-11-24T12:00:00.000Z',
+    '2025-11-24T12:00:00.000Z'
+  )
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================================
+-- VERIFICAÇÃO FINAL
+-- ============================================================================
+-- Selecionar todos os posts para verificar
+-- SELECT * FROM public.posts;
+
+-- Verificar se o bucket existe
+-- SELECT * FROM storage.buckets WHERE id = 'posts-images';
