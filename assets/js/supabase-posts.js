@@ -8,6 +8,8 @@
  * Buscar todos os posts publicados (ordenados por data)
  */
 async function fetchPublishedPosts() {
+    console.log('🔍 fetchPublishedPosts() chamado');
+    
     const client = window.supabaseConfig?.getSupabaseClient();
     if (!client) {
         console.error('❌ Cliente Supabase não inicializado');
@@ -15,6 +17,8 @@ async function fetchPublishedPosts() {
     }
 
     try {
+        console.log('📡 Buscando posts com status=published...');
+        
         const { data, error } = await client
             .from('posts')
             .select('*')
@@ -22,10 +26,16 @@ async function fetchPublishedPosts() {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('❌ Erro ao buscar posts:', error.message);
+            console.error('❌ Erro ao buscar posts publicados:', error.message);
+            console.error('Código:', error.code);
             return [];
         }
 
+        console.log('✅ Posts publicados carregados:', data?.length || 0);
+        if (data && data.length > 0) {
+            console.log('Posts encontrados:', data.map(p => ({ id: p.id, title: p.title, status: p.status })));
+        }
+        
         return data || [];
     } catch (error) {
         console.error('❌ Erro ao buscar posts (exceção):', error.message);
@@ -66,34 +76,62 @@ async function fetchPostById(postId) {
  * Buscar todos os posts (incluindo rascunhos) - Apenas para admin
  */
 async function fetchAllPosts() {
+    console.log('🔍 fetchAllPosts() chamado');
+    
     const client = window.supabaseConfig?.getSupabaseClient();
+    
+    if (!window.supabaseConfig) {
+        console.error('❌ window.supabaseConfig NÃO EXISTE');
+        return [];
+    }
+    
     if (!client) {
-        console.error('❌ Cliente Supabase não inicializado');
+        console.error('❌ Cliente Supabase não inicializado. supabaseConfig:', window.supabaseConfig);
         return [];
     }
 
     try {
+        console.log('📡 Conectando ao banco de dados...');
+        
         const { data, error } = await client
             .from('posts')
             .select('*')
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('❌ Erro ao buscar posts:', error.message);
+            console.error('❌ Erro ao buscar posts do Supabase:', error);
+            console.error('Código de erro:', error.code);
+            console.error('Mensagem:', error.message);
             return [];
         }
 
+        console.log('✅ Posts carregados com sucesso:', data?.length || 0, 'posts');
         return data || [];
     } catch (error) {
         console.error('❌ Erro ao buscar posts (exceção):', error.message);
+        console.error('Stack:', error.stack);
         return [];
     }
+}
+
+/**
+ * Gerar ID único (bigint)
+ * Usa timestamp + random para garantir unicidade
+ */
+function generatePostId() {
+    // Usar timestamp em ms (13 dígitos) + número aleatório (5 dígitos)
+    // Exemplo: 1711355569456_12345 → um número muito grande e único
+    const timestamp = Date.now(); // 13 dígitos
+    const random = Math.floor(Math.random() * 100000); // 5 dígitos
+    return parseInt(`${timestamp}${String(random).padStart(5, '0')}`);
 }
 
 /**
  * Criar um novo post
  */
 async function createPost(postData) {
+    console.log('✍️ createPost() chamado com:', postData);
+    
     const client = window.supabaseConfig?.getSupabaseClient();
     if (!client) {
         console.error('❌ Cliente Supabase não inicializado');
@@ -101,17 +139,27 @@ async function createPost(postData) {
     }
 
     try {
-        // Preparar dados
+        // Preparar dados - GERAR ID único (bigint)
+        const postId = generatePostId();
         const newPost = {
+            id: postId,  // ID numérico único
             title: postData.title || 'Sem Título',
             description: postData.description || '',
             content: postData.content || '',
-            image: postData.image || '',
+            image: postData.image || null,
             author: postData.author || 'Equipe CACS',
             status: postData.status || 'draft',
-            created_at: postData.created_at || new Date().toISOString(),
+            created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
+
+        console.log('💾 Salvando novo post no Supabase:', {
+            id: newPost.id,
+            title: newPost.title,
+            author: newPost.author,
+            status: newPost.status,
+            hasImage: newPost.image ? 'sim' : 'não'
+        });
 
         const { data, error } = await client
             .from('posts')
@@ -120,13 +168,19 @@ async function createPost(postData) {
             .single();
 
         if (error) {
-            console.error('❌ Erro ao criar post:', error.message);
+            console.error('❌ Erro ao criar post:', error);
+            console.error('Código:', error.code);
+            console.error('Mensagem:', error.message);
+            console.error('Detalhes:', error.details);
             return null;
         }
 
+        console.log('✅ Post criado com sucesso! ID:', data?.id);
+        console.log('Dados retornados:', data);
         return data;
     } catch (error) {
         console.error('❌ Erro ao criar post (exceção):', error.message);
+        console.error('Stack:', error.stack);
         return null;
     }
 }
@@ -299,15 +353,4 @@ window.supabasePosts = {
     deletePostImage
 };
 
-export {
-    fetchPublishedPosts,
-    fetchPostById,
-    fetchAllPosts,
-    createPost,
-    updatePost,
-    deletePost,
-    publishPost,
-    unpublishPost,
-    uploadPostImage,
-    deletePostImage
-};
+console.log('✅ supabasePosts exportado para window');
