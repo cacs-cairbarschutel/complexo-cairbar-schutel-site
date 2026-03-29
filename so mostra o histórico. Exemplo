@@ -1,0 +1,26 @@
+[33mc04cc6c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Alterações somente na home
+[33m92540d9[m ajuste imagem
+[33m65377b9[m Merge pull request #9 from cacs-cairbarschutel:hotflix/ajuste-logos-fotos
+[33m2efb29a[m[33m ([m[1;31morigin/hotflix/ajuste-logos-fotos[m[33m)[m bug: ajustes imagens
+[33m84d0393[m Merge pull request #8 from cacs-cairbarschutel:feature/melhoria-blog
+[33m6f31dc4[m[33m ([m[1;31morigin/feature/melhoria-blog[m[33m)[m feature: melhoria no blog
+[33m0f90177[m Merge pull request #7 from cacs-cairbarschutel:feature/banco-de-dados
+[33m8baa741[m[33m ([m[1;31morigin/feature/banco-de-dados[m[33m)[m feature: implementação supabase
+[33m2ae531e[m Merge pull request #6 from cacs-cairbarschutel/hotflix/ajuste-pastas
+[33m338948c[m[33m ([m[1;31morigin/hotflix/ajuste-pastas[m[33m)[m Merge branch 'main' of https://github.com/cacs-cairbarschutel/complexo-cairbar-schutel-site into hotflix/ajuste-pastas
+[33m9e3fb50[m docs: ajustes pastas
+[33mc6ffad0[m Merge pull request #5 from cacs-cairbarschutel/BUG/ajuste-botao-navbar
+[33m20ae73d[m[33m ([m[1;31morigin/BUG/ajuste-botao-navbar[m[33m)[m bug: ajustes no encolhedor do navbar
+[33mb015fdd[m Merge branch 'hotflix/ajuste-imagens'
+[33m8a4dcae[m[33m ([m[1;31morigin/hotflix/ajuste-imagens[m[33m)[m bug: implementação imagens restantes
+[33mb196021[m Merge pull request #4 from cacs-cairbarschutel/hotflix/ajuste-imagens
+[33mb0a997b[m Bug: Ajuste imagens quebradas
+[33m6aa419f[m Bug: ajuste logo
+[33m442dd58[m Merge branch 'main' of https://github.com/cacs-cairbarschutel/complexo-cairbar-schutel-site
+[33m0d8c1b6[m Merge branch 'feature/implementacao-blog'
+[33mab9b37e[m[33m ([m[1;31morigin/feature/implementacao-blog[m[33m)[m Bug: ajuste logo
+[33m66a9c6a[m Create CNAME
+[33m2bfa700[m[33m ([m[1;31morigin/develop[m[33m)[m Merge pull request #1 from cacs-cairbarschutel:feature/implementacao-blog
+[33m64ca5d4[m Bug: ajustes no texto
+[33mff5279c[m feat: implementação funcional blog
+[33m967a758[m feat: clone do site em repositório pessoal

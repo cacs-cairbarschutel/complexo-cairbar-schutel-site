@@ -37,11 +37,28 @@
             <nav class="main-nav">
                 <ul>
                     <li><a href="#impacto">SOBRE NÓS</a></li>
-                    <li><a href="#sobre">PROGRAMAS SOCIAIS</a></li>
+                    <li class="dropdown-wrapper">
+                        <a href="#sobre" style="display: flex; align-items: center; gap: 5px;">PROGRAMAS SOCIAIS <span style="font-size: 0.6rem;">▼</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="pages/cacs.html">CACS</a></li>
+                            <li><a href="pages/acolhimento.html">Programa de Acolhimento</a></li>
+                            <li><a href="pages/cdi.html">CDI - Centro Dia para Idosos</a></li>
+                            <li><a href="pages/bilingue.html">CACS Bilíngue</a></li>
+                            <li><a href="pages/florescer.html">CACS Florescer</a></li>
+                            <li><a href="pages/cedesp.html">CEDESP</a></li>
+                            <li><a href="pages/campanha-fome.html">Campanha Contra a Fome</a></li>
+                        </ul>
+                    </li>
                     <li><a href="#brecho">BRECHÓ</a></li>
                     <li><a href="#eventos">EVENTOS</a></li>
                     <li><a href="#blog">BLOG</a></li>
-                    <li><a href="#faca-parte">COMO APOIAR</a></li>
+                    <li class="dropdown-wrapper">
+                        <a href="#faca-parte" style="display: flex; align-items: center; gap: 5px;">COMO APOIAR <span style="font-size: 0.6rem;">▼</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="pages/doacao.html">Doação</a></li>
+                            <li><a href="pages/voluntario.html">Seja Voluntário</a></li>
+                        </ul>
+                    </li>
                     <li><a href="#contato">CONTATO</a></li>
                     <li><a href="pages/doacao.html" class="btn btn-primary"
                             style="padding: 8px 24px; font-size: 0.9rem; color: var(--secondary-color);">DOE AGORA</a>
@@ -98,8 +115,8 @@
                     </div>
                     <div class="stat-card fade-in-up" style="transition-delay: 0.4s;">
                         <span class="stat-plus">+</span>
-                        <span class="stat-number" style="--target: 2000;"></span>
-                        <p>PESSOAS ATENDIDAS</p>
+                        <span class="stat-number" style="--target: 1000;"></span>
+                        <p>PESSOAS IMPACTADAS POR ANO</p>
                     </div>
                     <div class="stat-card fade-in-up" style="transition-delay: 0.5s;">
                         <span class="stat-number" style="--target: 6;"></span>
@@ -116,7 +133,6 @@
                     <div>
                         <span class="blog-kicker">Blog do CACS</span>
                         <h2 class="section-title">Acompanhe nossos últimos posts</h2>
-                        <p>Os posts criados no painel admin são salvos no navegador e aparecem automaticamente aqui quando estiverem publicados.</p>
                     </div>
                     <a href="pages/blog.html" class="btn btn-secondary">Ver todos os posts</a>
                 </div>
@@ -145,31 +161,33 @@
             <div class="container split-layout reverse">
                 <div class="text-wrapper fade-in-left">
                     <h2>Programa de Acolhimento</h2>
-                    <p>Oferecemos acolhimento e suporte integral para pessoas em situação de vulnerabilidade, visando a reintegração social e o resgate da cidadania.</p>
+                    <p style="text-align: justify;">O Acolhimento Psicológico oferece atendimento gratuito para pessoas em situação de vulnerabilidade social em São Paulo, com psicólogos voluntários qualificados.</p>
+                    <p style="margin-top: 15px; text-align: justify;">Um espaço seguro para cuidar da saúde mental e promover bem-estar emocional na comunidade.</p>
                     <a href="pages/acolhimento.html" class="btn btn-secondary">Saiba mais</a>
                 </div>
                 <div class="image-wrapper fade-in-right">
-                    <img src="assets/img/WhatsApp Image 2025-12-08 at 11.05.24.jpg" alt="Programa de Acolhimento">
+                    <img src="assets/img/7. Acolhimento Psicológico.png" alt="Programa de Acolhimento" style="width: 100%; height: 350px; object-fit: cover; border-radius: 20px;">
                 </div>
             </div>
         </section>
 
         <!-- Seção CDI -->
         <section class="cdi-section" id="cdi">
-            <div class="container split-layout">
-                <div class="image-wrapper fade-in-left">
-                    <img src="assets/img/CDI.jpg"
-                        alt="Atividades com Idosos">
+            <div class="container split-layout" style="align-items: stretch;">
+                <div class="image-wrapper fade-in-left" style="display: flex;">
+                    <img src="assets/img/8. CDI.png"
+                        alt="Atividades com Idosos" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
                 </div>
-                <div class="text-wrapper fade-in-right">
-                    <h2>CDI - Centro Dia para Idosos</h2>
-                    <p>Atendemos até 30 pessoas idosas em vulnerabilidade social e com grau de dependência, que possuem
-                        limitações para realização das atividades de vida diária.</p>
-                    <a href="#bilingue" class="btn btn-secondary">Saiba mais</a>
+                <div class="text-wrapper fade-in-right" style="display: flex; flex-direction: column; justify-content: space-between; padding: 0;">
+                    <div>
+                        <h2 style="margin-top: 0;">CDI - Centro Dia para Idosos</h2>
+                        <p style="text-align: justify;">O Centro Dia para Idosos Dr. Ricardo oferece proteção social integral, estimulação cognitiva e convivência para idosos em vulnerabilidade social em São Paulo, promovendo envelhecimento ativo, autonomia e dignidade através de acompanhamento multidisciplinar.</p>
+                    </div>
+                    <a href="pages/cdi.html" class="btn btn-secondary" style="align-self: flex-start; margin-top: auto;">Saiba mais</a>
                 </div>
-                <div class="image-wrapper fade-in-right">
+                <div class="image-wrapper fade-in-right" style="display: flex;">
                     <img src="assets/img/CDI.jpg"
-                        alt="Atividades com Idosos">
+                        alt="Atividades com Idosos" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
                 </div>
             </div>
         </section>
@@ -182,9 +200,8 @@
                 </div>
                 <div class="text-wrapper fade-in-right">
                     <h2>CACS Bilíngue</h2>
-                    <p>Promovemos o aprendizado de um segundo idioma para crianças e adolescentes, ampliando horizontes
-                        e criando novas oportunidades de futuro.</p>
-                    <a href="#florescer" class="btn btn-secondary">Saiba mais</a>
+                    <p style="text-align: justify;">O CACS Bilíngue oferece aulas gratuitas de inglês para crianças e adolescentes em situação de vulnerabilidade social em São Paulo, ampliando horizontes, desenvolvendo talentos e criando oportunidades de futuro através de educação de qualidade.</p>
+                    <a href="pages/bilingue.html" class="btn btn-secondary">Saiba mais</a>
                 </div>
             </div>
         </section>
@@ -194,12 +211,11 @@
             <div class="container split-layout reverse">
                 <div class="text-wrapper fade-in-left">
                     <h2>CACS Florescer</h2>
-                    <p>Iniciativa focada no desenvolvimento integral e empoderamento, cultivando talentos e promovendo
-                        qualidade de vida para a comunidade.</p>
-                    <a href="#brecho" class="btn btn-secondary">Saiba mais</a>
+                    <p style="text-align: justify;">O CACS Florescer oferece capacitação em costura criativa e upcycling para mulheres em situação de vulnerabilidade social em São Paulo, promovendo autonomia financeira, desenvolvimento de habilidades e transformação através da economia circular.</p>
+                    <a href="pages/florescer.html" class="btn btn-secondary">Saiba mais</a>
                 </div>
                 <div class="image-wrapper fade-in-right">
-                    <img src="assets/img/hero-bg.jpg" alt="CACS Florescer">
+                    <img src="assets/img/9. CACS Florescer.png" alt="CACS Florescer" style="width: 100%; height: 350px; object-fit: cover; border-radius: 20px;">
                 </div>
             </div>
         </section>
@@ -225,38 +241,6 @@
             </div>
         </section>
 
-        <!-- Seção Eventos no CACS -->
-        <section class="eventos-section" id="eventos" style="background-color: var(--bg-light); padding: 80px 0;">
-            <div class="container fade-in-up" style="text-align: center; margin-bottom: 50px;">
-                <h2 class="section-title">Eventos no CACS</h2>
-                <p style="color: #555; max-width: 800px; margin: 0 auto 30px auto; font-size: 1.1rem;">Nossos eventos
-                    são momentos de muita alegria, união e solidariedade. Desde os tradicionais almoços beneficentes até
-                    a animada capoeira dos idosos e nossas campanhas contra a fome, cada encontro fortalece nossos laços
-                    com a comunidade.</p>
-                <a href="#faca-parte" class="btn btn-primary">Participar</a>
-            </div>
-
-            <div class="container gallery-grid">
-                <div class="gallery-item fade-in-up">
-                    <img src="assets/img/CB2.jpg" alt="Campanha Contra Fome"
-                        style="width: 100%; height: 300px; object-fit: cover; border-radius: 15px;">
-                    <h4 style="color: var(--secondary-color); margin-top: 15px; text-align: center; font-size: 1.2rem;">
-                        Campanha Contra Fome</h4>
-                </div>
-                <div class="gallery-item fade-in-up" style="animation-delay: 0.2s;">
-                    <img src="assets/img/Foto (30).JPG" alt="Capoeira dos Idosos"
-                        style="width: 100%; height: 300px; object-fit: cover; border-radius: 15px;">
-                    <h4 style="color: var(--secondary-color); margin-top: 15px; text-align: center; font-size: 1.2rem;">
-                        Capoeira dos Idosos</h4>
-                </div>
-                <div class="gallery-item fade-in-up" style="animation-delay: 0.4s;">
-                        <img src="assets/img/IMG_2072.JPG" alt="Almoços Beneficentes"
-                        style="width: 100%; height: 300px; object-fit: cover; border-radius: 15px;">
-                    <h4 style="color: var(--secondary-color); margin-top: 15px; text-align: center; font-size: 1.2rem;">
-                        Almoços Beneficentes</h4>
-                </div>
-            </div>
-        </section>
 
         <!-- Grid de Imagens (Visuais CCA/CEDESP) -->
         <section class="gallery-section" id="cedesp">
@@ -269,20 +253,31 @@
                 </div>
                 <div class="gallery-item text-item fade-in-up">
                     <h3>CEDESP</h3>
-                    <p>Meta para 2026: Implantação do Centro de Desenvolvimento Social e Produtivo para jovens.</p>
-                    <a href="#faca-parte" class="btn btn-primary">Saiba mais</a>
+                    <p>O CEDESP será um centro de capacitação profissional dedicado ao desenvolvimento social e produtivo de adolescentes e jovens a partir de 15 anos em situação de vulnerabilidade em São Paulo, com previsão de implantação em 2027.</p>
+                    <a href="pages/cedesp.html" class="btn btn-primary" style="margin-top: 20px;">Saiba mais</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Campanha Contra a Fome -->
+        <section class="cdi-section" id="campanha-fome">
+            <div class="container split-layout">
+                <div class="image-wrapper fade-in-left">
+                    <img src="assets/img/Cópia de 14. Campanha contra a Fome (2).jpg" alt="Campanha Contra a Fome" style="width: 100%; height: 350px; object-fit: cover; border-radius: 20px;">
+                </div>
+                <div class="text-wrapper fade-in-right">
+                    <h2>Campanha Contra a Fome</h2>
+                    <p style="text-align: justify;">A Campanha Contra a Fome oferece segurança alimentar integral para famílias em situação de vulnerabilidade social em São Paulo, distribuindo alimentos essenciais e promovendo dignidade através do acesso ao direito fundamental de se alimentar.</p>
+                    <a href="pages/campanha-fome.html" class="btn btn-secondary" style="margin-top: 15px;">Saiba mais</a>
                 </div>
             </div>
         </section>
 
         <!-- Seção Eventos no CACS -->
-        <section class="eventos-section" id="eventos" style="background-color: var(--bg-light); padding: 80px 0;">
+        <section class="eventos-section" id="eventos" style="background-color: var(--bg-light); padding: 40px 0 80px 0;">
             <div class="container fade-in-up" style="text-align: center; margin-bottom: 50px;">
                 <h2 class="section-title">Eventos no CACS</h2>
-                <p style="color: #555; max-width: 800px; margin: 0 auto 30px auto; font-size: 1.1rem;">Nossos eventos
-                    são momentos de muita alegria, união e solidariedade. Desde os tradicionais almoços beneficentes até
-                    a animada capoeira dos idosos e nossas campanhas contra a fome, cada encontro fortalece nossos laços
-                    com a comunidade.</p>
+                <p style="color: #555; max-width: 800px; margin: 0 auto 30px auto; font-size: 1.1rem;">Nossos eventos são momentos de muita alegria, união e solidariedade. Desde os tradicionais almoços beneficentes até o famoso Pechinhão, cada encontro fortalece nossos laços com a comunidade e nos permite gerar renda para financiar os nossos projetos.</p>
                 <a href="#faca-parte" class="btn btn-primary">Participar</a>
             </div>
 
@@ -328,7 +323,8 @@
                 <div class="split-layout">
                     <div class="info-block fade-in-up">
                         <h4>Informações</h4>
-                        <p><strong>ENDEREÇO:</strong><br>Rua Francisco Preto, 213 - Vila Morse, SP</p>
+                        <p><strong>ENDEREÇO:</strong><br>Rua Francisco Preto, 213 - Vila Morse, SP<br>CEP: 05623-010</p>
+                        <p><strong>CNPJ:</strong><br>62.909.114/0001-06</p>
                         <p><strong>CONTATO:</strong><br>(11) 3742-0516<br>contato@cairbarschutel.org</p>
                         <div class="badges">
                             <img src="assets/img/causas.png"
@@ -337,7 +333,7 @@
                                 alt="Selo Doar" style="width: 80px;">
                         </div>
                     </div>
-                    <form class="contact-form fade-in-up">
+                    <form class="contact-form fade-in-up" onsubmit="event.preventDefault(); alert('Obrigada pelo contato'); this.reset();">
                         <input type="text" placeholder="Seu nome" required>
                         <input type="email" placeholder="Seu e-mail" required>
                         <input type="text" placeholder="Assunto" required>
