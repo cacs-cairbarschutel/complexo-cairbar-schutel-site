@@ -1422,3 +1422,60 @@ body.admin-page {
         text-align: center;
     }
 }
+
+/* Botão WhatsApp Flutuante */
+.whatsapp-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 65px;
+    height: 65px;
+    background: #25d366;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    text-decoration: none;
+}
+
+.whatsapp-button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
+}
+
+.whatsapp-button:active {
+    transform: translateY(-2px);
+}
+
+.whatsapp-button svg {
+    width: 36px;
+    height: 36px;
+}
+
+.whatsapp-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .whatsapp-button {
+        width: 60px;
+        height: 60px;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .whatsapp-button svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .whatsapp-button:hover {
+        transform: translateY(-2px);
+    }
+}
