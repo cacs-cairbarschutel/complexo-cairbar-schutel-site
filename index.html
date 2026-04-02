@@ -36,7 +36,13 @@
 
             <nav class="main-nav">
                 <ul>
-                    <li><a href="#impacto">SOBRE NÓS</a></li>
+                    <li class="dropdown-wrapper">
+                        <a href="index.html#impacto" style="display: flex; align-items: center; gap: 5px;">SOBRE NÓS <span style="font-size: 0.6rem;">▼</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="pages/cacs.html">O CACS</a></li>
+                            <li><a href="pages/transparencia.html">Transparência</a></li>
+                        </ul>
+                    </li>
                     <li class="dropdown-wrapper">
                         <a href="#sobre" style="display: flex; align-items: center; gap: 5px;">PROGRAMAS SOCIAIS <span style="font-size: 0.6rem;">▼</span></a>
                         <ul class="dropdown-menu">
@@ -60,7 +66,7 @@
                         </ul>
                     </li>
                     <li><a href="#contato">CONTATO</a></li>
-                    <li><a href="pages/doacao.html" class="btn btn-primary"
+                    <li><a href="https://www.paypal.com/donate/?hosted_button_id=VPFVFTJXM2VK2" target="_blank" class="btn btn-primary"
                             style="padding: 8px 24px; font-size: 0.9rem; color: var(--secondary-color);">DOE AGORA</a>
                     </li>
                 </ul>
@@ -89,7 +95,7 @@
         </section>
 
         <!-- Seção de Impacto / Estatísticas -->
-        <section class="impact-section" id="impacto">
+        <section class="impact-section" id="impacto" style="padding-bottom: 20px;">
             <div class="container">
                 <h2 class="section-title">Nosso Impacto</h2>
                 <div class="stats-grid">
@@ -127,7 +133,7 @@
         </section>
 
         <!-- Seção Blog do CACS -->
-        <section class="blog-section" id="blog">
+        <section class="blog-section" id="blog" style="padding-top: 20px; padding-bottom: 30px;">
             <div class="container">
                 <div class="blog-section__header fade-in-up">
                     <div>
@@ -141,7 +147,7 @@
         </section>
 
         <!-- Seção Sobre o CACS -->
-        <section class="about-section" id="sobre">
+        <section class="about-section" id="sobre" style="padding-top: 30px;">
             <div class="container split-layout">
                 <div class="image-wrapper fade-in-left">
                     <img src="assets/img/Home-CACS.jpeg"
@@ -149,8 +155,7 @@
                 </div>
                 <div class="text-wrapper fade-in-right">
                     <h2>CACS</h2>
-                    <p>O CACS | Complexo Assistencial Cairbar Schutel trabalha para resgatar a dignidade e fomentar a
-                        autonomia de pessoas em situação de vulnerabilidade.</p>
+                    <p style="text-align: justify;">O CACS | Complexo Assistencial Cairbar Schutel, associação filantrópica sem fins lucrativos, fundado em 17 de janeiro de 1963, movido pela busca de uma sociedade mais justa e com mais oportunidades, trabalhando para resgatar a dignidade e fomentar a autonomia de pessoas em situação de vulnerabilidade.</p>
                     <a href="pages/cacs.html" class="btn btn-secondary">Saiba mais</a>
                 </div>
             </div>
@@ -236,7 +241,7 @@
                         acessíveis.</p>
                     <p style="margin-bottom: 30px;">Toda a renda é revertida para as famílias que apoiamos. Venha nos
                         visitar, faça suas compras de forma sustentável e ainda nos ajude a transformar vidas!</p>
-                    <a href="#contato" class="btn btn-primary">Venha nos visitar</a>
+                    <a href="pages/brecho.html" class="btn btn-secondary">Saiba mais</a>
                 </div>
             </div>
         </section>
@@ -274,11 +279,14 @@
         </section>
 
         <!-- Seção Eventos no CACS -->
-        <section class="eventos-section" id="eventos" style="background-color: var(--bg-light); padding: 40px 0 80px 0;">
+        <section class="eventos-section" id="eventos" style="background-color: var(--bg-light); padding: 40px 0 10px 0;">
             <div class="container fade-in-up" style="text-align: center; margin-bottom: 50px;">
                 <h2 class="section-title">Eventos no CACS</h2>
                 <p style="color: #555; max-width: 800px; margin: 0 auto 30px auto; font-size: 1.1rem;">Nossos eventos são momentos de muita alegria, união e solidariedade. Desde os tradicionais almoços beneficentes até o famoso Pechinhão, cada encontro fortalece nossos laços com a comunidade e nos permite gerar renda para financiar os nossos projetos.</p>
-                <a href="#faca-parte" class="btn btn-primary">Participar</a>
+                <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <a href="#faca-parte" class="btn btn-primary">Participar</a>
+                    <a href="pages/agenda.html" class="btn btn-primary">Próximos eventos</a>
+                </div>
             </div>
 
             <div class="container gallery-grid">
@@ -304,7 +312,7 @@
         </section>
 
         <!-- Chamada para Ação -->
-        <section class="cta-section" id="faca-parte">
+        <section class="cta-section" id="faca-parte" style="padding-top: 10px;">
             <div class="container">
                 <div class="cta-box fade-in-up">
                     <h2>Faça parte dessa causa</h2>
