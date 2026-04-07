@@ -738,6 +738,7 @@ section {
     .dropdown-wrapper:hover .dropdown-menu,
     .dropdown-wrapper:focus-within .dropdown-menu {
         display: flex;
+        transform: none !important;
     }
 
     .dropdown-menu li {

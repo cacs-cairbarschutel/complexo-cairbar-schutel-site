@@ -24,7 +24,13 @@
             </label>
             <nav class="main-nav">
                 <ul>
-                    <li><a href="../index.html#impacto">SOBRE NÓS</a></li>
+                    <li class="dropdown-wrapper">
+                        <a href="../index.html#impacto" style="display: flex; align-items: center; gap: 5px;">SOBRE NÓS <span style="font-size: 0.6rem;">▼</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="cacs.html">O CACS</a></li>
+                            <li><a href="../pages/transparencia.html">Transparência</a></li>
+                        </ul>
+                    </li>
                     <li class="dropdown-wrapper">
                         <a href="../index.html#sobre" style="display: flex; align-items: center; gap: 5px;">PROGRAMAS SOCIAIS <span style="font-size: 0.6rem;">▼</span></a>
                         <ul class="dropdown-menu">
@@ -52,25 +58,307 @@
     </header>
 
     <main>
+        <!-- Hero Section -->
         <section class="page-header" style="background-color: var(--secondary-color); color: #fff; padding: 60px 0; text-align: center;">
             <div class="container fade-in-up">
-                <h1 style="font-size: 3rem; margin-bottom: 10px; color: var(--primary-color);">CACS</h1>
-                <p style="font-size: 1.2rem; max-width: 800px; margin: 0 auto;">O CACS | Complexo Assistencial Cairbar Schutel trabalha para resgatar a dignidade e fomentar a autonomia de pessoas em situação de vulnerabilidade.</p>
+                <h1 style="font-size: 3rem; margin-bottom: 10px; color: var(--primary-color);">Sobre nós</h1>
+                <p style="font-size: 1.5rem; max-width: 800px; margin: 0 auto 20px; font-weight: bold;">Descubra como surgiu essa causa pela qual somos apaixonados!</p>
+                <p style="font-size: 1.2rem; max-width: 800px; margin: 0 auto;">Com 62 anos de atuação, o CACS se empenha hoje no aperfeiçoamento e ampliação do impacto social de seu trabalho.<br>Conheça nossa história e a nossa equipe!</p>
             </div>
         </section>
 
-        <section style="padding: 60px 0;">
-            <div class="container split-layout">
-                <div class="text-wrapper fade-in-up">
-                    <h2 style="color: var(--secondary-color); margin-bottom: 20px;">Sobre o CACS</h2>
-                    <p style="font-size: 1.1rem; line-height: 1.8; color: #555;">Nossa missão é promover a integração social e oferecer suporte para aqueles que mais precisam. Com diversas frentes de atuação, o CACS é um pilar de esperança para a comunidade, desenvolvendo projetos que abordam desde necessidades básicas até capacitação e educação de qualidade para jovens, adultos e idosos.</p>
-                    <div class="action-buttons">
-                        <a href="https://www.paypal.com/donate/?hosted_button_id=VPFVFTJXM2VK2" target="_blank" class="btn btn-primary">Apoiar este programa</a>
-                        <a href="../index.html" class="btn btn-secondary">Voltar para o início</a>
+        <!-- Missão, Visão, Valores -->
+        <section style="padding: 30px 0; background-color: #f9f9f9;">
+            <div class="container fade-in-up" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                <div style="background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+                    <h3 style="color: var(--secondary-color); margin-bottom: 15px;">» Nossa Missão</h3>
+                    <p style="color: #555; line-height: 1.6;">Garantir proteção social a pessoas em situação de vulnerabilidade e risco social e pessoal, contribuindo com ações afirmativas para resgatar a dignidade e fomentar a autonomia e o potencial transformador dessas pessoas.</p>
+                </div>
+                <div style="background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+                    <h3 style="color: var(--secondary-color); margin-bottom: 15px;">» Nossa visão</h3>
+                    <p style="color: #555; line-height: 1.6;">Consolidar nossa atuação como organização social de referência, autossustentável com a participação da sociedade organizada e conduzida por uma gestão norteada pela solidariedade.</p>
+                </div>
+                <div style="background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+                    <h3 style="color: var(--secondary-color); margin-bottom: 15px;">» Nossos valores</h3>
+                    <p style="color: #555; line-height: 1.6;">Ética, Transparência, Princípios Cristãos e Responsabilidade Social.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Apoiadores Estratégicos -->
+        <section style="padding: 40px 0; text-align: center; background-color: #ffffff;">
+            <div class="container fade-in-up">
+                <h2 style="color: var(--secondary-color); margin-bottom: 30px;">Apoiadores estratégicos</h2>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 30px;">
+                    <img src="../assets/img/PARCEIRO1.jpg" alt="Parceiro 1" style="max-height: 80px; object-fit: contain; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s ease; mix-blend-mode: multiply;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity='0.7'">
+                    <img src="../assets/img/PARCEIRO2.jpg" alt="Parceiro 2" style="max-height: 80px; object-fit: contain; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s ease; mix-blend-mode: multiply;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity='0.7'">
+                    <img src="../assets/img/PARCEIRO3.jpg" alt="Parceiro 3" style="max-height: 80px; object-fit: contain; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s ease; mix-blend-mode: multiply;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity='0.7'">
+                    <img src="../assets/img/PARCEIRO5.jpg" alt="Parceiro 5" style="max-height: 80px; object-fit: contain; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s ease; mix-blend-mode: multiply;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity='0.7'">
+                    <img src="../assets/img/Novo-Projeto-3.png" alt="Apoiador 1" style="max-height: 80px; object-fit: contain; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s ease; mix-blend-mode: multiply;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity='0.7'">
+                    <img src="../assets/img/Novo-Projeto-2.png" alt="Apoiador 2" style="max-height: 80px; object-fit: contain; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s ease; mix-blend-mode: multiply;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity='0.7'">
+                    <img src="../assets/img/Novo-Projeto-1.png" alt="Apoiador 3" style="max-height: 80px; object-fit: contain; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s ease; mix-blend-mode: multiply;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity='0.7'">
+                    <img src="../assets/img/PARCEIRO8.jpg" alt="Parceiro 8" style="max-height: 80px; object-fit: contain; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s ease; mix-blend-mode: multiply;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity='0.7'">
+                    <img src="../assets/img/lets.png" alt="LETS" style="max-height: 80px; object-fit: contain; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s ease; mix-blend-mode: multiply;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity='0.7'">
+                    <img src="../assets/img/Design-sem-nome-300x300.png" alt="Apoiador 4" style="max-height: 80px; object-fit: contain; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s ease; mix-blend-mode: multiply;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(100%)'; this.style.opacity='0.7'">
+                </div>
+            </div>
+        </section>
+
+        <!-- Nossa História -->
+        <section style="padding: 60px 0; background-color: #fff;">
+            <div class="container fade-in-up">
+                <h2 style="color: var(--secondary-color); margin-bottom: 30px; text-align: center;">Nossa história</h2>
+                <div style="max-width: 900px; margin: 0 auto 40px; color: #555; line-height: 1.8; text-align: justify;">
+                    <img src="../assets/img/Sobre-nos-2-248x300.jpeg" alt="Primeiras Instalações do CACS" style="float: left; margin: 0 20px 10px 0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 248px; max-width: 100%;">
+                    <p>O CACS | Complexo Assistencial Cairbar Schutel, Organização da Sociedade Civil – (OSC) sem fins lucrativos, foi criado em 1963 movido pela busca de uma sociedade mais justa e com mais oportunidades, trabalhando para resgatar a dignidade e fomentar a autonomia de pessoas em situação de vulnerabilidade.</p>
+                    <p>As primeiras instalações foram inauguradas em 1966, para receber 20 crianças. Novo prédio foi construído em 1979, quando passamos a atender 40 crianças, à época apenas meninos.</p>
+                    <p>Em 1995 uma nova edificação foi inaugurada, ampliando a capacidade de atendimento para 60 crianças: 30 meninos e 30 meninas. Em 2008 o CACS dividiu seu atendimento em 3 casas modelo, com 20 crianças cada.</p>
+                    <p>Cada casa modelo, denominada “Lar Cairbar Schutel” assistia 20 crianças e adolescentes de até 17 anos e 11 meses de idade; recebiam amparo integral – abrigo, alimentação e educação; assistência médica, odontológica e psicológica, além de lazer, dentro e fora da organização. Os jovens também realizavam cursos e estágios profissionalizantes quando atingiam a idade pertinente.</p>
+                    <p>Buscando readequar e reestruturar o trabalho atendendo às mais urgentes demandas sociais, em julho de 2018 o CACS encerrou o serviço na modalidade SAICA, para desenvolver trabalhos voltados à educação e a capacitação de crianças e adolescentes, com maior amplitude e impacto social.</p>
+                    <p>E novas frentes de trabalho se abrem em nosso país ainda pleno de graves carências. O CDI – Centro Dia para Idosos Dr. Ricardo, em funcionamento desde 01/04/2016, é dedicado à atenção diurna de até 30 pessoas idosas em vulnerabilidade social e com grau de dependência, que possuem limitações para realização das atividades de vida diária e convivem com suas famílias, mas não dispõem de atendimento de tempo integral no domicílio.</p>
+                    <div style="clear: both;"></div>
+                </div>
+
+                <!-- Galeria de Fotos da História -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 30px;">
+                    <img src="../assets/img/Nossa-historia-1-300x177.jpeg" alt="História 1" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <img src="../assets/img/Nossa-historia-2-300x227.jpeg" alt="História 2" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <img src="../assets/img/Nossa-historia-2a-300x225.jpeg" alt="História 3" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <img src="../assets/img/05.-Nossa-Historia-Idosos-300x148.jpg" alt="História Idosos" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                </div>
+            </div>
+        </section>
+
+        <!-- Biografia Cairbar Schutel -->
+        <section style="padding: 60px 0; background-color: var(--tertiary-color); color: var(--secondary-color);">
+            <div class="container fade-in-up">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="margin-bottom: 5px;">Cairbar Schutel</h2>
+                    <h4 style="font-weight: 400;">O Bandeirante do Espiritismo</h4>
+                </div>
+                <div class="split-layout" style="align-items: flex-start;">
+                    <div class="text-wrapper" style="line-height: 1.8; text-align: justify; flex: 2;">
+                        <img src="../assets/img/WhatsApp-Image-2023-01-12-at-14.20.38-300x300.jpeg" alt="Cairbar Schutel" style="float: left; margin: 0 20px 10px 0; border-radius: 8px; width: 250px; max-width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                        <p>Cairbar Schutel nasceu no Rio de Janeiro em 22 de setembro de 1868. Filho de Antero de Souza Schutel e de Rita Tavares Schutel, frequentou o Colégio D. Pedro II no Rio de Janeiro, à época capital federal. Iniciou sua trajetória profissional como aprendiz de farmácia ainda na adolescência, evoluindo rapidamente para prático de farmácia. No Rio, trabalhou em diversas farmácias e em razão de problemas de saúde, aos 17 anos teve que mudar-se da capital.</p>
+                        <p>Veio para o Estado de São Paulo e escolheu como destino final a cidade de Araraquara, onde empregou-se na Farmácia Moura. Teve rápidas passagens pelas cidades de Piracicaba e Itápolis até estabelecer-se em definitivo na Vila do Senhor Bom Jesus das Palmeiras, atual município de Matão, em 1895.</p>
+                        <p>Teve grande influência política nesta cidade. Em 1895, Matão era apenas um Distrito Policial, elevando-se a Distrito de Paz em 1897 e Município pertencente à comarca de Araraquara, em 1898. Cairbar, um dos fundadores da cidade, ocupou o cargo de Intendente – equivalente a Prefeito – de 28 de março a 7 de outubro de 1899 e de 18 de agosto a 15 de outubro de 1900, destacando-se como homem público interessado nos problemas das pessoas e nas causas primordiais que servissem de auxílio aos mais necessitados.</p>
+                        <p>Católico por tradição, Cairbar abraçou o Espiritismo e dele se tornou um dos maiores divulgadores.</p>
+                        <p>Fundou em 15 de julho de 1905 o Centro Espírita Amantes da Pobreza (atual Centro Espírita O Clarim); em 15 de agosto daquele ano lançou o jornal “O Clarim”. Além disso ministrava palestras doutrinárias nas cidades vizinhas e em programas radiofônicos na antiga PRD-4 de Araraquara.</p>
+                        <p>Em 15 de fevereiro de 1925 fundou a “Revista Internacional de Espiritismo”, publicada até hoje.</p>
+                        <p>É conhecido como “O Bandeirante do Espiritismo”, pelo sua motivação e luta constante pela divulgação espírita.</p>
+                        <p>Cairbar Schutel retornou à pátria espiritual no dia 30 de janeiro de 1938, às 16h15 horas. Na lápide onde seu corpo foi sepultado está gravada a célebre frase: <strong>“Vivi, vivo e viverei, porque sou imortal”</strong>.</p>
+                        <div style="clear: both;"></div>
+                    </div>
+                    <div class="text-wrapper" style="flex: 1; min-width: 300px; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+                        <h4 style="margin-bottom: 20px; color: var(--secondary-color);">Obras Literárias:</h4>
+                        <ul style="list-style: disc; padding-left: 20px; line-height: 1.6;">
+                            <li>Espiritismo e protestantismo – setembro de 1944</li>
+                            <li>Histeria e fenômenos psíquicos – dezembro de 1911</li>
+                            <li>O Diabo e a igreja – dezembro de 1914</li>
+                            <li>Espiritismo para crianças – 1918</li>
+                            <li>Interpretação sintética do apocalipse – 1918</li>
+                            <li>Cartas a esmo – 1918</li>
+                            <li>Médiuns e mediunidades – agosto de 1923</li>
+                            <li>Gênese da Alma – setembro de 1924</li>
+                            <li>Espiritismo e materialismo – dezembro de 1925</li>
+                            <li>Fatos espíritas e as forças X... – maio de 1926</li>
+                            <li>Parábolas e ensinos de Jesus – janeiro de 1928</li>
+                            <li>O Espírito do cristianismo – fevereiro de 1930</li>
+                            <li>A Vida no outro mundo – outubro de 1932</li>
+                            <li>Vida e atos dos apóstolos – fevereiro de 1933</li>
+                            <li>Preces espíritas – 1936</li>
+                            <li>Conferências radiofônicas – setembro de 1937</li>
+                        </ul>
                     </div>
                 </div>
-                <div class="image-wrapper fade-in-up" style="transition-delay: 0.2s;">
-                    <img src="../assets/img/Home-CACS.jpeg" alt="CACS" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; height: auto;">
+            </div>
+        </section>
+
+        <!-- Equipe Título -->
+        <section style="padding: 30px 0; background-color: var(--secondary-color); color: var(--primary-color);">
+            <div class="container fade-in-up text-center" style="display: flex; justify-content: center; align-items: center;">
+                <h4 style="margin: 0; font-size: 1.8rem; text-align: center;">Equipe</h4>
+            </div>
+        </section>
+
+        <!-- Conselho Deliberativo -->
+        <section style="padding: 30px 0; background-color: #f9f9f9;">
+            <div class="container fade-in-up text-center">
+                <h4 style="color: var(--secondary-color); margin-bottom: 20px; font-size: 1.8rem;">Conselho Deliberativo</h4>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Alice-150x150.jpeg" alt="Alice Camargo" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Alice Camargo Pitcher Vasconcelos</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Conselheira</p>
+                    </div>
+
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Christianne-Gianelli-150x150.jpeg" alt="Christianne Giannelli" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Christianne Giannelli Lobato</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Conselheira</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Luiz-Eduardo-150x150.jpeg" alt="Luiz Eduardo" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Luiz Eduardo Almeida Vieira Barbosa</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Conselheiro</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/marco-antonio-150x150.jpg" alt="Marco Antônio" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Marco Antônio Honorato de Oliveira</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Conselheiro</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Vera-150x150.jpeg" alt="Vera Lúcia" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Vera Lúcia Simões Vieira Barbosa</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Conselheira</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Diretoria Executiva -->
+        <section style="padding: 30px 0; background-color: #ffffff;">
+            <div class="container fade-in-up text-center">
+                <h4 style="color: var(--secondary-color); margin-bottom: 20px; font-size: 1.8rem;">Diretoria Executiva</h4>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px">
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Gilberto-150x150.jpeg" alt="Gilberto" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Gilberto Magalhães Sarmento Afonso</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">PRESIDENTE</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Abel-150x150.jpeg" alt="Abel" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Abel Glaser</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Vice-Presidente</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Haercio-150x150.jpeg" alt="Haércio" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Haércio Suguimoto</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Secretário Geral</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Naila-150x150.jpeg" alt="Náila" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Náila Giannelli</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">1ª Secretária</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Paulo-Telesi-150x150.jpeg" alt="Paulo" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Paulo Roberto Gil Telesi</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">1º Tesoureiro</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Geraldo-150x150.jpeg" alt="José Geraldo" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">José Geraldo Vasconcelos de Moura</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">2º Tesoureiro</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conselho Fiscal -->
+        <section style="padding: 30px 0; background-color: #f9f9f9;">
+            <div class="container fade-in-up text-center">
+                <h4 style="color: var(--secondary-color); margin-bottom: 20px; font-size: 1.8rem;">Conselho Fiscal</h4>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px">
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Ailton-150x150.jpeg" alt="Ailton" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Ailton Ricardo Estevam</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Efetivo</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Arley-150x150.jpeg" alt="Arley" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Arley Lobato Junior</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Efetivo</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Iseralda-150x150.jpeg" alt="Iseralda" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Iseralda Trevizan Glaser</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Efetivo</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Reinaldo-150x150.jpeg" alt="Reinaldo" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Reinaldo Corrêa</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Suplente</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Rodrigo-150x150.jpeg" alt="Rodrigo" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Rodrigo Sousa Madeira Campos</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Suplente</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Selma-150x150.jpeg" alt="Selma" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Selma Segato Magalhães Sarmento Afonso</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Suplente</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quem Somos -->
+        <section style="padding: 30px 0; background-color: #ffffff;">
+            <div class="container fade-in-up text-center">
+                <h4 style="color: var(--secondary-color); margin-bottom: 20px; font-size: 1.8rem;">A Equipe</h4>
+                <p style="color: #555; line-height: 1.8; margin-bottom: 30px;">O trabalho no CACS é realizado por colaboradores e voluntários. Conheça a nossa equipe!</p>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px">
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Ailton-150x150.jpeg" alt="Ailton Ricardo" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Ailton Ricardo Estevam</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Superintendente</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/edila.png" alt="Édila Kiarelli" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); background-color: #eee;">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Édila Kiarelli Lima</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Gerente administrativo</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Foto-site-3-1-150x150.png" alt="Maria Eduarda" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); background-color: #eee;">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Maria Eduarda da Silva</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Auxiliar administrativo</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Equipe técnica do Centro Dia para Idosos Dr. Ricardo -->
+        <section style="padding: 30px 0; background-color: #f9f9f9;">
+            <div class="container fade-in-up text-center">
+                <h4 style="color: var(--secondary-color); margin-bottom: 20px; font-size: 1.8rem;">Equipe técnica do Centro Dia para Idosos Dr. Ricardo</h4>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px">
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/grazielly-150x150.jpg" alt="Grazielly" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Grazielly de Siqueira Basso</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Gerente de serviço</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Sem-Titulo-2-copia.png" alt="Claudinei" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); background-color: #eee;">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Claudinei Alves de Souza</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Psicólogo</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/livia-150x150.png" alt="Lívia" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); background-color: #eee;">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Lívia de Almeida Coelho Gimenes</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Nutricionista</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Simone-150x150.jpg" alt="Simone" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Simone Viesba Domiciano</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Assistente social</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/carolina-150x150.jpg" alt="Caroline" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Caroline Gomez Cerqueira</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Enfermeira</p>
+                    </div>
+                    <div style="text-align: center; width: 150px;">
+                        <img src="../assets/img/Foto-site-150x150.png" alt="Ana Luísa" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); background-color: #eee;">
+                        <h6 style="color: var(--secondary-color); margin-bottom: 5px; font-size: 1rem;">Ana Luísa Brandão Corrêa dos Santos</h6>
+                        <p style="color: #666; font-size: 0.85rem; margin: 0;">Gerontóloga</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <a href="https://www.paypal.com/donate/?hosted_button_id=VPFVFTJXM2VK2" target="_blank" class="btn btn-primary">Apoiar este programa</a>
+                    <a href="../index.html" class="btn btn-secondary">Voltar para o início</a>
                 </div>
             </div>
         </section>
