@@ -377,6 +377,16 @@
 
     <!-- Scripts Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest"></script>
+    
+    <!-- Injetar credenciais Supabase (solução para site estático) -->
+    <script>
+        window.__SUPABASE_CREDENTIALS__ = {
+            url: 'https://ylcvwikjelkqgehvaobq.supabase.co',
+            key: 'sb_publishable_KilOBnCNArQ22tGBILNQLQ_-9hZdw4U'
+        };
+        console.log('✅ Credenciais Supabase injetadas:', window.__SUPABASE_CREDENTIALS__);
+    </script>
+    
     <script src="assets/js/supabase-config.js"></script>
     <script src="assets/js/supabase-posts.js"></script>
     <script src="assets/js/script-new.js"></script>
