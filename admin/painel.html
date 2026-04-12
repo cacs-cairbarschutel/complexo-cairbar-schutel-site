@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - CACS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="https://cacs-cairbarschutel.org.br/wp-content/uploads/2024/09/fav-1.png">
+    <style>
+        .admin-panel-page {
+            background: linear-gradient(180deg, #f7f9fc 0%, #eef3f9 100%);
+        }
+
+        .admin-panel-main {
+            min-height: calc(100vh - 80px);
+            padding: 56px 0 72px;
+        }
+
+        .admin-panel-hero {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: #fff;
+            border-radius: 24px;
+            padding: 56px 40px;
+            margin-bottom: 28px;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.12);
+        }
+
+        .admin-panel-hero h1 {
+            margin: 12px 0 14px;
+            font-size: clamp(2rem, 3vw, 3rem);
+            line-height: 1.1;
+        }
+
+        .admin-panel-hero p {
+            margin: 0;
+            max-width: 720px;
+            line-height: 1.7;
+            font-size: 1.05rem;
+            opacity: 0.95;
+        }
+
+        .admin-panel-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+        }
+
+        .admin-panel-card {
+            position: relative;
+            overflow: hidden;
+            background: #fff;
+            border-radius: 22px;
+            padding: 28px;
+            min-height: 280px;
+            box-shadow: 0 12px 35px rgba(8, 15, 30, 0.08);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            display: grid;
+            align-content: space-between;
+            gap: 18px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .admin-panel-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 45px rgba(8, 15, 30, 0.12);
+        }
+
+        .admin-panel-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(255, 209, 0, 0.14), transparent 34%),
+                        radial-gradient(circle at bottom left, rgba(196, 24, 52, 0.12), transparent 32%);
+            pointer-events: none;
+        }
+
+        .admin-panel-card__content,
+        .admin-panel-card__footer {
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-panel-card__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--primary-color);
+        }
+
+        .admin-panel-card h2 {
+            margin: 10px 0 12px;
+            font-size: 1.6rem;
+            color: var(--secondary-color);
+        }
+
+        .admin-panel-card p {
+            margin: 0;
+            color: #556;
+            line-height: 1.7;
+        }
+
+        .admin-panel-card__footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .admin-panel-card__meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .admin-panel-card__action {
+            padding: 12px 22px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.2s ease;
+        }
+
+        .admin-panel-card__action:hover {
+            transform: translateY(-1px);
+        }
+
+        .admin-panel-card--blog {
+            background: linear-gradient(180deg, #fff 0%, #fcfbf7 100%);
+        }
+
+        .admin-panel-card--home {
+            background: linear-gradient(180deg, #fff 0%, #f7f9ff 100%);
+        }
+
+        .admin-panel-card__icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(196, 24, 52, 0.08);
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 900px) {
+            .admin-panel-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-panel-hero {
+                padding: 36px 24px;
+            }
+        }
+    </style>
+</head>
+<body class="admin-panel-page" data-admin-area="panel">
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <img src="../assets/img/Logo-Cairbar-Branco.png" alt="CACS Logo">
+                </a>
+            </div>
+
+            <nav class="main-nav admin-nav">
+                <ul>
+                    <li><a href="../index.html">Abrir site</a></li>
+                    <li><a href="../pages/blog.html">Blog público</a></li>
+                    <li><a href="../index.html">Home pública</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="admin-panel-main">
+        <section class="container">
+            <div class="admin-panel-hero fade-in-up">
+                <span class="blog-kicker">Painel administrativo</span>
+                <h1>Escolha qual área editar</h1>
+                <p>Use os cards abaixo para abrir o painel do blog ou o editor da home. Este é o ponto único de entrada do admin.</p>
+            </div>
+
+            <div class="admin-panel-grid">
+                <article class="admin-panel-card admin-panel-card--blog fade-in-up">
+                    <div class="admin-panel-card__content">
+                        <span class="admin-panel-card__eyebrow">
+                            <span class="admin-panel-card__icon">B</span>
+                            Blog
+                        </span>
+                        <h2>Gerenciar posts e conteúdo do blog</h2>
+                        <p>Abra o painel do blog para criar, editar, publicar e organizar os posts do site com rich text e imagens.</p>
+                    </div>
+                    <div class="admin-panel-card__footer">
+                        <div class="admin-panel-card__meta">Acesso ao painel atual de posts</div>
+                        <a class="admin-panel-card__action btn btn-primary" href="login.html?target=blog">Acessar blog</a>
+                    </div>
+                </article>
+
+                <article class="admin-panel-card admin-panel-card--home fade-in-up">
+                    <div class="admin-panel-card__content">
+                        <span class="admin-panel-card__eyebrow">
+                            <span class="admin-panel-card__icon">H</span>
+                            Home
+                        </span>
+                        <h2>Editar o conteúdo da página inicial</h2>
+                        <p>Abra o editor da home para alterar hero, programas, campanhas e demais blocos dinâmicos da página principal.</p>
+                    </div>
+                    <div class="admin-panel-card__footer">
+                        <div class="admin-panel-card__meta">Acesso ao editor da home</div>
+                        <a class="admin-panel-card__action btn btn-secondary" href="login.html?target=home">Acessar home</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script src="../assets/js/admin-access.js"></script>
+</body>
+</html>
