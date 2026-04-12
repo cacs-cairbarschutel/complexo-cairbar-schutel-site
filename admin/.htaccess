@@ -1,0 +1,8 @@
+AuthType Basic
+AuthName "Acesso restrito ao painel administrativo"
+AuthUserFile "/home/SEU_USUARIO/.htpasswd-admin"
+Require valid-user
+
+<FilesMatch "^(login|painel|index|admin-home)\.html$">
+    Require valid-user
+</FilesMatch>
