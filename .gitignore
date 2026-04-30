@@ -27,6 +27,8 @@ build/
 # Variáveis sensíveis
 .env.production.local
 config.local.js
+seo-api-*.json
+google-service-account.json
 
 # Git
 .git/

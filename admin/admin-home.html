@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Home - CACS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="https://cacs-cairbarschutel.org.br/wp-content/uploads/2024/09/fav-1.png">
+    <style>
+        .admin-page {
+            background-color: #f5f7fb;
+        }
+
+        .admin-main {
+            min-height: calc(100vh - 80px);
+            padding: 60px 0;
+        }
+
+        .home-admin-hero {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: #fff;
+            border-radius: 20px;
+            padding: 48px 36px;
+            margin-bottom: 32px;
+        }
+
+        .home-admin-hero h1 {
+            margin: 0 0 12px;
+            font-size: 2.25rem;
+        }
+
+        .home-admin-hero p {
+            margin: 0;
+            max-width: 760px;
+            line-height: 1.7;
+        }
+
+        .home-admin-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .home-admin-toolbar__actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .home-admin-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            align-items: start;
+        }
+
+        .home-admin-group {
+            grid-column: 1 / -1;
+            display: grid;
+            gap: 18px;
+        }
+
+        .home-admin-group__title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 8px 2px 0;
+        }
+
+        .home-admin-group__title h3 {
+            margin: 0;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .home-admin-group__title p {
+            margin: 0;
+            color: #666;
+        }
+
+        .home-admin-group__cards {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .home-section-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+            height: 760px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .home-section-card__toggle {
+            border: 0;
+            background: transparent;
+            color: var(--secondary-color);
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .home-section-card__header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #ececec;
+        }
+
+        .home-section-card__header h2 {
+            margin: 6px 0 0;
+            font-size: 1.35rem;
+            color: var(--secondary-color);
+        }
+
+        .home-section-card__eyebrow {
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--primary-color);
+        }
+
+        .home-section-card__grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 22px;
+            align-items: start;
+            min-height: 0;
+        }
+
+        .home-section-card__fields {
+            display: grid;
+            gap: 18px;
+        }
+
+        .home-section-card__fields textarea {
+            min-height: 180px;
+            resize: vertical;
+            line-height: 1.6;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .home-section-card__fields textarea#hero-description {
+            min-height: 220px;
+        }
+
+        .home-section-card__fields textarea#sobre-description,
+        .home-section-card__fields textarea#acolhimento-description {
+            min-height: 200px;
+        }
+
+        .home-section-card__preview {
+            background: #fafafa;
+            border: 1px solid #eaeaea;
+            border-radius: 14px;
+            padding: 18px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .home-section-card__compare {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+
+        .home-section-card__compare-panel {
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 14px;
+            background: #fff;
+            display: grid;
+            gap: 10px;
+        }
+
+        .home-section-card__compare-panel h3 {
+            margin: 0;
+            font-size: 0.92rem;
+            color: var(--secondary-color);
+        }
+
+        .home-section-card__compare-panel p {
+            margin: 0;
+            color: #555;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .home-section-card__preview img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+            background: #f0f0f0;
+        }
+
+        .home-section-card__preview small {
+            color: #777;
+            word-break: break-all;
+        }
+
+        .home-section-card__compare-panel img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            background: #f0f0f0;
+        }
+
+        .home-section-card__compare-panel small {
+            color: #777;
+            word-break: break-all;
+        }
+
+        .home-section-card__body {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .home-section-card__body::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .home-section-card__body::-webkit-scrollbar-thumb {
+            background: rgba(15, 23, 42, 0.2);
+            border-radius: 999px;
+        }
+
+        .home-section-card__body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .status-message--info {
+            background: #eef6ff;
+            color: #2457a4;
+        }
+
+        .status-message--success {
+            background: #edf9f0;
+            color: #1f7a3d;
+        }
+
+        .status-message--error {
+            background: #fff1f0;
+            color: #b42318;
+        }
+
+        .home-save-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(8, 15, 30, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+        }
+
+        .home-save-modal.is-open {
+            display: flex;
+        }
+
+        .home-save-modal__panel {
+            width: min(100%, 520px);
+            background: #fff;
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 20px 70px rgba(0, 0, 0, 0.22);
+            display: grid;
+            gap: 18px;
+        }
+
+        .home-save-modal__panel h3 {
+            margin: 0;
+            font-size: 1.45rem;
+            color: var(--secondary-color);
+        }
+
+        .home-save-modal__panel p {
+            margin: 0;
+            line-height: 1.7;
+            color: #555;
+        }
+
+        .home-save-modal__actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 960px) {
+            .home-admin-form {
+                grid-template-columns: 1fr;
+            }
+
+            .home-admin-group__cards {
+                grid-template-columns: 1fr;
+            }
+
+            .home-section-card__grid {
+                grid-template-columns: 1fr;
+            }
+
+            .home-section-card__compare {
+                grid-template-columns: 1fr;
+            }
+
+            .home-admin-hero {
+                padding: 32px 24px;
+            }
+        }
+
+        .home-section-card__body[hidden] {
+            display: none;
+        }
+    </style>
+</head>
+<body class="admin-page" data-admin-area="home">
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <img src="../assets/img/Logo-Cairbar-Branco.png" alt="CACS Logo">
+                </a>
+            </div>
+
+            <nav class="main-nav admin-nav">
+                <ul>
+                    <li><a href="painel.html">Voltar ao painel</a></li>
+                    <li><a href="../index.html">Abrir home</a></li>
+                    <li><a href="../pages/blog.html">Abrir blog público</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <section class="container">
+            <div class="home-admin-hero fade-in-up">
+                <span class="blog-kicker">Conteúdo da Home</span>
+                <h1>Editar títulos, descrições e imagens da página inicial</h1>
+                <p>Esta tela altera o conteúdo dinâmico da home. A estrutura, o layout e as classes da página permanecem iguais.</p>
+            </div>
+
+            <div class="home-admin-toolbar">
+                <div>
+                    <h2 style="margin: 0; color: var(--secondary-color);">Seções editáveis</h2>
+                    <p style="margin: 6px 0 0; color: #666;">Hero, sobre, acolhimento e demais blocos da home</p>
+                </div>
+                <div class="home-admin-toolbar__actions">
+                    <button type="button" class="btn btn-secondary" id="reload-home-content">Recarregar conteúdo</button>
+                    <button type="submit" form="admin-home-form" class="btn btn-primary" id="save-home-content">Salvar conteúdo</button>
+                </div>
+            </div>
+
+            <form id="admin-home-form" class="home-admin-form">
+                <div class="home-admin-group">
+                    <div class="home-admin-group__title">
+                        <div>
+                            <h3>Conteúdo principal</h3>
+                            <p>Primeiro impacto e apresentação institucional</p>
+                        </div>
+                    </div>
+                    <div class="home-admin-group__cards">
+                        <article class="home-section-card" data-section-card="hero">
+                    <div class="home-section-card__header">
+                        <div>
+                            <span class="home-section-card__eyebrow">Hero</span>
+                            <h2>Primeiro impacto da página inicial</h2>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <small style="color: #777;">Título, descrição e imagem principal</small>
+                            <button type="button" class="home-section-card__toggle" data-toggle-section="hero">Recolher</button>
+                        </div>
+                    </div>
+                    <div class="home-section-card__body">
+                        <div class="home-section-card__compare">
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como está agora</h3>
+                                <strong id="hero-current-title"></strong>
+                                <p id="hero-current-description"></p>
+                                <img id="hero-current-image-preview" alt="Imagem atual do hero">
+                                <small id="hero-current-image">Nenhuma imagem definida</small>
+                            </div>
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como vai ficar</h3>
+                                <strong id="hero-preview-title"></strong>
+                                <p id="hero-preview-description"></p>
+                                <img id="hero-preview" alt="Pré-visualização do hero" hidden>
+                                <small id="hero-preview-image-text">Nenhuma imagem definida</small>
+                            </div>
+                        </div>
+                        <div class="home-section-card__grid">
+                            <div class="home-section-card__fields">
+                                <div class="form-group">
+                                    <label for="hero-title">Título</label>
+                                    <input type="text" id="hero-title" name="hero-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="hero-description">Descrição</label>
+                                    <textarea id="hero-description" name="hero-description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="hero-image">Imagem</label>
+                                    <input type="file" id="hero-image" name="hero-image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </article>
+
+                    <article class="home-section-card" data-section-card="sobre">
+                    <div class="home-section-card__header">
+                        <div>
+                            <span class="home-section-card__eyebrow">Sobre</span>
+                            <h2>Bloco institucional da home</h2>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <small style="color: #777;">Título, descrição e imagem do bloco sobre</small>
+                            <button type="button" class="home-section-card__toggle" data-toggle-section="sobre">Recolher</button>
+                        </div>
+                    </div>
+                    <div class="home-section-card__body">
+                        <div class="home-section-card__compare">
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como está agora</h3>
+                                <strong id="sobre-current-title"></strong>
+                                <p id="sobre-current-description"></p>
+                                <img id="sobre-current-image-preview" alt="Imagem atual da seção sobre">
+                                <small id="sobre-current-image">Nenhuma imagem definida</small>
+                            </div>
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como vai ficar</h3>
+                                <strong id="sobre-preview-title"></strong>
+                                <p id="sobre-preview-description"></p>
+                                <img id="sobre-preview" alt="Pré-visualização da seção sobre" hidden>
+                                <small id="sobre-preview-image-text">Nenhuma imagem definida</small>
+                            </div>
+                        </div>
+                        <div class="home-section-card__grid">
+                            <div class="home-section-card__fields">
+                                <div class="form-group">
+                                    <label for="sobre-title">Título</label>
+                                    <input type="text" id="sobre-title" name="sobre-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sobre-description">Descrição</label>
+                                    <textarea id="sobre-description" name="sobre-description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sobre-image">Imagem</label>
+                                    <input type="file" id="sobre-image" name="sobre-image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </article>
+
+                    <article class="home-section-card" data-section-card="acolhimento">
+                    <div class="home-section-card__header">
+                        <div>
+                            <span class="home-section-card__eyebrow">Acolhimento</span>
+                            <h2>Bloco de destaque do programa</h2>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <small style="color: #777;">Título, descrição e imagem do bloco em destaque</small>
+                            <button type="button" class="home-section-card__toggle" data-toggle-section="acolhimento">Recolher</button>
+                        </div>
+                    </div>
+                    <div class="home-section-card__body">
+                        <div class="home-section-card__compare">
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como está agora</h3>
+                                <strong id="acolhimento-current-title"></strong>
+                                <p id="acolhimento-current-description"></p>
+                                <img id="acolhimento-current-image-preview" alt="Imagem atual da seção acolhimento">
+                                <small id="acolhimento-current-image">Nenhuma imagem definida</small>
+                            </div>
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como vai ficar</h3>
+                                <strong id="acolhimento-preview-title"></strong>
+                                <p id="acolhimento-preview-description"></p>
+                                <img id="acolhimento-preview" alt="Pré-visualização da seção acolhimento" hidden>
+                                <small id="acolhimento-preview-image-text">Nenhuma imagem definida</small>
+                            </div>
+                        </div>
+                        <div class="home-section-card__grid">
+                            <div class="home-section-card__fields">
+                                <div class="form-group">
+                                    <label for="acolhimento-title">Título</label>
+                                    <input type="text" id="acolhimento-title" name="acolhimento-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acolhimento-description">Descrição</label>
+                                    <textarea id="acolhimento-description" name="acolhimento-description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acolhimento-image">Imagem</label>
+                                    <input type="file" id="acolhimento-image" name="acolhimento-image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </article>
+
+                    <article class="home-section-card" data-section-card="cdi">
+                    <div class="home-section-card__header">
+                        <div>
+                            <span class="home-section-card__eyebrow">CDI</span>
+                            <h2>Bloco do Centro Dia para Idosos</h2>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <small style="color: #777;">Título, descrição e imagem principal</small>
+                            <button type="button" class="home-section-card__toggle" data-toggle-section="cdi">Recolher</button>
+                        </div>
+                    </div>
+                    <div class="home-section-card__body">
+                        <div class="home-section-card__compare">
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como está agora</h3>
+                                <strong id="cdi-current-title"></strong>
+                                <p id="cdi-current-description"></p>
+                                <img id="cdi-current-image-preview" alt="Imagem atual da seção CDI">
+                                <small id="cdi-current-image">Nenhuma imagem definida</small>
+                            </div>
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como vai ficar</h3>
+                                <strong id="cdi-preview-title"></strong>
+                                <p id="cdi-preview-description"></p>
+                                <img id="cdi-preview" alt="Pré-visualização da seção CDI" hidden>
+                                <small id="cdi-preview-image-text">Nenhuma imagem definida</small>
+                            </div>
+                        </div>
+                        <div class="home-section-card__grid">
+                            <div class="home-section-card__fields">
+                                <div class="form-group">
+                                    <label for="cdi-title">Título</label>
+                                    <input type="text" id="cdi-title" name="cdi-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cdi-description">Descrição</label>
+                                    <textarea id="cdi-description" name="cdi-description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cdi-image">Imagem</label>
+                                    <input type="file" id="cdi-image" name="cdi-image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </article>
+
+                    <article class="home-section-card" data-section-card="bilingue">
+                    <div class="home-section-card__header">
+                        <div>
+                            <span class="home-section-card__eyebrow">Bilíngue</span>
+                            <h2>Bloco do programa bilíngue</h2>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <small style="color: #777;">Título, descrição e imagem principal</small>
+                            <button type="button" class="home-section-card__toggle" data-toggle-section="bilingue">Recolher</button>
+                        </div>
+                    </div>
+                    <div class="home-section-card__body">
+                        <div class="home-section-card__compare">
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como está agora</h3>
+                                <strong id="bilingue-current-title"></strong>
+                                <p id="bilingue-current-description"></p>
+                                <img id="bilingue-current-image-preview" alt="Imagem atual da seção bilíngue">
+                                <small id="bilingue-current-image">Nenhuma imagem definida</small>
+                            </div>
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como vai ficar</h3>
+                                <strong id="bilingue-preview-title"></strong>
+                                <p id="bilingue-preview-description"></p>
+                                <img id="bilingue-preview" alt="Pré-visualização da seção bilíngue" hidden>
+                                <small id="bilingue-preview-image-text">Nenhuma imagem definida</small>
+                            </div>
+                        </div>
+                        <div class="home-section-card__grid">
+                            <div class="home-section-card__fields">
+                                <div class="form-group">
+                                    <label for="bilingue-title">Título</label>
+                                    <input type="text" id="bilingue-title" name="bilingue-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bilingue-description">Descrição</label>
+                                    <textarea id="bilingue-description" name="bilingue-description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bilingue-image">Imagem</label>
+                                    <input type="file" id="bilingue-image" name="bilingue-image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </article>
+
+                    <article class="home-section-card" data-section-card="florescer">
+                    <div class="home-section-card__header">
+                        <div>
+                            <span class="home-section-card__eyebrow">Florescer</span>
+                            <h2>Bloco do programa Florescer</h2>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <small style="color: #777;">Título, descrição e imagem principal</small>
+                            <button type="button" class="home-section-card__toggle" data-toggle-section="florescer">Recolher</button>
+                        </div>
+                    </div>
+                    <div class="home-section-card__body">
+                        <div class="home-section-card__compare">
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como está agora</h3>
+                                <strong id="florescer-current-title"></strong>
+                                <p id="florescer-current-description"></p>
+                                <img id="florescer-current-image-preview" alt="Imagem atual da seção Florescer">
+                                <small id="florescer-current-image">Nenhuma imagem definida</small>
+                            </div>
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como vai ficar</h3>
+                                <strong id="florescer-preview-title"></strong>
+                                <p id="florescer-preview-description"></p>
+                                <img id="florescer-preview" alt="Pré-visualização da seção Florescer" hidden>
+                                <small id="florescer-preview-image-text">Nenhuma imagem definida</small>
+                            </div>
+                        </div>
+                        <div class="home-section-card__grid">
+                            <div class="home-section-card__fields">
+                                <div class="form-group">
+                                    <label for="florescer-title">Título</label>
+                                    <input type="text" id="florescer-title" name="florescer-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="florescer-description">Descrição</label>
+                                    <textarea id="florescer-description" name="florescer-description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="florescer-image">Imagem</label>
+                                    <input type="file" id="florescer-image" name="florescer-image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </article>
+
+                    <article class="home-section-card" data-section-card="brecho">
+                    <div class="home-section-card__header">
+                        <div>
+                            <span class="home-section-card__eyebrow">Brechó</span>
+                            <h2>Bloco do brechó solidário</h2>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <small style="color: #777;">Título, descrição e imagem principal</small>
+                            <button type="button" class="home-section-card__toggle" data-toggle-section="brecho">Recolher</button>
+                        </div>
+                    </div>
+                    <div class="home-section-card__body">
+                        <div class="home-section-card__compare">
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como está agora</h3>
+                                <strong id="brecho-current-title"></strong>
+                                <p id="brecho-current-description"></p>
+                                <img id="brecho-current-image-preview" alt="Imagem atual do brechó">
+                                <small id="brecho-current-image">Nenhuma imagem definida</small>
+                            </div>
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como vai ficar</h3>
+                                <strong id="brecho-preview-title"></strong>
+                                <p id="brecho-preview-description"></p>
+                                <img id="brecho-preview" alt="Pré-visualização do brechó" hidden>
+                                <small id="brecho-preview-image-text">Nenhuma imagem definida</small>
+                            </div>
+                        </div>
+                        <div class="home-section-card__grid">
+                            <div class="home-section-card__fields">
+                                <div class="form-group">
+                                    <label for="brecho-title">Título</label>
+                                    <input type="text" id="brecho-title" name="brecho-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="brecho-description">Descrição</label>
+                                    <textarea id="brecho-description" name="brecho-description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="brecho-image">Imagem</label>
+                                    <input type="file" id="brecho-image" name="brecho-image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </article>
+
+                    <article class="home-section-card" data-section-card="cedesp">
+                    <div class="home-section-card__header">
+                        <div>
+                            <span class="home-section-card__eyebrow">CEDESP</span>
+                            <h2>Bloco do centro de capacitação</h2>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <small style="color: #777;">Título, descrição e imagem principal</small>
+                            <button type="button" class="home-section-card__toggle" data-toggle-section="cedesp">Recolher</button>
+                        </div>
+                    </div>
+                    <div class="home-section-card__body">
+                        <div class="home-section-card__compare">
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como está agora</h3>
+                                <strong id="cedesp-current-title"></strong>
+                                <p id="cedesp-current-description"></p>
+                                <img id="cedesp-current-image-preview" alt="Imagem atual do CEDESP">
+                                <small id="cedesp-current-image">Nenhuma imagem definida</small>
+                            </div>
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como vai ficar</h3>
+                                <strong id="cedesp-preview-title"></strong>
+                                <p id="cedesp-preview-description"></p>
+                                <img id="cedesp-preview" alt="Pré-visualização do CEDESP" hidden>
+                                <small id="cedesp-preview-image-text">Nenhuma imagem definida</small>
+                            </div>
+                        </div>
+                        <div class="home-section-card__grid">
+                            <div class="home-section-card__fields">
+                                <div class="form-group">
+                                    <label for="cedesp-title">Título</label>
+                                    <input type="text" id="cedesp-title" name="cedesp-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cedesp-description">Descrição</label>
+                                    <textarea id="cedesp-description" name="cedesp-description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cedesp-image">Imagem</label>
+                                    <input type="file" id="cedesp-image" name="cedesp-image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </article>
+
+                    <article class="home-section-card" data-section-card="campanha-fome">
+                    <div class="home-section-card__header">
+                        <div>
+                            <span class="home-section-card__eyebrow">Campanha</span>
+                            <h2>Bloco da Campanha Contra a Fome</h2>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <small style="color: #777;">Título, descrição e imagem principal</small>
+                            <button type="button" class="home-section-card__toggle" data-toggle-section="campanha-fome">Recolher</button>
+                        </div>
+                    </div>
+                    <div class="home-section-card__body">
+                        <div class="home-section-card__compare">
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como está agora</h3>
+                                <strong id="campanha-fome-current-title"></strong>
+                                <p id="campanha-fome-current-description"></p>
+                                <img id="campanha-fome-current-image-preview" alt="Imagem atual da Campanha Contra a Fome">
+                                <small id="campanha-fome-current-image">Nenhuma imagem definida</small>
+                            </div>
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como vai ficar</h3>
+                                <strong id="campanha-fome-preview-title"></strong>
+                                <p id="campanha-fome-preview-description"></p>
+                                <img id="campanha-fome-preview" alt="Pré-visualização da Campanha Contra a Fome" hidden>
+                                <small id="campanha-fome-preview-image-text">Nenhuma imagem definida</small>
+                            </div>
+                        </div>
+                        <div class="home-section-card__grid">
+                            <div class="home-section-card__fields">
+                                <div class="form-group">
+                                    <label for="campanha-fome-title">Título</label>
+                                    <input type="text" id="campanha-fome-title" name="campanha-fome-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="campanha-fome-description">Descrição</label>
+                                    <textarea id="campanha-fome-description" name="campanha-fome-description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="campanha-fome-image">Imagem</label>
+                                    <input type="file" id="campanha-fome-image" name="campanha-fome-image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </article>
+
+                    <article class="home-section-card" data-section-card="eventos">
+                    <div class="home-section-card__header">
+                        <div>
+                            <span class="home-section-card__eyebrow">Eventos</span>
+                            <h2>Bloco de eventos na home</h2>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <small style="color: #777;">Título e descrição da seção de eventos</small>
+                            <button type="button" class="home-section-card__toggle" data-toggle-section="eventos">Recolher</button>
+                        </div>
+                    </div>
+                    <div class="home-section-card__body">
+                        <div class="home-section-card__compare">
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como está agora</h3>
+                                <strong id="eventos-current-title"></strong>
+                                <p id="eventos-current-description"></p>
+                                <img id="eventos-current-image-preview" alt="Imagem atual dos eventos">
+                                <small id="eventos-current-image">Nenhuma imagem definida</small>
+                            </div>
+                            <div class="home-section-card__compare-panel">
+                                <h3>Como vai ficar</h3>
+                                <strong id="eventos-preview-title"></strong>
+                                <p id="eventos-preview-description"></p>
+                                <img id="eventos-preview" alt="Pré-visualização dos eventos" hidden>
+                                <small id="eventos-preview-image-text">Nenhuma imagem definida</small>
+                            </div>
+                        </div>
+                        <div class="home-section-card__grid">
+                            <div class="home-section-card__fields">
+                                <div class="form-group">
+                                    <label for="eventos-title">Título</label>
+                                    <input type="text" id="eventos-title" name="eventos-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eventos-description">Descrição</label>
+                                    <textarea id="eventos-description" name="eventos-description" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="home-admin-group">
+                    <div class="home-admin-group__title">
+                        <div>
+                            <h3>Apoio e contato</h3>
+                            <p>Chamada para ação e formulário de contato</p>
+                        </div>
+                    </div>
+                    <div class="home-admin-group__cards">
+                        <article class="home-section-card" data-section-card="faca-parte">
+                            <div class="home-section-card__header">
+                                <div>
+                                    <span class="home-section-card__eyebrow">Faça parte</span>
+                                    <h2>Chamada para ação</h2>
+                                </div>
+                                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                    <small style="color: #777;">Título, botões e texto da chamada</small>
+                                    <button type="button" class="home-section-card__toggle" data-toggle-section="faca-parte">Recolher</button>
+                                </div>
+                            </div>
+                            <div class="home-section-card__body">
+                                <div class="home-section-card__compare">
+                                    <div class="home-section-card__compare-panel">
+                                        <h3>Como está agora</h3>
+                                        <strong id="faca-parte-current-title"></strong>
+                                        <p id="faca-parte-current-description"></p>
+                                        <img id="faca-parte-current-image-preview" alt="Imagem atual da chamada para ação">
+                                        <small id="faca-parte-current-image">Nenhuma imagem definida</small>
+                                    </div>
+                                    <div class="home-section-card__compare-panel">
+                                        <h3>Como vai ficar</h3>
+                                        <strong id="faca-parte-preview-title"></strong>
+                                        <p id="faca-parte-preview-description"></p>
+                                        <img id="faca-parte-preview" alt="Pré-visualização da chamada para ação" hidden>
+                                        <small id="faca-parte-preview-image-text">Nenhuma imagem definida</small>
+                                    </div>
+                                </div>
+                                <div class="home-section-card__grid">
+                                    <div class="home-section-card__fields">
+                                        <div class="form-group">
+                                            <label for="faca-parte-title">Título</label>
+                                            <input type="text" id="faca-parte-title" name="faca-parte-title" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="faca-parte-description">Descrição</label>
+                                            <textarea id="faca-parte-description" name="faca-parte-description" required></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="home-section-card" data-section-card="contato">
+                            <div class="home-section-card__header">
+                                <div>
+                                    <span class="home-section-card__eyebrow">Contato</span>
+                                    <h2>Informações e formulário</h2>
+                                </div>
+                                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                    <small style="color: #777;">Título e texto da seção de contato</small>
+                                    <button type="button" class="home-section-card__toggle" data-toggle-section="contato">Recolher</button>
+                                </div>
+                            </div>
+                            <div class="home-section-card__body">
+                                <div class="home-section-card__compare">
+                                    <div class="home-section-card__compare-panel">
+                                        <h3>Como está agora</h3>
+                                        <strong id="contato-current-title"></strong>
+                                        <p id="contato-current-description"></p>
+                                        <img id="contato-current-image-preview" alt="Imagem atual do contato">
+                                        <small id="contato-current-image">Nenhuma imagem definida</small>
+                                    </div>
+                                    <div class="home-section-card__compare-panel">
+                                        <h3>Como vai ficar</h3>
+                                        <strong id="contato-preview-title"></strong>
+                                        <p id="contato-preview-description"></p>
+                                        <img id="contato-preview" alt="Pré-visualização do contato" hidden>
+                                        <small id="contato-preview-image-text">Nenhuma imagem definida</small>
+                                    </div>
+                                </div>
+                                <div class="home-section-card__grid">
+                                    <div class="home-section-card__fields">
+                                        <div class="form-group">
+                                            <label for="contato-title">Título</label>
+                                            <input type="text" id="contato-title" name="contato-title" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="contato-description">Descrição</label>
+                                            <textarea id="contato-description" name="contato-description" required></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <div id="home-status" class="status-message status-message--info">Os dados serão carregados automaticamente ao abrir esta página.</div>
+            </form>
+        </section>
+    </main>
+
+    <div id="home-save-modal" class="home-save-modal" aria-hidden="true">
+        <div class="home-save-modal__panel" role="dialog" aria-modal="true" aria-labelledby="home-save-modal-title">
+            <h3 id="home-save-modal-title">Alteração salva</h3>
+            <p>As alterações da página inicial foram salvas com sucesso.</p>
+            <div class="home-save-modal__actions">
+                <button type="button" class="btn btn-primary" id="home-save-modal-close">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest"></script>
+    <script>
+        window.__SUPABASE_CREDENTIALS__ = {
+            url: 'https://ylcvwikjelkqgehvaobq.supabase.co',
+            key: 'sb_publishable_KilOBnCNArQ22tGBILNQLQ_-9hZdw4U'
+        };
+    </script>
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="../assets/js/admin-access.js"></script>
+    <script src="../assets/js/admin-home.js"></script>
+</body>
+</html>

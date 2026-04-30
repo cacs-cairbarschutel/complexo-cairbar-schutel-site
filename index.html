@@ -63,6 +63,7 @@
                         <ul class="dropdown-menu">
                             <li><a href="pages/doacao.html">Doação</a></li>
                             <li><a href="pages/voluntario.html">Seja Voluntário</a></li>
+                            <li><a href="pages/nfp.html">Nota Fiscal Paulista</a></li>
                         </ul>
                     </li>
                     <li><a href="#contato">CONTATO</a></li>
@@ -78,16 +79,14 @@
         <!-- Seção Hero -->
         <section class="hero-section">
             <div class="hero-carousel">
-                <div class="carousel-slide active" style="background-image: url('assets/img/hero-bg.jpg')"></div>
-                <div class="carousel-slide" style="background-image: url('assets/img/CB2.jpg')"></div>
+                <div class="carousel-slide active" style="background-image: url('assets/img/CB2.jpg')"></div>
                 <div class="carousel-slide" style="background-image: url('assets/img/IMG-20251122-WA0023.jpg')"></div>
-                <div class="carousel-slide"
-                    style="background-image: url('assets/img/WhatsApp Image 2025-12-08 at 11.05.23 (10).jpg')"></div>
+                <div class="carousel-slide" style="background-image: url('assets/img/WhatsApp Image 2025-12-08 at 11.05.23 (10).jpg')"></div>
             </div>
             <div class="hero-overlay"></div>
             <div class="container hero-content fade-in-up">
                 <h1>63 anos de um trabalho de amor!</h1>
-                <p>O CACS | Complexo Assistencial Cairbar Schutel, associação filantrópica sem fins lucrativos, foi
+                <p>O CACS | Complexo Assistencial Cairbar Schutel, organização filantrópica sem fins lucrativos, foi
                     criado em 17 de janeiro de 1963 movido pela busca de uma sociedade mais justa e com mais
                     oportunidades.</p>
                 <a href="#impacto" class="btn btn-primary">Saiba mais</a>
@@ -142,7 +141,7 @@
                     </div>
                     <a href="pages/blog.html" class="btn btn-secondary">Ver todos os posts</a>
                 </div>
-                <div id="posts" class="blog-grid blog-grid--home"></div>
+                <div id="posts" class="blog-grid blog-grid--home" style="min-height: 450px;"></div>
             </div>
         </section>
 
@@ -155,7 +154,7 @@
                 </div>
                 <div class="text-wrapper fade-in-right">
                     <h2>CACS</h2>
-                    <p style="text-align: justify;">O CACS | Complexo Assistencial Cairbar Schutel, associação filantrópica sem fins lucrativos, fundado em 17 de janeiro de 1963, movido pela busca de uma sociedade mais justa e com mais oportunidades, trabalhando para resgatar a dignidade e fomentar a autonomia de pessoas em situação de vulnerabilidade.</p>
+                    <p style="text-align: justify;">O CACS | Complexo Assistencial Cairbar Schutel, organização filantrópica sem fins lucrativos, fundado em 17 de janeiro de 1963, movido pela busca de uma sociedade mais justa e com mais oportunidades, trabalhando para resgatar a dignidade e fomentar a autonomia de pessoas em situação de vulnerabilidade.</p>
                     <a href="pages/cacs.html" class="btn btn-secondary">Saiba mais</a>
                 </div>
             </div>
@@ -187,8 +186,12 @@
                     <div>
                         <h2 style="margin-top: 0;">CDI - Centro Dia para Idosos</h2>
                         <p style="text-align: justify;">O Centro Dia para Idosos Dr. Ricardo oferece proteção social integral, estimulação cognitiva e convivência para idosos em vulnerabilidade social em São Paulo, promovendo envelhecimento ativo, autonomia e dignidade através de acompanhamento multidisciplinar.</p>
+                        <div style="margin-top: 20px; display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 10px; border-left: 4px solid var(--primary-color);">
+                            <img src="assets/img/prefeitura sp.jpg" alt="Prefeitura de São Paulo" style="height: 50px; width: auto; object-fit: contain; box-shadow: none; mix-blend-mode: multiply; flex-shrink: 0;">
+                            <p style="margin: 0; flex: 1; font-size: 0.95rem; line-height: 1.4; text-align: left;"><strong>Convênio Municipal:</strong> Serviço realizado em parceria com a Prefeitura da Cidade de São Paulo.</p>
+                        </div>
                     </div>
-                    <a href="pages/cdi.html" class="btn btn-secondary" style="align-self: flex-start; margin-top: auto;">Saiba mais</a>
+                    <a href="pages/cdi.html" class="btn btn-secondary" style="align-self: flex-start; margin-top: 20px;">Saiba mais</a>
                 </div>
                 <div class="image-wrapper fade-in-right" style="display: flex;">
                     <img src="assets/img/CDI.jpg"
@@ -297,10 +300,10 @@
                         Campanha Contra Fome</h4>
                 </div>
                 <div class="gallery-item fade-in-up" style="animation-delay: 0.2s;">
-                    <img src="assets/img/Foto (30).JPG" alt="Capoeira dos Idosos"
-                        style="width: 100%; height: 300px; object-fit: cover; border-radius: 15px;">
+                    <img src="assets/img/calendario 2026.JPG" alt="Acompanhe nossos eventos"
+                        style="width: 100%; height: 300px; object-fit: contain; border-radius: 15px; background-color: #EFEFEF;">
                     <h4 style="color: var(--secondary-color); margin-top: 15px; text-align: center; font-size: 1.2rem;">
-                        Capoeira dos Idosos</h4>
+                        Acompanhe nossos eventos</h4>
                 </div>
                 <div class="gallery-item fade-in-up" style="animation-delay: 0.4s;">
                     <img src="assets/img/IMG_2072.JPG" alt="Almoços Beneficentes"
@@ -341,14 +344,54 @@
                                 alt="Selo Doar" style="width: 80px;">
                         </div>
                     </div>
-                    <form class="contact-form fade-in-up" onsubmit="event.preventDefault(); alert('Obrigada pelo contato'); this.reset();">
-                        <input type="text" placeholder="Seu nome" required>
-                        <input type="email" placeholder="Seu e-mail" required>
-                        <input type="text" placeholder="Assunto" required>
-                        <textarea rows="5" placeholder="Sua mensagem"></textarea>
-                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    <form class="contact-form fade-in-up" id="main-contact-form">
+                        <input type="text" name="name" placeholder="Seu nome" required>
+                        <input type="email" name="email" placeholder="Seu e-mail" required>
+                        <input type="text" name="_subject" placeholder="Assunto" required>
+                        <textarea name="message" rows="5" placeholder="Sua mensagem" required></textarea>
+                        
+                        <input type="hidden" name="_captcha" value="false">
+                        <!-- Remove o _next já que estamos usando AJAX -->
+
+                        <button type="submit" class="btn btn-primary" id="contact-submit-btn">Enviar</button>
                     </form>
                 </div>
+                <script>
+                    document.getElementById('main-contact-form').addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        const form = e.target;
+                        const btn = document.getElementById('contact-submit-btn');
+                        const originalText = btn.innerText;
+                        btn.innerText = 'Enviando...';
+                        btn.disabled = true;
+
+                        const formData = new FormData(form);
+
+                        fetch('https://formsubmit.co/ajax/contato@cairbarschutel.org.br', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success === "true" || data.success === true) {
+                                alert('Obrigado pelo contato! Sua mensagem foi enviada com sucesso.');
+                                form.reset();
+                            } else {
+                                alert('Aviso: Verifique a caixa de entrada de contato@cairbarschutel.org.br para ativar o formulário pela primeira vez.');
+                            }
+                        })
+                        .catch(error => {
+                            alert('Ocorreu um erro ao enviar. Tente novamente mais tarde.');
+                        })
+                        .finally(() => {
+                            btn.innerText = originalText;
+                            btn.disabled = false;
+                        });
+                    });
+                </script>
             </div>
         </section>
     </main>
@@ -389,6 +432,7 @@
     
     <script src="assets/js/supabase-config.js"></script>
     <script src="assets/js/supabase-posts.js"></script>
+    <script src="assets/js/home-content.js"></script>
     <script src="assets/js/script-new.js"></script>
 </body>
 

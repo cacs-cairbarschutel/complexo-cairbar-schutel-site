@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecionando...</title>
+    <script>
+        // Redirecionar URLs antigas do WordPress para a home
+        const path = window.location.pathname;
+        
+        // URLs que devem redirecionar
+        const shouldRedirect = [
+            '/sobre-nos',
+            '/pagina-padrao',
+            '/ouvidoria',
+            '/doe-1',
+            '/fale-conosco',
+            '/tag/',
+            '/wp-admin',
+            '/wp-login',
+            '/wp-includes',
+            '/wp-content'
+        ];
+        
+        // Verifica se a URL atual contém alguma das URLs antigas
+        let isOldUrl = shouldRedirect.some(url => path.includes(url)) || 
+                      /\/\d{4}\/\d{2}\/\d{2}\//.test(path); // Formato de post antigo
+        
+        if (isOldUrl) {
+            // Redireciona para a home
+            window.location.href = '/';
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        p { color: #666; }
+        a { color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Página não encontrada (404)</h1>
+        <p>Redirecionando para a página inicial...</p>
+        <p>Se não redirecionar automaticamente, <a href="/">clique aqui</a>.</p>
+    </div>
+</body>
+</html>

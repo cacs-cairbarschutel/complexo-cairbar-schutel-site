@@ -1,0 +1,23 @@
+# Ativar mod_rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Redirecionar URLs WordPress antigas para a home
+    RewriteRule ^sobre-nos/?$ / [R=301,L]
+    RewriteRule ^pagina-padrao/?$ / [R=301,L]
+    RewriteRule ^ouvidoria/?$ / [R=301,L]
+    RewriteRule ^doe-1/?$ / [R=301,L]
+    
+    # Redirecionar posts antigos (formato /YYYY/MM/DD/slug/)
+    RewriteRule ^[0-9]{4}/[0-9]{2}/[0-9]{2}/.*/?$ / [R=301,L]
+    
+    # Redirecionar tags
+    RewriteRule ^tag/.*/?$ / [R=301,L]
+    
+    # Redirecionar wp-content (PDFs e outros)
+    RewriteRule ^wp-content/.*$ / [R=301,L]
+    
+    # Redirecionar outras páginas WordPress comuns
+    RewriteRule ^(wp-admin|wp-login|wp-includes).*$ / [R=301,L]
+</IfModule>
