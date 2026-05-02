@@ -83,6 +83,14 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
+        .admin-grid .admin-panel:last-child {
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
         .panel-heading {
             display: flex;
             justify-content: space-between;
@@ -480,7 +488,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             z-index: 10000;
-            animate: slideIn 0.3s ease;
+            animation: slideIn 0.3s ease;
             max-width: 400px;
         }
 
@@ -530,7 +538,7 @@
     </style>
 </head>
 
-<body class="admin-page">
+<body class="admin-page" data-admin-area="blog">
     <header class="site-header">
         <div class="container header-container">
             <div class="logo">
@@ -541,6 +549,7 @@
 
             <nav class="main-nav admin-nav">
                 <ul>
+                    <li><a href="painel.html">Voltar ao painel</a></li>
                     <li><a href="../index.html">Voltar para a home</a></li>
                     <li><a href="../pages/blog.html">Abrir blog público</a></li>
                 </ul>
@@ -555,6 +564,8 @@
                 <h1>Gerencie os posts do blog</h1>
                 <p>Crie, edite e exclua publicações salvas no Supabase. Os posts publicados aparecem automaticamente na home e na página do blog.</p>
                 <div class="admin-hero__actions">
+                    <a href="painel.html" class="btn btn-secondary">Painel único</a>
+                    <a href="painel.html" class="btn btn-secondary">Editar home</a>
                     <a href="../index.html#blog" class="btn btn-primary">Ver seção do blog</a>
                     <a href="../pages/blog.html" class="btn btn-secondary">Abrir blog público</a>
                 </div>
@@ -648,6 +659,7 @@
     </script>
     
     <script src="../assets/js/supabase-config.js"></script>
+    <script src="../assets/js/admin-access.js"></script>
     <script src="../assets/js/supabase-posts.js"></script>
     
     <!-- Script Admin Melhorado -->
