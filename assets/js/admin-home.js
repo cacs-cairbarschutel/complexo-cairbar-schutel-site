@@ -4,12 +4,12 @@ const HOME_AUTOSAVE_DELAY = 900;
 const HOME_ADMIN_DEFAULTS = {
     hero: {
         title: '63 anos de um trabalho de amor!',
-        description: 'O CACS | Complexo Assistencial Cairbar Schutel, associação filantrópica sem fins lucrativos, foi criado em 17 de janeiro de 1963 movido pela busca de uma sociedade mais justa e com mais oportunidades.',
+        description: 'O CACS | Complexo Assistencial Cairbar Schutel, organização filantrópica sem fins lucrativos, foi criado em 17 de janeiro de 1963 movido pela busca de uma sociedade mais justa e com mais oportunidades.',
         image_url: 'assets/img/hero-bg.jpg'
     },
     sobre: {
         title: 'CACS',
-        description: 'O CACS | Complexo Assistencial Cairbar Schutel, associação filantrópica sem fins lucrativos, fundado em 17 de janeiro de 1963, movido pela busca de uma sociedade mais justa e com mais oportunidades, trabalhando para resgatar a dignidade e fomentar a autonomia de pessoas em situação de vulnerabilidade.',
+        description: 'O CACS | Complexo Assistencial Cairbar Schutel, organização filantrópica sem fins lucrativos, fundado em 17 de janeiro de 1963, movido pela busca de uma sociedade mais justa e com mais oportunidades, trabalhando para resgatar a dignidade e fomentar a autonomia de pessoas em situação de vulnerabilidade.',
         image_url: 'assets/img/Home-CACS.jpeg'
     },
     acolhimento: {
