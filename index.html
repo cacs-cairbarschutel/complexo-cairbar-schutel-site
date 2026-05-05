@@ -385,14 +385,13 @@
                                 'Accept': 'application/json'
                             }
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success === "true" || data.success === true) {
-                                alert('Obrigado pelo contato! Sua mensagem foi enviada com sucesso.');
-                                form.reset();
-                            } else {
-                                alert('Aviso: Verifique a caixa de entrada de contato@cairbarschutel.org.br para ativar o formulário pela primeira vez.');
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Falha no envio');
                             }
+
+                            alert('Obrigado pelo contato! Sua mensagem foi enviada com sucesso.');
+                            form.reset();
                         })
                         .catch(error => {
                             alert('Ocorreu um erro ao enviar. Tente novamente mais tarde.');
