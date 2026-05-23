@@ -2,6 +2,13 @@
 <html lang="pt-BR">
 
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TCGXD7LC');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CACS - Complexo Assistencial Cairbar Schutel</title>
@@ -16,6 +23,10 @@
 </head>
 
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TCGXD7LC"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
     <!-- Cabeçalho / Navegação -->
     <header class="site-header">
@@ -300,7 +311,7 @@
                         Campanha Contra Fome</h4>
                 </div>
                 <div class="gallery-item fade-in-up" style="animation-delay: 0.2s;">
-                    <img src="assets/img/calendario 2026.JPG" alt="Acompanhe nossos eventos"
+                    <img src="assets/img/calendario.JPG" alt="Acompanhe nossos eventos"
                         style="width: 100%; height: 300px; object-fit: contain; border-radius: 15px; background-color: #EFEFEF;">
                     <h4 style="color: var(--secondary-color); margin-top: 15px; text-align: center; font-size: 1.2rem;">
                         Acompanhe nossos eventos</h4>
@@ -374,14 +385,13 @@
                                 'Accept': 'application/json'
                             }
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success === "true" || data.success === true) {
-                                alert('Obrigado pelo contato! Sua mensagem foi enviada com sucesso.');
-                                form.reset();
-                            } else {
-                                alert('Aviso: Verifique a caixa de entrada de contato@cairbarschutel.org.br para ativar o formulário pela primeira vez.');
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Falha no envio');
                             }
+
+                            alert('Obrigado pelo contato! Sua mensagem foi enviada com sucesso.');
+                            form.reset();
                         })
                         .catch(error => {
                             alert('Ocorreu um erro ao enviar. Tente novamente mais tarde.');
