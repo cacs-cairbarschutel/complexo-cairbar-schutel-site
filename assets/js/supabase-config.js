@@ -1,126 +1,83 @@
 /**
- * Configuração do Supabase
+ * Configuração da API (Migração Neon)
  * 
- * Este arquivo inicializa o cliente Supabase para comunicação com o banco de dados.
- * As variáveis de ambiente são carregadas de forma diferente dependendo do ambiente.
+ * Este arquivo foi adaptado para se comunicar com um backend personalizado
+ * que utiliza o Neon PostgreSQL, substituindo o SDK do Supabase.
  */
 
-let SUPABASE_URL = '';
-let SUPABASE_ANON_KEY = '';
-
-// Detectar ambiente e carregar variáveis
-// 1. Primeiro tenta credenciais injetadas no window (para sites estáticos)
-if (window.__SUPABASE_CREDENTIALS__) {
-    SUPABASE_URL = window.__SUPABASE_CREDENTIALS__.url;
-    SUPABASE_ANON_KEY = window.__SUPABASE_CREDENTIALS__.key;
-    console.log('✅ Credenciais carregadas do window');
-}
-
-// Validação
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.warn('⚠️ Variáveis de ambiente Supabase não configuradas. Configure .env.local com VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY');
-    console.warn('❌ SUPABASE_URL:', SUPABASE_URL);
-    console.warn('❌ SUPABASE_ANON_KEY:', SUPABASE_ANON_KEY);
-} else {
-    console.log('✅ Supabase URL:', SUPABASE_URL);
-    console.log('✅ Supabase configured');
-}
+const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api';
 
 /**
- * Cliente Supabase global
- * Para usar: await supabaseClient.from('posts').select('*')
+ * Cliente Mock para manter compatibilidade com o código existente
  */
-let supabaseClient = null;
+const supabaseClient = {
+    from: (table) => ({
+        select: (columns) => ({
+            eq: (col, val) => ({
+                order: (col, opts) => fetch(`${API_BASE_URL}/${table}?${col}=${val}`).then(r => r.json().then(data => ({ data, error: null }))),
+                single: () => fetch(`${API_BASE_URL}/${table}/${val}`).then(r => r.json().then(data => ({ data, error: null })))
+            }),
+            in: (col, vals) => fetch(`${API_BASE_URL}/${table}?sections=${vals.join(',')}`).then(r => r.json().then(data => ({ data, error: null }))),
+            order: (col, opts) => fetch(`${API_BASE_URL}/${table}`).then(r => r.json().then(data => ({ data, error: null })))
+        }),
+        insert: (data) => ({
+            select: () => ({
+                single: () => fetch(`${API_BASE_URL}/${table}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data[0])
+                }).then(r => r.json().then(data => ({ data, error: null })))
+            })
+        }),
+        update: (data) => ({
+            eq: (col, val) => ({
+                select: () => ({
+                    single: () => fetch(`${API_BASE_URL}/${table}/${val}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    }).then(r => r.json().then(data => ({ data, error: null })))
+                })
+            })
+        }),
+        delete: () => ({
+            eq: (col, val) => fetch(`${API_BASE_URL}/${table}/${val}`, { method: 'DELETE' }).then(r => r.json().then(data => ({ data, error: null })))
+        })
+    }),
+    storage: {
+        from: (bucket) => ({
+            upload: (path, file) => {
+                const formData = new FormData();
+                formData.append('image', file);
+                return fetch(`${API_BASE_URL}/upload`, {
+                    method: 'POST',
+                    body: formData
+                }).then(r => r.json().then(data => ({ data, error: null })));
+            },
+            getPublicUrl: (path) => ({ data: { publicUrl: `${API_BASE_URL.replace('/api', '')}/uploads/${path.split('/').pop()}` } })
+        })
+    }
+};
 
-/**
- * Inicializar cliente Supabase (chamado uma única vez)
- */
 async function initSupabaseClient() {
-    console.log('🚀 initSupabaseClient() chamado');
-    
-    if (supabaseClient) {
-        console.log('✅ Cliente Supabase já estava inicializado');
-        return supabaseClient;
-    }
-    
-    // Carregar biblioteca Supabase dinamicamente
-    if (!window.supabase) {
-        console.error('❌ window.supabase não está definido. A biblioteca Supabase não foi carregada no HTML.');
-        console.error('Certifique-se de que há uma tag <script> com a CDN do Supabase ANTES dos outros scripts');
-        return null;
-    }
-
-    console.log('✅ window.supabase encontrado, criando cliente...');
-    console.log('📍 URL:', SUPABASE_URL);
-    console.log('🔑 KEY:', SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 20) + '...' : 'NÃO DEFINIDA');
-
-    try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('✅ Cliente Supabase criado com sucesso');
-        return supabaseClient;
-    } catch (error) {
-        console.error('❌ Erro ao criar cliente Supabase:', error);
-        return null;
-    }
-}
-
-/**
- * Obter instância do cliente Supabase
- */
-function getSupabaseClient() {
-    if (!supabaseClient) {
-        console.error('❌ Cliente Supabase não inicializado. Chame initSupabaseClient() primeiro.');
-        return null;
-    }
+    console.log('🚀 API Client (Neon Migration) inicializado');
+    window.supabase = supabaseClient; // Mock para compatibilidade
     return supabaseClient;
 }
 
-/**
- * Verificar se está autenticado
- */
+function getSupabaseClient() {
+    return supabaseClient;
+}
+
+// Manter funções de Auth (usando a lógica local do admin-access.js)
 async function isAuthenticated() {
-    const client = getSupabaseClient();
-    if (!client) return false;
-
-    const { data: { session } } = await client.auth.getSession();
-    return !!session;
+    return !!sessionStorage.getItem('cacs-admin-session');
 }
 
-/**
- * Obter usuário atual
- */
-async function getCurrentUser() {
-    const client = getSupabaseClient();
-    if (!client) return null;
-
-    const { data: { user } } = await client.auth.getUser();
-    return user;
-}
-
-/**
- * Logout
- */
-async function logoutSupabase() {
-    const client = getSupabaseClient();
-    if (!client) return false;
-
-    const { error } = await client.auth.signOut();
-    if (error) {
-        console.error('❌ Erro ao fazer logout:', error.message);
-        return false;
-    }
-    return true;
-}
-
-// Exportar para uso em outros arquivos (window namespace)
 window.supabaseConfig = {
     initSupabaseClient,
     getSupabaseClient,
     isAuthenticated,
-    getCurrentUser,
-    logoutSupabase,
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
+    API_BASE_URL
 };
 
-console.log('✅ supabaseConfig exportado para window');
