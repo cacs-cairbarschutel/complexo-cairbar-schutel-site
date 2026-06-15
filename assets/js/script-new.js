@@ -19,26 +19,21 @@ async function initializeSupabase() {
     
     try {
         // Verificar se os scripts necessários estão carregados
-        if (!window.supabase) {
-            console.warn('⚠️ window.supabase não carregado. Você viu a CDN do Supabase?');
+        if (!window.supabase && !window.supabaseConfig) {
+            console.warn('⚠️ window.supabase e window.supabaseConfig não carregados.');
             USE_SUPABASE = false;
             return false;
         }
 
-        console.log('✅ window.supabase encontrado');
+        console.log('✅ Sistema de Banco de Dados encontrado');
 
-        if (!window.supabaseConfig) {
-            console.warn('⚠️ window.supabaseConfig não disponível. supabase-config.js foi carregado?');
-            USE_SUPABASE = false;
-            return false;
+        if (window.supabaseConfig && !window.supabase) {
+            console.log('🔄 Inicializando via supabaseConfig (Neon Migration)...');
+            await window.supabaseConfig.initSupabaseClient();
         }
 
-        console.log('✅ window.supabaseConfig encontrado');
+        const client = window.supabaseConfig ? window.supabaseConfig.getSupabaseClient() : window.supabase;
 
-        // Inicializar cliente
-        console.log('⏳ Chamando initSupabaseClient()...');
-        await window.supabaseConfig.initSupabaseClient();
-        const client = window.supabaseConfig.getSupabaseClient();
 
         if (!client) {
             console.warn('⚠️ Cliente Supabase não pôde ser criado. initSupabaseClient() retornou null.');
