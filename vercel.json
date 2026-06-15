@@ -1,6 +1,11 @@
 {
   "version": 2,
-  "name": "cacs-site",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/backend/server.js"
+    }
+  ],
   "builds": [
     {
       "src": "backend/server.js",
@@ -22,18 +27,5 @@
       "src": "admin/**",
       "use": "@vercel/static"
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "backend/server.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/$1"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
