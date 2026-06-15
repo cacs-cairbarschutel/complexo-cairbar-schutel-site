@@ -3,29 +3,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/backend/server.js"
-    }
-  ],
-  "builds": [
-    {
-      "src": "backend/server.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "**/*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "assets/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "pages/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "admin/**",
-      "use": "@vercel/static"
+      "destination": "/api/index.js"
     }
   ]
 }
