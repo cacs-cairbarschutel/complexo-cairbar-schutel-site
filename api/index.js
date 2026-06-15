@@ -24,10 +24,15 @@ app.use(express.json());
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+// --- ROTA DE TESTE (PING) ---
+app.get(['/api/health', '/health'], (req, res) => {
+  res.json({ status: 'ok', message: 'API CACS está viva!', timestamp: new Date() });
+});
+
 // --- ROTAS DE POSTS ---
 
-// Listar posts publicados
-app.get('/posts', async (req, res) => {
+// Listar posts publicados (aceita /api/posts ou /posts)
+app.get(['/api/posts', '/posts'], async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM posts WHERE status = $1 ORDER BY created_at DESC', ['published']);
     res.json(result.rows);
@@ -37,9 +42,8 @@ app.get('/posts', async (req, res) => {
 });
 
 // Criar post (Admin)
-app.post('/posts', upload.single('image'), async (req, res) => {
+app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
   const { title, description, content, author, status } = req.body;
-  // Na Vercel, o upload local não funciona. Imagem ficará nula por enquanto.
   const imageUrl = null; 
 
   try {
@@ -55,7 +59,7 @@ app.post('/posts', upload.single('image'), async (req, res) => {
 
 // --- ROTAS DE HOME CONTENT ---
 
-app.get('/home-content', async (req, res) => {
+app.get(['/api/home-content', '/home-content'], async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM home_content');
     res.json(result.rows);
@@ -64,9 +68,9 @@ app.get('/home-content', async (req, res) => {
   }
 });
 
-app.post('/home-content', upload.single('image'), async (req, res) => {
+app.post(['/api/home-content', '/home-content'], upload.single('image'), async (req, res) => {
   const { section, title, description } = req.body;
-  const imageUrl = req.file ? `/assets/img/uploads/${req.file.filename}` : req.body.image_url;
+  const imageUrl = req.body.image_url || null;
 
   try {
     const result = await pool.query(
