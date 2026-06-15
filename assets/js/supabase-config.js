@@ -5,7 +5,9 @@
  * que utiliza o Neon PostgreSQL, substituindo o SDK do Supabase.
  */
 
-const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api';
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000/api' 
+    : 'https://complexo-cairbar-schutel-site.vercel.app/api';
 
 /**
  * Cliente Mock para manter compatibilidade com o código existente
