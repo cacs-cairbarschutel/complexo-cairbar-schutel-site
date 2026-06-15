@@ -20,19 +20,8 @@ const pool = new Pool({
 app.use(cors());
 app.use(express.json());
 
-// Configuração de upload de imagens (Local)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = './assets/img/uploads';
-    if (!fs.existsSync(dir)){
-        fs.mkdirSync(dir, { recursive: true });
-    }
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
+// Configuração de upload de imagens (Memória para Vercel)
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // --- ROTAS DE POSTS ---
@@ -50,7 +39,8 @@ app.get('/api/posts', async (req, res) => {
 // Criar post (Admin)
 app.post('/api/posts', upload.single('image'), async (req, res) => {
   const { title, description, content, author, status } = req.body;
-  const imageUrl = req.file ? `/assets/img/uploads/${req.file.filename}` : null;
+  // Na Vercel, o upload local não funciona. Imagem ficará nula por enquanto.
+  const imageUrl = null; 
 
   try {
     const result = await pool.query(
