@@ -11,39 +11,45 @@ const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhos
  * Cliente Mock para manter compatibilidade com o código existente
  */
 const supabaseClient = {
-    from: (table) => ({
-        select: (columns) => ({
-            eq: (col, val) => ({
-                order: (col, opts) => fetch(`${API_BASE_URL}/${table}?${col}=${val}`).then(r => r.json().then(data => ({ data, error: null }))),
-                single: () => fetch(`${API_BASE_URL}/${table}/${val}`).then(r => r.json().then(data => ({ data, error: null })))
+    from: (table) => {
+        const normalizedTable = table.replace(/_/g, '-');
+        return {
+            select: (columns) => ({
+                eq: (col, val) => ({
+                    order: (col, opts) => fetch(`${API_BASE_URL}/${normalizedTable}?${col}=${val}`).then(r => r.json().then(data => ({ data, error: null }))),
+                    single: () => fetch(`${API_BASE_URL}/${normalizedTable}/${val}`).then(r => r.json().then(data => ({ data, error: null })))
+                }),
+                in: (col, vals) => ({
+                    order: (col, opts) => fetch(`${API_BASE_URL}/${normalizedTable}?sections=${vals.join(',')}`).then(r => r.json().then(data => ({ data, error: null }))),
+                    then: (fn) => fetch(`${API_BASE_URL}/${normalizedTable}?sections=${vals.join(',')}`).then(r => r.json().then(data => fn({ data, error: null })))
+                }),
+                order: (col, opts) => fetch(`${API_BASE_URL}/${normalizedTable}`).then(r => r.json().then(data => ({ data, error: null })))
             }),
-            in: (col, vals) => fetch(`${API_BASE_URL}/${table}?sections=${vals.join(',')}`).then(r => r.json().then(data => ({ data, error: null }))),
-            order: (col, opts) => fetch(`${API_BASE_URL}/${table}`).then(r => r.json().then(data => ({ data, error: null })))
-        }),
-        insert: (data) => ({
-            select: () => ({
-                single: () => fetch(`${API_BASE_URL}/${table}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data[0])
-                }).then(r => r.json().then(data => ({ data, error: null })))
-            })
-        }),
-        update: (data) => ({
-            eq: (col, val) => ({
+            insert: (data) => ({
                 select: () => ({
-                    single: () => fetch(`${API_BASE_URL}/${table}/${val}`, {
-                        method: 'PUT',
+                    single: () => fetch(`${API_BASE_URL}/${normalizedTable}`, {
+                        method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
+                        body: JSON.stringify(data[0])
                     }).then(r => r.json().then(data => ({ data, error: null })))
                 })
+            }),
+            update: (data) => ({
+                eq: (col, val) => ({
+                    select: () => ({
+                        single: () => fetch(`${API_BASE_URL}/${normalizedTable}/${val}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        }).then(r => r.json().then(data => ({ data, error: null })))
+                    })
+                })
+            }),
+            delete: () => ({
+                eq: (col, val) => fetch(`${API_BASE_URL}/${normalizedTable}/${val}`, { method: 'DELETE' }).then(r => r.json().then(data => ({ data, error: null })))
             })
-        }),
-        delete: () => ({
-            eq: (col, val) => fetch(`${API_BASE_URL}/${table}/${val}`, { method: 'DELETE' }).then(r => r.json().then(data => ({ data, error: null })))
-        })
-    }),
+        };
+    },
     storage: {
         from: (bucket) => ({
             upload: (path, file) => {
