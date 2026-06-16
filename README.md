@@ -21,3 +21,8 @@ Website oficial do Complexo Cairbar Schutel.
 
 1. Copie o arquivo `.env.example` para `.env` e preencha as variáveis necessárias.
 2. Certifique-se de ter o Node.js instalado para rodar o backend localmente, se necessário.
+
+## Contribuidores
+
+- Gabriel Sousa
+- Mariana Hoffmann
