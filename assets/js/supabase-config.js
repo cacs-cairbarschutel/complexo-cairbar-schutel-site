@@ -5,7 +5,11 @@
  * que utiliza o Neon PostgreSQL, substituindo o SDK do Supabase.
  */
 
-const API_BASE_URL = window.location.hostname === 'localhost' 
+const isLocal = window.location.hostname === 'localhost' || 
+                 window.location.hostname === '127.0.0.1' || 
+                 window.location.hostname.startsWith('192.168.');
+
+const API_BASE_URL = isLocal 
     ? 'http://localhost:3000/api' 
     : 'https://complexo-cairbar-schutel-site.vercel.app/api';
 
@@ -15,42 +19,75 @@ const API_BASE_URL = window.location.hostname === 'localhost'
 const supabaseClient = {
     from: (table) => {
         const normalizedTable = table.replace(/_/g, '-');
-        return {
-            select: (columns) => ({
-                eq: (col, val) => ({
-                    order: (col, opts) => fetch(`${API_BASE_URL}/${normalizedTable}?${col}=${val}`).then(r => r.json().then(data => ({ data, error: null }))),
-                    single: () => fetch(`${API_BASE_URL}/${normalizedTable}/${val}`).then(r => r.json().then(data => ({ data, error: null })))
-                }),
-                in: (col, vals) => ({
-                    order: (col, opts) => fetch(`${API_BASE_URL}/${normalizedTable}?sections=${vals.join(',')}`).then(r => r.json().then(data => ({ data, error: null }))),
-                    then: (fn) => fetch(`${API_BASE_URL}/${normalizedTable}?sections=${vals.join(',')}`).then(r => r.json().then(data => fn({ data, error: null })))
-                }),
-                order: (col, opts) => fetch(`${API_BASE_URL}/${normalizedTable}`).then(r => r.json().then(data => ({ data, error: null })))
-            }),
-            insert: (data) => ({
-                select: () => ({
-                    single: () => fetch(`${API_BASE_URL}/${normalizedTable}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data[0])
-                    }).then(r => r.json().then(data => ({ data, error: null })))
-                })
-            }),
-            update: (data) => ({
-                eq: (col, val) => ({
-                    select: () => ({
-                        single: () => fetch(`${API_BASE_URL}/${normalizedTable}/${val}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(data)
-                        }).then(r => r.json().then(data => ({ data, error: null })))
-                    })
-                })
-            }),
-            delete: () => ({
-                eq: (col, val) => fetch(`${API_BASE_URL}/${normalizedTable}/${val}`, { method: 'DELETE' }).then(r => r.json().then(data => ({ data, error: null })))
-            })
+        
+        const createQueryBuilder = () => {
+            const builder = {
+                select: (columns) => builder,
+                eq: (col, val) => {
+                    builder._query = builder._query ? `${builder._query}&${col}=${val}` : `${col}=${val}`;
+                    return builder;
+                },
+                in: (col, vals) => {
+                    builder._query = builder._query ? `${builder._query}&sections=${vals.join(',')}` : `sections=${vals.join(',')}`;
+                    return builder;
+                },
+                order: (col, opts) => builder,
+                single: () => builder,
+                limit: (n) => builder,
+                
+                // Implementação do Thenable para o await funcionar em qualquer ponto da cadeia
+                then: (resolve) => {
+                    const url = builder._id 
+                        ? `${API_BASE_URL}/${normalizedTable}/${builder._id}`
+                        : `${API_BASE_URL}/${normalizedTable}${builder._query ? '?' + builder._query : ''}`;
+                    
+                    fetch(url)
+                        .then(r => {
+                            if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+                            return r.json();
+                        })
+                        .then(data => resolve({ data, error: null }))
+                        .catch(err => {
+                            console.error(`❌ Erro na API (${normalizedTable}):`, err.message);
+                            resolve({ data: null, error: err });
+                        });
+                },
+                
+                // Métodos de mutação
+                insert: (data) => {
+                    return {
+                        select: () => ({
+                            single: () => fetch(`${API_BASE_URL}/${normalizedTable}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(data[0])
+                            }).then(r => r.json().then(data => ({ data, error: null })))
+                        })
+                    };
+                },
+                update: (data) => {
+                    return {
+                        eq: (col, val) => ({
+                            select: () => ({
+                                single: () => fetch(`${API_BASE_URL}/${normalizedTable}/${val}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(data)
+                                }).then(r => r.json().then(data => ({ data, error: null })))
+                            })
+                        })
+                    };
+                },
+                delete: () => {
+                    return {
+                        eq: (col, val) => fetch(`${API_BASE_URL}/${normalizedTable}/${val}`, { method: 'DELETE' }).then(r => r.json().then(data => ({ data, error: null })))
+                    };
+                }
+            };
+            return builder;
         };
+
+        return createQueryBuilder();
     },
     storage: {
         from: (bucket) => ({

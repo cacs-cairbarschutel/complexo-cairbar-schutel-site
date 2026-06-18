@@ -1,20 +1,24 @@
 const express = require('express');
-const { Pool } = require('pg');
+const mysql = require('mysql2/promise');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configuração do Neon (PostgreSQL)
-// Defina a variável de ambiente DATABASE_URL no seu servidor
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+// Configuração do MySQL
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : null,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
 app.use(cors());
@@ -37,27 +41,34 @@ const upload = multer({ storage: storage });
 
 // --- ROTAS DE POSTS ---
 
-// Listar posts publicados
 app.get('/api/posts', async (req, res) => {
+  const { status } = req.query;
   try {
-    const result = await pool.query('SELECT * FROM posts WHERE status = $1 ORDER BY created_at DESC', ['published']);
-    res.json(result.rows);
+    let query = 'SELECT * FROM posts';
+    const params = [];
+    if (status) {
+      query += ' WHERE status = ?';
+      params.push(status);
+    }
+    query += ' ORDER BY created_at DESC';
+    const [rows] = await pool.query(query, params);
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Criar post (Admin)
 app.post('/api/posts', upload.single('image'), async (req, res) => {
   const { title, description, content, author, status } = req.body;
   const imageUrl = req.file ? `/assets/img/uploads/${req.file.filename}` : null;
 
   try {
-    const result = await pool.query(
-      'INSERT INTO posts (id, title, description, content, image, author, status, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *',
+    const [result] = await pool.query(
+      'INSERT INTO posts (id, title, description, content, image, author, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
       [Date.now(), title, description, content, imageUrl, author, status || 'draft']
     );
-    res.status(201).json(result.rows[0]);
+    const [newPost] = await pool.query('SELECT * FROM posts WHERE id = ?', [result.insertId || Date.now()]);
+    res.status(201).json(newPost[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -67,8 +78,8 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
 
 app.get('/api/home-content', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM home_content');
-    res.json(result.rows);
+    const [rows] = await pool.query('SELECT * FROM home_content');
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -79,11 +90,12 @@ app.post('/api/home-content', upload.single('image'), async (req, res) => {
   const imageUrl = req.file ? `/assets/img/uploads/${req.file.filename}` : req.body.image_url;
 
   try {
-    const result = await pool.query(
-      'INSERT INTO home_content (section, title, description, image_url, updated_at) VALUES ($1, $2, $3, $4, NOW()) ON CONFLICT (section) DO UPDATE SET title = $2, description = $3, image_url = $4, updated_at = NOW() RETURNING *',
-      [section, title, description, imageUrl]
+    await pool.query(
+      'INSERT INTO home_content (section, title, description, image_url, updated_at) VALUES (?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE title = ?, description = ?, image_url = ?, updated_at = NOW()',
+      [section, title, description, imageUrl, title, description, imageUrl]
     );
-    res.json(result.rows[0]);
+    const [updatedRow] = await pool.query('SELECT * FROM home_content WHERE section = ?', [section]);
+    res.json(updatedRow[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -91,9 +103,8 @@ app.post('/api/home-content', upload.single('image'), async (req, res) => {
 
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
-    console.log(`🚀 Servidor rodando em http://localhost:${port}`);
+    console.log(`🚀 Servidor MySQL (Backend) rodando em http://localhost:${port}`);
   });
 }
 
 module.exports = app;
-

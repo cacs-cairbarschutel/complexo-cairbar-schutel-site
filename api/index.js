@@ -1,57 +1,93 @@
 const express = require('express');
-const { Pool } = require('pg');
+const mysql = require('mysql2/promise');
 const cors = require('cors');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configuração do Neon (PostgreSQL)
-// Defina a variável de ambiente DATABASE_URL no seu servidor
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+// Configuração do MySQL
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
 app.use(cors());
 app.use(express.json());
 
-// Configuração de upload de imagens (Memória para Vercel)
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // --- ROTA DE TESTE (PING) ---
-app.get(['/api/health', '/health'], (req, res) => {
-  res.json({ status: 'ok', message: 'API CACS está viva!', timestamp: new Date() });
+app.get(['/api/health', '/health'], async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT NOW() as now');
+    const [postsCount] = await pool.query('SELECT count(*) as count FROM posts');
+    res.json({ 
+      status: 'ok', 
+      database: 'connected (MySQL)', 
+      db_time: rows[0].now,
+      total_posts_in_db: postsCount[0].count,
+      timestamp: new Date() 
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', error: err.message });
+  }
 });
 
 // --- ROTAS DE POSTS ---
 
-// Listar posts publicados (aceita /api/posts ou /posts)
 app.get(['/api/posts', '/posts'], async (req, res) => {
+  const { status } = req.query;
   try {
-    const result = await pool.query('SELECT * FROM posts WHERE status = $1 ORDER BY created_at DESC', ['published']);
-    res.json(result.rows);
+    let query = 'SELECT * FROM posts';
+    const params = [];
+
+    if (status) {
+      query += ' WHERE status = ?';
+      params.push(status);
+    }
+
+    query += ' ORDER BY created_at DESC';
+    
+    const [rows] = await pool.query(query, params);
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Criar post (Admin)
+app.get(['/api/posts/:id', '/posts/:id'], async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM posts WHERE id = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Post não encontrado' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
   const { title, description, content, author, status } = req.body;
   const imageUrl = null; 
 
   try {
-    const result = await pool.query(
-      'INSERT INTO posts (id, title, description, content, image, author, status, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *',
+    const [result] = await pool.query(
+      'INSERT INTO posts (id, title, description, content, image, author, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
       [Date.now(), title, description, content, imageUrl, author, status || 'draft']
     );
-    res.status(201).json(result.rows[0]);
+    
+    const [newPost] = await pool.query('SELECT * FROM posts WHERE id = ?', [result.insertId || Date.now()]);
+    res.status(201).json(newPost[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -61,8 +97,8 @@ app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
 
 app.get(['/api/home-content', '/home-content'], async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM home_content');
-    res.json(result.rows);
+    const [rows] = await pool.query('SELECT * FROM home_content');
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -73,11 +109,13 @@ app.post(['/api/home-content', '/home-content'], upload.single('image'), async (
   const imageUrl = req.body.image_url || null;
 
   try {
-    const result = await pool.query(
-      'INSERT INTO home_content (section, title, description, image_url, updated_at) VALUES ($1, $2, $3, $4, NOW()) ON CONFLICT (section) DO UPDATE SET title = $2, description = $3, image_url = $4, updated_at = NOW() RETURNING *',
-      [section, title, description, imageUrl]
+    const [result] = await pool.query(
+      'INSERT INTO home_content (section, title, description, image_url, updated_at) VALUES (?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE title = ?, description = ?, image_url = ?, updated_at = NOW()',
+      [section, title, description, imageUrl, title, description, imageUrl]
     );
-    res.json(result.rows[0]);
+    
+    const [updatedRow] = await pool.query('SELECT * FROM home_content WHERE section = ?', [section]);
+    res.json(updatedRow[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -85,9 +123,8 @@ app.post(['/api/home-content', '/home-content'], upload.single('image'), async (
 
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
-    console.log(`🚀 Servidor rodando em http://localhost:${port}`);
+    console.log(`🚀 Servidor MySQL rodando em http://localhost:${port}`);
   });
 }
 
 module.exports = app;
-
