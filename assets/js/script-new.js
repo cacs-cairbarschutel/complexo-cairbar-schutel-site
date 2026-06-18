@@ -84,7 +84,10 @@ function normalizeImagePath(imagePath) {
         return value;
     }
 
-    const fileName = value
+    // Se começar com /, remover a barra inicial para processamento
+    let cleanPath = value.startsWith('/') ? value.substring(1) : value;
+
+    const fileName = cleanPath
         .replace(/^Fotos\//, '')
         .replace(/^assets\/img\//, '');
 
@@ -170,15 +173,21 @@ async function getPosts() {
         try {
             console.log('🔍 Buscando posts do Supabase...');
             const posts = await window.supabasePosts.fetchAllPosts();
-            console.log('✅ Posts encontrados:', posts?.length || 0);
-            return posts;
+            
+            if (posts && posts.length > 0) {
+                console.log('✅ Posts encontrados no banco:', posts.length);
+                return posts;
+            }
+            
+            console.warn('⚠️ Banco de dados retornou 0 posts.');
+            return [];
         } catch (error) {
-            console.error('❌ Erro ao buscar posts do Supabase:', error.message);
+            console.error('❌ Erro ao buscar posts do banco:', error.message);
             return [];
         }
     }
 
-    console.warn('⚠️ Supabase não disponível (USE_SUPABASE=' + USE_SUPABASE + '). Nenhum post carregado.');
+    console.warn('⚠️ Sistema de banco de dados não disponível.');
     return [];
 }
 
@@ -409,7 +418,7 @@ function renderStoredContent(content) {
 }
 
 async function getPublishedPosts(limit) {
-    console.log('📰 getPublishedPosts(' + limit + ') chamado');
+    console.log('📰 getPublishedPosts(' + limit + ') chamado (MODO: MOSTRAR TUDO)');
     
     const posts = await getPosts();
     console.log('📊 Total de posts recebidos de getPosts():', posts?.length || 0);
@@ -419,22 +428,12 @@ async function getPublishedPosts(limit) {
         return [];
     }
 
+    // REMOVIDO FILTRO DE STATUS: Mostrando tudo que estiver no banco para diagnóstico
     const filtered = posts
-        .filter((post) => {
-            const isPublished = post.status === 'published';
-            if (!isPublished) {
-                console.log('⏭️  Filtrando post não publicado:', post.title, 'status=' + post.status);
-            }
-            return isPublished;
-        })
         .sort((a, b) => new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt))
         .slice(0, limit);
 
-    console.log('✅ Posts publicados após filtro:', filtered.length);
-    if (filtered.length > 0) {
-        console.log('Posts a renderizar:', filtered.map(p => ({ id: p.id, title: p.title, status: p.status })));
-    }
-    
+    console.log('✅ Posts processados (sem filtro de status):', filtered.length);
     return filtered;
 }
 

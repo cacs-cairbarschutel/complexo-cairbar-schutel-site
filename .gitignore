@@ -40,3 +40,5 @@ Thumbs.db
 
 .vs/
 *.sln
+.vercel
+.env*

@@ -19,6 +19,8 @@ async function fetchPublishedPosts() {
     try {
         console.log('📡 Buscando posts com status=published...');
         
+        // Na nossa API mock, .from('posts').select('*').eq('status', 'published') 
+        // agora gera a URL /api/posts?status=published
         const { data, error } = await client
             .from('posts')
             .select('*')
@@ -27,15 +29,10 @@ async function fetchPublishedPosts() {
 
         if (error) {
             console.error('❌ Erro ao buscar posts publicados:', error.message);
-            console.error('Código:', error.code);
             return [];
         }
 
         console.log('✅ Posts publicados carregados:', data?.length || 0);
-        if (data && data.length > 0) {
-            console.log('Posts encontrados:', data.map(p => ({ id: p.id, title: p.title, status: p.status })));
-        }
-        
         return data || [];
     } catch (error) {
         console.error('❌ Erro ao buscar posts (exceção):', error.message);
