@@ -217,7 +217,7 @@ async function addPost(post) {
 async function deletePost(id) {
     if (USE_SUPABASE && window.supabasePosts) {
         try {
-            await window.supabasePosts.deletePost(Number(id));
+            await window.supabasePosts.deletePost(String(id));
         } catch (error) {
             console.error('Erro ao deletar post do Supabase:', error.message);
             throw error;
@@ -238,7 +238,7 @@ async function updatePost(updatedPost) {
                 created_at: updatedPost.created_at || updatedPost.createdAt,
                 updated_at: new Date().toISOString()
             };
-            await window.supabasePosts.updatePost(Number(updatedPost.id), postData);
+            await window.supabasePosts.updatePost(String(updatedPost.id), postData);
         } catch (error) {
             console.error('Erro ao atualizar post no Supabase:', error.message);
             throw error;
@@ -253,7 +253,7 @@ async function updatePost(updatedPost) {
  */
 async function getPostById(id) {
     const posts = await getPosts();
-    return posts.find((post) => post.id === Number(id));
+    return posts.find((post) => String(post.id) === String(id));
 }
 
 /**
@@ -798,7 +798,7 @@ function renderAdminBlog() {
             return;
         }
 
-        const id = Number(actionButton.dataset.id);
+        const id = actionButton.dataset.id;
         const action = actionButton.dataset.action;
 
         if (action === 'edit') {

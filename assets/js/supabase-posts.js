@@ -120,10 +120,10 @@ async function fetchAllPosts() {
  */
 function generatePostId() {
     // Usar timestamp em ms (13 dígitos) + número aleatório (5 dígitos)
-    // Exemplo: 1711355569456_12345 → um número muito grande e único
+    // Exemplo: 171135556945612345 → um número muito grande e único
     const timestamp = Date.now(); // 13 dígitos
     const random = Math.floor(Math.random() * 100000); // 5 dígitos
-    return parseInt(`${timestamp}${String(random).padStart(5, '0')}`);
+    return `${timestamp}${String(random).padStart(5, '0')}`;
 }
 
 /**

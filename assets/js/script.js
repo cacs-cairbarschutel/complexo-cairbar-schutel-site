@@ -106,17 +106,17 @@ function addPost(post) {
 }
 
 function deletePost(id) {
-    const posts = getPosts().filter((post) => post.id !== Number(id));
+    const posts = getPosts().filter((post) => String(post.id) !== String(id));
     savePosts(posts);
 }
 
 function updatePost(updatedPost) {
-    const posts = getPosts().map((post) => (post.id === Number(updatedPost.id) ? updatedPost : post));
+    const posts = getPosts().map((post) => (String(post.id) === String(updatedPost.id) ? updatedPost : post));
     savePosts(posts);
 }
 
 function getPostById(id) {
-    return getPosts().find((post) => post.id === Number(id));
+    return getPosts().find((post) => String(post.id) === String(id));
 }
 
 function ensureSeedPosts() {
@@ -590,7 +590,7 @@ function renderAdminBlog() {
             return;
         }
 
-        const id = Number(actionButton.dataset.id);
+        const id = actionButton.dataset.id;
         const action = actionButton.dataset.action;
 
         if (action === 'edit') {
