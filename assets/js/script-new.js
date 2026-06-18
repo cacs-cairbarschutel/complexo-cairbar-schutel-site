@@ -252,8 +252,31 @@ async function updatePost(updatedPost) {
  * Obter post por ID
  */
 async function getPostById(id) {
+    console.log('🔍 getPostById chamado para ID:', id);
+    
+    if (USE_SUPABASE && window.supabasePosts) {
+        try {
+            console.log('📡 Buscando post diretamente no Supabase por ID...');
+            const post = await window.supabasePosts.fetchPostById(String(id));
+            if (post) {
+                console.log('✅ Post encontrado via busca direta:', post.title);
+                return post;
+            }
+        } catch (error) {
+            console.error('❌ Erro ao buscar post individual no Supabase:', error.message);
+        }
+    }
+
+    // Fallback para busca local (pode falhar com BIGINTs grandes devido a precisão do JS)
+    console.log('⚠️ Tentando busca local como fallback...');
     const posts = await getPosts();
-    return posts.find((post) => String(post.id) === String(id));
+    const found = posts.find((post) => String(post.id) === String(id));
+    
+    if (!found) {
+        console.warn('❌ Post não encontrado nem localmente. IDs disponíveis:', posts.map(p => String(p.id)));
+    }
+    
+    return found;
 }
 
 /**
@@ -261,12 +284,13 @@ async function getPostById(id) {
  */
 async function ensureSeedPosts() {
     try {
-        let posts = await getPosts();
-        if (posts.length === 0) {
-            console.info('Nenhum post encontrado. Os posts padrão devem estar no Supabase.');
+        // No Supabase não precisamos fazer seed automático via script-new.js 
+        // pois os dados já devem estar lá. Apenas log para debug.
+        if (USE_SUPABASE) {
+            console.info('ℹ️ Verificando conexão para posts...');
         }
     } catch (error) {
-        console.error('Erro ao verificar posts padrão:', error);
+        console.error('Erro ao verificar posts:', error);
     }
 }
 
@@ -496,27 +520,40 @@ async function renderBlogIndex() {
 }
 
 async function renderPostDetail() {
+    console.log('📖 renderPostDetail() chamado');
     const container = document.getElementById('post-detail');
 
     if (!container) {
+        console.log('⏭️  Container #post-detail não encontrado, pulando...');
         return;
     }
 
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
+    console.log('🆔 ID do post na URL:', id);
+    
+    if (!id) {
+        console.warn('⚠️ Nenhum ID de post fornecido na URL');
+        return;
+    }
+
     const post = await getPostById(id);
 
     if (!post) {
+        console.error('❌ Post não encontrado para o ID:', id);
         container.innerHTML = `
             <div class="blog-detail__empty">
                 <h1>Post não encontrado</h1>
                 <p>O artigo solicitado não está disponível no momento.</p>
-                <a class="btn btn-secondary" href="blog.html">Voltar para o blog</a>
+                <div style="margin-top: 20px;">
+                    <a class="btn btn-secondary" href="blog.html">Voltar para o blog</a>
+                </div>
             </div>
         `;
         return;
     }
 
+    console.log('✨ Renderizando detalhes do post:', post.title);
     const content = renderStoredContent(post.content);
 
     container.innerHTML = `
