@@ -24,6 +24,9 @@ const supabaseClient = {
             const builder = {
                 select: (columns) => builder,
                 eq: (col, val) => {
+                    if (col === 'id') {
+                        builder._id = val;
+                    }
                     builder._query = builder._query ? `${builder._query}&${col}=${val}` : `${col}=${val}`;
                     return builder;
                 },
@@ -32,7 +35,10 @@ const supabaseClient = {
                     return builder;
                 },
                 order: (col, opts) => builder,
-                single: () => builder,
+                single: () => {
+                    builder._single = true;
+                    return builder;
+                },
                 limit: (n) => builder,
                 
                 // Implementação do Thenable para o await funcionar em qualquer ponto da cadeia
@@ -46,7 +52,13 @@ const supabaseClient = {
                             if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
                             return r.json();
                         })
-                        .then(data => resolve({ data, error: null }))
+                        .then(data => {
+                            let processedData = data;
+                            if (builder._single && Array.isArray(data)) {
+                                processedData = data[0] || null;
+                            }
+                            resolve({ data: processedData, error: null });
+                        })
                         .catch(err => {
                             console.error(`❌ Erro na API (${normalizedTable}):`, err.message);
                             resolve({ data: null, error: err });
