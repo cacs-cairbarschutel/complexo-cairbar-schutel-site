@@ -60,19 +60,68 @@ app.get('/api/posts', async (req, res) => {
 
 app.post('/api/posts', upload.single('image'), async (req, res) => {
   const { title, description, content, author, status } = req.body;
-  const imageUrl = req.file ? `/assets/img/uploads/${req.file.filename}` : null;
+  const postId = req.body.id || Date.now();
+  const imageUrl = req.file 
+    ? `/assets/img/uploads/${req.file.filename}` 
+    : (req.body.image || null);
 
   try {
-    const [result] = await pool.query(
+    await pool.query(
       'INSERT INTO posts (id, title, description, content, image, author, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
-      [Date.now(), title, description, content, imageUrl, author, status || 'draft']
+      [postId, title, description, content, imageUrl, author, status || 'draft']
     );
-    const [newPost] = await pool.query('SELECT * FROM posts WHERE id = ?', [result.insertId || Date.now()]);
+    const [newPost] = await pool.query('SELECT * FROM posts WHERE id = ?', [postId]);
     res.status(201).json(newPost[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+app.put('/api/posts/:id', upload.single('image'), async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM posts WHERE id = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Post não encontrado' });
+    }
+    const existing = rows[0];
+    const title = req.body.title !== undefined ? req.body.title : existing.title;
+    const description = req.body.description !== undefined ? req.body.description : existing.description;
+    const content = req.body.content !== undefined ? req.body.content : existing.content;
+    const author = req.body.author !== undefined ? req.body.author : existing.author;
+    const status = req.body.status !== undefined ? req.body.status : existing.status;
+    const published_at = req.body.published_at !== undefined ? req.body.published_at : existing.published_at;
+    
+    const imageUrl = req.file 
+      ? `/assets/img/uploads/${req.file.filename}` 
+      : (req.body.image !== undefined ? req.body.image : existing.image);
+
+    await pool.query(
+      'UPDATE posts SET title = ?, description = ?, content = ?, image = ?, author = ?, status = ?, published_at = ?, updated_at = NOW() WHERE id = ?',
+      [title, description, content, imageUrl, author, status, published_at, id]
+    );
+
+    const [updatedPost] = await pool.query('SELECT * FROM posts WHERE id = ?', [id]);
+    res.json(updatedPost[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/posts/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM posts WHERE id = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Post não encontrado' });
+    }
+    await pool.query('DELETE FROM posts WHERE id = ?', [id]);
+    res.json({ message: 'Post deletado com sucesso', id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // --- ROTAS DE HOME CONTENT ---
 
