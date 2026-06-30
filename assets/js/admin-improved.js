@@ -29,7 +29,11 @@ function escapeHtml(text) {
 }
 
 function formatDate(dateString) {
+    if (!dateString) return 'Data não disponível';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+        return 'Data inválida';
+    }
     return new Intl.DateTimeFormat('pt-BR', {
         day: '2-digit',
         month: 'long',

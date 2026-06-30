@@ -7,7 +7,9 @@
 
 const isLocal = window.location.hostname === 'localhost' || 
                  window.location.hostname === '127.0.0.1' || 
-                 window.location.hostname.startsWith('192.168.');
+                 window.location.hostname.startsWith('192.168.') ||
+                 window.location.hostname === '' ||
+                 window.location.protocol === 'file:';
 
 const API_BASE_URL = isLocal 
     ? 'http://localhost:3000/api' 
