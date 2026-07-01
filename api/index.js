@@ -13,13 +13,17 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  supportBigNumbers: true,
+  bigNumberStrings: true,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 });
 
 app.use(cors());
-app.use(express.json());
+// Aumentar limites para aceitar imagens em base64 enviadas no corpo JSON
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -79,9 +83,28 @@ app.get(['/api/posts/:id', '/posts/:id'], async (req, res) => {
 app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
   const { title, description, content, author, status } = req.body;
   const postId = req.body.id || Date.now();
-  const imageUrl = req.file 
-    ? `/assets/img/uploads/${req.file.filename}` 
-    : (req.body.image || null);
+
+  // Determinar URL/imagem
+  let imageUrl = null;
+  if (req.file && req.file.buffer) {
+    // para uploads via multipart (multer memoryStorage), gerar nome e salvar em disco
+    try {
+      const path = require('path');
+      const fs = require('fs');
+      const uploadsDir = path.join(__dirname, '..', 'assets', 'img', 'uploads');
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+      const fileName = `${postId}-${Date.now()}-${req.file.originalname}`.replace(/\s+/g, '_');
+      const filePath = path.join(uploadsDir, fileName);
+      fs.writeFileSync(filePath, req.file.buffer);
+      imageUrl = `/assets/img/uploads/${fileName}`;
+    } catch (e) {
+      console.error('Erro ao salvar arquivo de upload:', e);
+      imageUrl = null;
+    }
+  } else if (req.body.image) {
+    // imagem enviada como base64 no corpo
+    imageUrl = req.body.image;
+  }
 
   try {
     await pool.query(
@@ -111,9 +134,23 @@ app.put(['/api/posts/:id', '/posts/:id'], upload.single('image'), async (req, re
     const status = req.body.status !== undefined ? req.body.status : existing.status;
     const published_at = req.body.published_at !== undefined ? req.body.published_at : existing.published_at;
     
-    const imageUrl = req.file 
-      ? `/assets/img/uploads/${req.file.filename}` 
-      : (req.body.image !== undefined ? req.body.image : existing.image);
+    let imageUrl = existing.image;
+    if (req.file && req.file.buffer) {
+      try {
+        const path = require('path');
+        const fs = require('fs');
+        const uploadsDir = path.join(__dirname, '..', 'assets', 'img', 'uploads');
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        const fileName = `${id}-${Date.now()}-${req.file.originalname}`.replace(/\s+/g, '_');
+        const filePath = path.join(uploadsDir, fileName);
+        fs.writeFileSync(filePath, req.file.buffer);
+        imageUrl = `/assets/img/uploads/${fileName}`;
+      } catch (e) {
+        console.error('Erro ao salvar arquivo de upload:', e);
+      }
+    } else if (req.body.image !== undefined) {
+      imageUrl = req.body.image;
+    }
 
     await pool.query(
       'UPDATE posts SET title = ?, description = ?, content = ?, image = ?, author = ?, status = ?, published_at = ?, updated_at = NOW() WHERE id = ?',
@@ -138,6 +175,33 @@ app.delete(['/api/posts/:id', '/posts/:id'], async (req, res) => {
     res.json({ message: 'Post deletado com sucesso', id });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+
+// Rota para upload de imagens (compatibilidade com frontend storage.upload)
+app.post('/upload', upload.single('image'), async (req, res) => {
+  if (!req.file || !req.file.buffer) {
+    return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+  }
+
+  try {
+    const path = require('path');
+    const fs = require('fs');
+    const uploadsDir = path.join(__dirname, '..', 'assets', 'img', 'uploads');
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+    const fileName = `${Date.now()}-${req.file.originalname}`.replace(/\s+/g, '_');
+    const filePath = path.join(uploadsDir, fileName);
+    fs.writeFileSync(filePath, req.file.buffer);
+
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const publicUrl = `${protocol}://${host}/assets/img/uploads/${fileName}`;
+
+    return res.json({ data: { publicUrl }, error: null });
+  } catch (e) {
+    console.error('Erro ao salvar upload:', e);
+    return res.status(500).json({ error: e.message });
   }
 });
 
