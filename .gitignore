@@ -37,7 +37,7 @@ google-service-account.json
 Thumbs.db
 .DS_Store
 
-
+.env.example
 .vs/
 *.sln
 .vercel
