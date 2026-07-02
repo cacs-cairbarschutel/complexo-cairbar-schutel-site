@@ -1,7 +1,7 @@
 {
-  "name": "cacs-neon-backend",
+  "name": "cacs-backend",
   "version": "1.0.0",
-  "description": "Backend para migração do CACS de Supabase para Neon PostgreSQL",
+  "description": "Backend do CACS para HostGator/MySQL e Vercel",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -93,15 +93,15 @@ const homeAutosaveTimers = new Map();
 let pendingManualSave = false;
 
 function getHomeAdminClient() {
-    return window.supabaseConfig?.getSupabaseClient?.() || null;
+    return window.apiConfig?.getApiClient?.() || null;
 }
 
 async function ensureHomeAdminClient() {
-    if (!window.supabaseConfig?.initSupabaseClient) {
+    if (!window.apiConfig?.initApiClient) {
         return null;
     }
 
-    await window.supabaseConfig.initSupabaseClient();
+    await window.apiConfig.initApiClient();
     return getHomeAdminClient();
 }
 
@@ -414,7 +414,7 @@ async function saveSectionViaFunction(section, title, description, imageUrl, fil
         formData.append('image', file);
     }
 
-    const response = await fetch(`${window.supabaseConfig.SUPABASE_URL}/functions/v1/home-content-admin`, {
+    const response = await fetch(`${window.apiConfig.API_BASE_URL.replace('/api', '')}/functions/v1/home-content-admin`, {
         method: 'POST',
         body: formData,
     });

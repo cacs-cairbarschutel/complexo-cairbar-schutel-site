@@ -6,4 +6,4 @@
 4. Ajuste a linha `AuthUserFile` no [admin/.htaccess](admin/.htaccess) para o caminho real do seu servidor.
 5. Verifique abrindo diretamente [admin/painel.html](admin/painel.html): o navegador deve pedir autenticação antes de carregar a página.
 
-Observação: isso protege o acesso direto ao painel no nível da hospedagem. O Supabase continua responsável apenas pelos dados do site.
+Observação: isso protege o acesso direto ao painel no nível da hospedagem. O backend continua responsável apenas pelos dados do site.

@@ -42,3 +42,5 @@ Thumbs.db
 *.sln
 .vercel
 .env*
+!.env.example
+backup_supabase.sql

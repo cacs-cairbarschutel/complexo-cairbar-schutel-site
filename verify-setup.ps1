@@ -1,8 +1,8 @@
-# Verificação de Configuração Supabase - Windows PowerShell
+# Verificação de Configuração do Backend - Windows PowerShell
 # Execute este script na raiz do projeto para verificar se tudo está configurado
 
 Write-Host "=================================================="
-Write-Host "🔍 VERIFICANDO IMPLEMENTAÇÃO SUPABASE"
+Write-Host "🔍 VERIFICANDO IMPLEMENTAÇÃO DO BACKEND"
 Write-Host "=================================================="
 Write-Host ""
 
@@ -12,9 +12,8 @@ $files = @(
     ".env.example",
     ".gitignore",
     "supabase-init.sql",
-    "SUPABASE-SETUP.md",
-    "assets/js/supabase-config.js",
-    "assets/js/supabase-posts.js",
+    "assets/js/api-config.js",
+    "assets/js/posts-api.js",
     "assets/js/script-new.js"
 )
 
@@ -33,10 +32,10 @@ if (Test-Path ".env.local") {
     
     $content = Get-Content ".env.local"
     
-    if ($content -match "VITE_SUPABASE_URL") {
-        Write-Host "  ✅ VITE_SUPABASE_URL configurado"
+    if ($content -match "DB_HOST") {
+        Write-Host "  ✅ DB_HOST configurado"
     } else {
-        Write-Host "  ❌ VITE_SUPABASE_URL não encontrado"
+        Write-Host "  ❌ DB_HOST não encontrado"
     }
     
     if ($content -match "VITE_SUPABASE_ANON_KEY") {
