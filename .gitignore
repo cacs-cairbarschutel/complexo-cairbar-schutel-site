@@ -37,10 +37,19 @@ google-service-account.json
 Thumbs.db
 .DS_Store
 
-.env.example
 .vs/
 *.sln
 .vercel
 .env*
-!.env.example
 backup_supabase.sql
+
+# Backups, dumps e arquivos temporários de banco
+*.log
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+*.backup
+*.dump
+*.sql.gz
+*.tmp
