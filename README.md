@@ -9,12 +9,11 @@ Website oficial do Complexo Cairbar Schutel.
 - `/assets`: Recursos estáticos (CSS, Imagens, JS).
 - `/financeiro`: Seção de doações e financeiro.
 - `/pages`: Páginas de conteúdo do site.
-- `/supabase`: Configurações, migrações e Edge Functions do Supabase.
 
 ## Tecnologias
 
 - Frontend: HTML/CSS/JavaScript.
-- Backend: Node.js, Supabase (PostgreSQL, Edge Functions).
+- Backend: Node.js + MySQL na HostGator.
 - Hospedagem: Vercel / HostGator.
 
 ## Configuração

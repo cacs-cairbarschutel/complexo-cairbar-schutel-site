@@ -16,6 +16,8 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : null,
+  supportBigNumbers: true,
+  bigNumberStrings: true,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0

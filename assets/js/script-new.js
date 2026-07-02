@@ -1,72 +1,72 @@
 /**
- * Script Principal - Integrado com Supabase
- * Este arquivo gerencia a exibição e edição de posts com armazenamento em Supabase
+ * Script principal integrado com a API do backend
+ * Este arquivo gerencia a exibição e edição de posts com armazenamento no backend
  */
 
 const BLOG_STORAGE_KEY = 'posts';
-let SUPABASE_INITIALIZED = false;
-let USE_SUPABASE = false;
+let API_INITIALIZED = false;
+let USE_API = false;
 
 // ============================================================================
-// INICIALIZAÇÃO SUPABASE
+// INICIALIZAÇÃO DA API
 // ============================================================================
 
 /**
- * Inicializar Supabase no carregamento da página
+ * Inicializar a API no carregamento da página
  */
-async function initializeSupabase() {
-    console.log('🚀 initializeSupabase() chamado');
+async function initializeApiClient() {
+    console.log('🚀 initializeApiClient() chamado');
     
     try {
         // Verificar se os scripts necessários estão carregados
-        if (!window.supabase && !window.supabaseConfig) {
-            console.warn('⚠️ window.supabase e window.supabaseConfig não carregados.');
-            USE_SUPABASE = false;
+        if (!window.apiConfig && !window.postsApi) {
+            console.warn('⚠️ apiConfig e postsApi não carregados.');
+            USE_API = false;
             return false;
         }
 
-        console.log('✅ Sistema de Banco de Dados encontrado');
+        console.log('✅ Sistema de API encontrado');
 
-        if (window.supabaseConfig && !window.supabase) {
-            console.log('🔄 Inicializando via supabaseConfig (Neon Migration)...');
-            await window.supabaseConfig.initSupabaseClient();
+        if (window.apiConfig && !window.api) {
+            console.log('🔄 Inicializando via apiConfig...');
+            await window.apiConfig.initApiClient();
         }
 
-        const client = window.supabaseConfig ? window.supabaseConfig.getSupabaseClient() : window.supabase;
+        const client = window.apiConfig ? window.apiConfig.getApiClient() : window.postsApi;
 
 
         if (!client) {
-            console.warn('⚠️ Cliente Supabase não pôde ser criado. initSupabaseClient() retornou null.');
-            USE_SUPABASE = false;
+            console.warn('⚠️ Cliente da API não pôde ser criado. initApiClient() retornou null.');
+            USE_API = false;
             return false;
         }
 
-        console.log('✅ Cliente Supabase criado com sucesso');
+        console.log('✅ Cliente da API criado com sucesso');
 
         // Tentar fazer uma query de teste
         console.log('📡 Testando conexão com banco de dados...');
         const { error } = await client.from('posts').select('count');
 
         if (error) {
-            console.warn('⚠️ Supabase indisponível:', error.message);
-            USE_SUPABASE = false;
+            console.warn('⚠️ API indisponível:', error.message);
+            USE_API = false;
             return false;
         }
 
-        USE_SUPABASE = true;
-        SUPABASE_INITIALIZED = true;
-        console.log('✅ Supabase inicializado com sucesso!');
+        USE_API = true;
+        API_INITIALIZED = true;
+        console.log('✅ API inicializada com sucesso!');
         return true;
     } catch (error) {
-        console.error('❌ Erro ao inicializar Supabase:', error.message);
+        console.error('❌ Erro ao inicializar API:', error.message);
         console.error('Stack:', error.stack);
-        USE_SUPABASE = false;
+        USE_API = false;
         return false;
     }
 }
 
 // ============================================================================
-// FUNÇÕES DE ARMAZENAMENTO (Supabase + LocalStorage Fallback)
+// FUNÇÕES DE ARMAZENAMENTO (API + LocalStorage Fallback)
 // ============================================================================
 
 function getPageAssetPrefix() {
@@ -162,17 +162,17 @@ function writeStoredPosts(posts) {
 }
 
 /**
- * Obter posts (apenas do Supabase)
+ * Obter posts (apenas da API)
  */
 async function getPosts() {
     console.log('📋 getPosts() chamado');
-    console.log('USE_SUPABASE:', USE_SUPABASE);
-    console.log('window.supabasePosts:', window.supabasePosts);
+    console.log('USE_API:', USE_API);
+    console.log('window.postsApi:', window.postsApi);
     
-    if (USE_SUPABASE && window.supabasePosts) {
+    if (USE_API && window.postsApi) {
         try {
-            console.log('🔍 Buscando posts do Supabase...');
-            const posts = await window.supabasePosts.fetchAllPosts();
+            console.log('🔍 Buscando posts da API...');
+            const posts = await window.postsApi.fetchAllPosts();
             
             if (posts && posts.length > 0) {
                 console.log('✅ Posts encontrados no banco:', posts.length);
@@ -187,12 +187,12 @@ async function getPosts() {
         }
     }
 
-    console.warn('⚠️ Sistema de banco de dados não disponível.');
+    console.warn('⚠️ Sistema de API não disponível.');
     return [];
 }
 
 /**
- * Salvar posts (apenas no Supabase via operações específicas)
+ * Salvar posts (apenas na API via operações específicas)
  * Nota: Esta função agora é um placeholder. Use createPost, updatePost, deletePost
  */
 async function savePosts(posts) {
@@ -201,59 +201,59 @@ async function savePosts(posts) {
 }
 
 /**
- * Adicionar novo post (apenas Supabase)
+ * Adicionar novo post (apenas API)
  */
 async function addPost(post) {
-    if (USE_SUPABASE && window.supabasePosts) {
+    if (USE_API && window.postsApi) {
         try {
             const newPost = {
                 ...post,
                 created_at: post.created_at || post.createdAt || new Date().toISOString()
             };
-            await window.supabasePosts.createPost(newPost);
+            await window.postsApi.createPost(newPost);
         } catch (error) {
-            console.error('Erro ao criar post no Supabase:', error.message);
+            console.error('Erro ao criar post na API:', error.message);
             throw error;
         }
     } else {
-        console.error('Supabase não disponível. Post não foi criado.');
+        console.error('API não disponível. Post não foi criado.');
     }
 }
 
 /**
- * Deletar um post (apenas Supabase)
+ * Deletar um post (apenas API)
  */
 async function deletePost(id) {
-    if (USE_SUPABASE && window.supabasePosts) {
+    if (USE_API && window.postsApi) {
         try {
-            await window.supabasePosts.deletePost(String(id));
+            await window.postsApi.deletePost(String(id));
         } catch (error) {
-            console.error('Erro ao deletar post do Supabase:', error.message);
+            console.error('Erro ao deletar post da API:', error.message);
             throw error;
         }
     } else {
-        console.error('Supabase não disponível. Post não foi deletado.');
+        console.error('API não disponível. Post não foi deletado.');
     }
 }
 
 /**
- * Atualizar um post existente (apenas Supabase)
+ * Atualizar um post existente (apenas API)
  */
 async function updatePost(updatedPost) {
-    if (USE_SUPABASE && window.supabasePosts) {
+    if (USE_API && window.postsApi) {
         try {
             const postData = {
                 ...updatedPost,
                 created_at: updatedPost.created_at || updatedPost.createdAt,
                 updated_at: new Date().toISOString()
             };
-            await window.supabasePosts.updatePost(String(updatedPost.id), postData);
+            await window.postsApi.updatePost(String(updatedPost.id), postData);
         } catch (error) {
-            console.error('Erro ao atualizar post no Supabase:', error.message);
+            console.error('Erro ao atualizar post na API:', error.message);
             throw error;
         }
     } else {
-        console.error('Supabase não disponível. Post não foi atualizado.');
+        console.error('API não disponível. Post não foi atualizado.');
     }
 }
 
@@ -263,16 +263,16 @@ async function updatePost(updatedPost) {
 async function getPostById(id) {
     console.log('🔍 getPostById chamado para ID:', id);
     
-    if (USE_SUPABASE && window.supabasePosts) {
+    if (USE_API && window.postsApi) {
         try {
-            console.log('📡 Buscando post diretamente no Supabase por ID...');
-            const post = await window.supabasePosts.fetchPostById(String(id));
+            console.log('📡 Buscando post diretamente na API por ID...');
+            const post = await window.postsApi.fetchPostById(String(id));
             if (post) {
                 console.log('✅ Post encontrado via busca direta:', post.title);
                 return post;
             }
         } catch (error) {
-            console.error('❌ Erro ao buscar post individual no Supabase:', error.message);
+            console.error('❌ Erro ao buscar post individual na API:', error.message);
         }
     }
 
@@ -289,13 +289,13 @@ async function getPostById(id) {
 }
 
 /**
- * Garantir que os posts padrão estejam no Supabase
+ * Garantir que os posts padrão estejam na API
  */
 async function ensureSeedPosts() {
     try {
-        // No Supabase não precisamos fazer seed automático via script-new.js 
+        // Na API não precisamos fazer seed automático via script-new.js
         // pois os dados já devem estar lá. Apenas log para debug.
-        if (USE_SUPABASE) {
+        if (USE_API) {
             console.info('ℹ️ Verificando conexão para posts...');
         }
     } catch (error) {
@@ -1020,10 +1020,10 @@ function setupImpactObserver() {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🎯 DOMContentLoaded disparado');
     
-    // Inicializar Supabase
-    console.log('⏳ Inicializando Supabase...');
-    const supabaseReady = await initializeSupabase();
-    console.log('Supabase pronto:', supabaseReady);
+    // Inicializar API
+    console.log('⏳ Inicializando API...');
+    const apiReady = await initializeApiClient();
+    console.log('API pronta:', apiReady);
 
     // Garantir que há posts padrão
     console.log('⏳ Executando ensureSeedPosts...');

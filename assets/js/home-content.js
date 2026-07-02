@@ -149,17 +149,17 @@ function normalizeHomeImageUrl(imageUrl) {
     return value.replace(/^\.\//, '').replace(/^\//, '');
 }
 
-function getHomeSupabaseClient() {
-    return window.supabaseConfig?.getSupabaseClient?.() || null;
+function getHomeApiClient() {
+    return window.apiConfig?.getApiClient?.() || null;
 }
 
-async function ensureHomeSupabaseClient() {
-    if (!window.supabaseConfig?.initSupabaseClient) {
+async function ensureHomeApiClient() {
+    if (!window.apiConfig?.initApiClient) {
         return null;
     }
 
-    await window.supabaseConfig.initSupabaseClient();
-    return getHomeSupabaseClient();
+    await window.apiConfig.initApiClient();
+    return getHomeApiClient();
 }
 
 function findHomeRow(rows, section) {
@@ -223,7 +223,7 @@ async function carregarConteudoHome() {
         }
     });
 
-    const client = await ensureHomeSupabaseClient();
+    const client = await ensureHomeApiClient();
 
     if (!client) {
         return;

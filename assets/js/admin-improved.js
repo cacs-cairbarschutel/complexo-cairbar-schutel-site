@@ -59,18 +59,18 @@ function showNotification(message, type = 'info') {
 }
 
 // ============================================================================
-// AGUARDAR SUPABASE ESTAR PRONTO
+// AGUARDAR A API ESTAR PRONTA
 // ============================================================================
 
-async function waitForSupabase(maxAttempts = 50) {
+async function waitForApi(maxAttempts = 50) {
     for (let i = 0; i < maxAttempts; i++) {
-        if (window.supabasePosts && window.supabasePosts.fetchAllPosts) {
-            console.log('✅ Supabase Posts carregado com sucesso');
+        if (window.postsApi && window.postsApi.fetchAllPosts) {
+            console.log('✅ API de posts carregada com sucesso');
             return true;
         }
         await new Promise(resolve => setTimeout(resolve, 100));
     }
-    console.error('❌ Timeout: Supabase Posts não carregou');
+    console.error('❌ Timeout: API de posts não carregou');
     return false;
 }
 
@@ -233,10 +233,10 @@ function handleDrop(e) {
 async function handleSubmitForm(e) {
     e.preventDefault();
 
-    // Verificar Supabase antes de fazer nada
-    if (!window.supabasePosts || !window.supabasePosts.createPost || !window.supabasePosts.updatePost) {
+    // Verificar a API antes de fazer nada
+    if (!window.postsApi || !window.postsApi.createPost || !window.postsApi.updatePost) {
         showNotification('❌ Aguarde o banco de dados carregar... Se o erro persistir, recarregue a página.', 'error');
-        console.error('❌ supabasePosts não disponível:', window.supabasePosts);
+        console.error('❌ postsApi não disponível:', window.postsApi);
         return;
     }
 
@@ -270,7 +270,7 @@ async function handleSubmitForm(e) {
         }
 
         const post = {
-            // Não enviar ID para criação nova - deixar Supabase gerar
+            // Não enviar ID para criação nova - deixar a API gerar
             ...(editingPostId && { id: editingPostId }),  // Só incluir ID se estiver editando
             title,
             author,
@@ -282,17 +282,17 @@ async function handleSubmitForm(e) {
             updated_at: new Date().toISOString()
         };
 
-        console.log('💾 Enviando para Supabase...');
+        console.log('💾 Enviando para a API...');
         console.log('Dados do post:', post);
 
         if (editingPostId) {
             console.log('🔄 Modo: ATUALIZAR post ID:', editingPostId);
-            const result = await window.supabasePosts.updatePost(editingPostId, post);
+            const result = await window.postsApi.updatePost(editingPostId, post);
             console.log('✅ updatePost retornou:', result);
             showNotification('✅ Post atualizado com sucesso!', 'success');
         } else {
             console.log('✍️ Modo: CRIAR novo post');
-            const result = await window.supabasePosts.createPost(post);
+            const result = await window.postsApi.createPost(post);
             console.log('✅ createPost retornou:', result);
             
             if (result) {
@@ -316,7 +316,7 @@ async function handleSubmitForm(e) {
 
 async function editPost(postId) {
     try {
-        const post = await window.supabasePosts.fetchPostById(postId);
+        const post = await window.postsApi.fetchPostById(postId);
 
         if (!post) {
             showNotification('❌ Post não encontrado', 'error');
@@ -355,7 +355,7 @@ async function deletePost(postId) {
     }
 
     try {
-        await window.supabasePosts.deletePost(postId);
+        await window.postsApi.deletePost(postId);
         showNotification('✅ Post deletado com sucesso!', 'success');
         await loadPostsList();
     } catch (error) {
@@ -390,21 +390,21 @@ async function loadPostsList() {
     }
 
     try {
-        // Verificar se Supabase Posts estão disponíveis
-        if (!window.supabasePosts) {
-            console.warn('⏳ window.supabasePosts ainda não disponível');
+        // Verificar se os posts da API estão disponíveis
+        if (!window.postsApi) {
+            console.warn('⏳ window.postsApi ainda não disponível');
             listContainer.innerHTML = '<p class="posts-list__error">❌ Aguardando conexão com o banco de dados...</p>';
             return;
         }
         
-        if (!window.supabasePosts.fetchAllPosts) {
-            console.warn('⏳ window.supabasePosts.fetchAllPosts não disponível');
+        if (!window.postsApi.fetchAllPosts) {
+            console.warn('⏳ window.postsApi.fetchAllPosts não disponível');
             listContainer.innerHTML = '<p class="posts-list__error">❌ Aguardando funções de banco de dados...</p>';
             return;
         }
 
-        console.log('📡 Buscando posts do Supabase...');
-        const posts = await window.supabasePosts.fetchAllPosts();
+        console.log('📡 Buscando posts do backend...');
+        const posts = await window.postsApi.fetchAllPosts();
         
         console.log('✅ Posts recebidos:', posts?.length || 0);
 
@@ -459,7 +459,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log('✅ Elementos do DOM capturados');
 
-    // Inicializar Quill Editor (não depende do Supabase)
+    // Inicializar Quill Editor (não depende da API)
     quillEditor = new Quill('#content-editor', {
         theme: 'snow',
         modules: {
@@ -497,22 +497,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log('✅ Event listeners configurados');
 
-    // Inicializar Supabase e carregar posts (NÃO bloqueia o resto)
+    // Inicializar a API e carregar posts (NÃO bloqueia o resto)
     try {
-        console.log('🚀 Iniciando Supabase...');
-        await window.supabaseConfig.initSupabaseClient();
+        console.log('🚀 Iniciando API...');
+        await window.apiConfig.initApiClient();
         
-        console.log('⏳ Aguardando Supabase estar pronto...');
-        const supabaseReady = await waitForSupabase();
+        console.log('⏳ Aguardando API estar pronta...');
+        const apiReady = await waitForApi();
         
-        if (supabaseReady) {
-            console.log('✅ Supabase pronto! Carregando posts...');
+        if (apiReady) {
+            console.log('✅ API pronta! Carregando posts...');
             await loadPostsList();
         } else {
             showNotification('❌ Erro: Banco de dados não respondeu. Recarregue a página.', 'error');
         }
     } catch (error) {
-        console.error('❌ Erro ao inicializar Supabase:', error);
+        console.error('❌ Erro ao inicializar API:', error);
         showNotification('❌ Erro ao conectar com o banco de dados. Recarregue a página.', 'error');
     }
 });
