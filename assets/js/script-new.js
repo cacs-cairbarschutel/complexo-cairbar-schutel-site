@@ -1039,11 +1039,11 @@ function setupImpactObserver() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
-                impactSection.classList.add('visible');
+                impactSection.classList.add('visible');         
                 observer.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.3 });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
 
     observer.observe(impactSection);
 }

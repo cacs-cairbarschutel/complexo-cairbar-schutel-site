@@ -392,7 +392,7 @@ section {
 }
 
 .impact-section.visible .stat-number {
-    animation: countUp 4s ease-out forwards;
+    animation: countUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .stat-number::after {
