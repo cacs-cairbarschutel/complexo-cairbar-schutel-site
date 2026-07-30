@@ -18,7 +18,12 @@ const apiClient = {
 
         const createQueryBuilder = () => {
             const builder = {
-                select: () => builder,
+                select: (cols) => {
+                    if (cols && cols !== '*') {
+                        builder._query = builder._query ? `${builder._query}&fields=${cols}` : `fields=${cols}`;
+                    }
+                    return builder;
+                },
                 eq: (col, val) => {
                     if (col === 'id') {
                         builder._id = val;
@@ -35,7 +40,12 @@ const apiClient = {
                     builder._single = true;
                     return builder;
                 },
-                limit: () => builder,
+                limit: (count) => {
+                    if (count) {
+                        builder._query = builder._query ? `${builder._query}&limit=${count}` : `limit=${count}`;
+                    }
+                    return builder;
+                },
                 then: (resolve) => {
                     const url = builder._id
                         ? `${API_BASE_URL}/${normalizedTable}/${builder._id}`
