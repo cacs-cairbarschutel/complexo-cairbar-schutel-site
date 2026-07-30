@@ -48,9 +48,14 @@ app.get(['/api/health', '/health'], async (req, res) => {
 // --- ROTAS DE POSTS ---
 
 app.get(['/api/posts', '/posts'], async (req, res) => {
-  const { status } = req.query;
+  const { status, limit, fields } = req.query;
   try {
-    let query = 'SELECT * FROM posts';
+    let selectCols = '*';
+    if (fields === 'summary') {
+      selectCols = 'id, title, description, image, author, status, created_at, published_at';
+    }
+
+    let query = `SELECT ${selectCols} FROM posts`;
     const params = [];
 
     if (status) {
@@ -59,7 +64,14 @@ app.get(['/api/posts', '/posts'], async (req, res) => {
     }
 
     query += ' ORDER BY created_at DESC';
-    
+
+    const parsedLimit = parseInt(limit, 10);
+    if (!isNaN(parsedLimit) && parsedLimit > 0) {
+      query += ' LIMIT ?';
+      params.push(parsedLimit);
+    }
+
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     const [rows] = await pool.query(query, params);
     res.json(rows);
   } catch (err) {
@@ -210,6 +222,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 
 app.get(['/api/home-content', '/home-content'], async (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     const [rows] = await pool.query('SELECT * FROM home_content');
     res.json(rows);
   } catch (err) {

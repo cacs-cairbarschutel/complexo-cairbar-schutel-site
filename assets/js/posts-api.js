@@ -2,7 +2,7 @@
  * Funções para gerenciar posts no backend.
  */
 
-async function fetchPublishedPosts() {
+async function fetchPublishedPosts(limit) {
     const client = window.apiConfig?.getApiClient();
     if (!client) {
         console.error('Cliente da API não inicializado');
@@ -10,11 +10,17 @@ async function fetchPublishedPosts() {
     }
 
     try {
-        const { data, error } = await client
+        let builder = client
             .from('posts')
-            .select('*')
+            .select('summary')
             .eq('status', 'published')
             .order('created_at', { ascending: false });
+
+        if (limit) {
+            builder = builder.limit(limit);
+        }
+
+        const { data, error } = await builder;
 
         if (error) {
             console.error('Erro ao buscar posts publicados:', error.message);

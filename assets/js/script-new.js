@@ -43,20 +43,26 @@ async function initializeApiClient() {
 
         console.log('✅ Cliente da API criado com sucesso');
 
-        // Tentar fazer uma query de teste
-        console.log('📡 Testando conexão com banco de dados...');
-        const { error } = await client.from('posts').select('count');
+        // Testar disponibilidade da API de forma não-bloqueante (timeout de 2.5s)
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            const apiUrl = `${window.apiConfig?.API_BASE_URL || 'http://localhost:3000/api'}/posts?limit=1`;
+            const testRes = await fetch(apiUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
 
-        if (error) {
-            console.warn('⚠️ API indisponível:', error.message);
-            USE_API = false;
-            return false;
+            if (testRes.ok) {
+                USE_API = true;
+                API_INITIALIZED = true;
+                console.log('✅ API online e operacional!');
+                return true;
+            }
+        } catch (e) {
+            console.warn('⚠️ API não respondeu a tempo ou está offline. Usando fallback para dados padrão.');
         }
 
-        USE_API = true;
-        API_INITIALIZED = true;
-        console.log('✅ API inicializada com sucesso!');
-        return true;
+        USE_API = false;
+        return false;
     } catch (error) {
         console.error('❌ Erro ao inicializar API:', error.message);
         console.error('Stack:', error.stack);
@@ -179,16 +185,16 @@ async function getPosts() {
                 return posts;
             }
             
-            console.warn('⚠️ Banco de dados retornou 0 posts.');
-            return [];
+            console.warn('⚠️ Banco de dados retornou 0 posts. Usando posts padrão.');
+            return DEFAULT_POSTS;
         } catch (error) {
             console.error('❌ Erro ao buscar posts do banco:', error.message);
-            return [];
+            return DEFAULT_POSTS;
         }
     }
 
-    console.warn('⚠️ Sistema de API não disponível.');
-    return [];
+    console.warn('⚠️ Sistema de API não disponível. Usando posts padrão.');
+    return DEFAULT_POSTS;
 }
 
 /**
@@ -417,24 +423,46 @@ function renderStoredContent(content) {
         .join('');
 }
 
+const POSTS_HOME_CACHE_KEY = 'cacs_home_posts_cache';
+
+function getCachedHomePosts() {
+    try {
+        const raw = localStorage.getItem(POSTS_HOME_CACHE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function setCachedHomePosts(posts) {
+    try {
+        localStorage.setItem(POSTS_HOME_CACHE_KEY, JSON.stringify(posts));
+    } catch (e) {
+        console.warn('Erro ao salvar cache de posts:', e);
+    }
+}
+
 async function getPublishedPosts(limit) {
-    console.log('📰 getPublishedPosts(' + limit + ') chamado (MODO: MOSTRAR TUDO)');
+    console.log('📰 getPublishedPosts(' + limit + ') chamado');
+
+    if (USE_API && window.postsApi && window.postsApi.fetchPublishedPosts) {
+        try {
+            const apiPosts = await window.postsApi.fetchPublishedPosts(limit);
+            if (apiPosts && apiPosts.length > 0) {
+                return apiPosts;
+            }
+        } catch (error) {
+            console.error('❌ Erro ao buscar posts publicados da API:', error.message);
+        }
+    }
     
     const posts = await getPosts();
-    console.log('📊 Total de posts recebidos de getPosts():', posts?.length || 0);
-    
-    if (!posts || posts.length === 0) {
-        console.warn('⚠️ getPosts() retornou 0 posts');
-        return [];
-    }
+    const list = (posts && posts.length > 0) ? posts : DEFAULT_POSTS;
 
-    // REMOVIDO FILTRO DE STATUS: Mostrando tudo que estiver no banco para diagnóstico
-    const filtered = posts
+    return list
+        .filter(p => p.status === 'published' || !p.status)
         .sort((a, b) => new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt))
         .slice(0, limit);
-
-    console.log('✅ Posts processados (sem filtro de status):', filtered.length);
-    return filtered;
 }
 
 function renderPostCards(container, posts) {
@@ -454,14 +482,6 @@ function renderPostCards(container, posts) {
     const routePrefix = getBlogRoutePrefix();
 
     const html = posts.map((post, index) => {
-        console.log(`📝 Post ${index + 1}:`, {
-            id: post.id,
-            title: post.title,
-            hasImage: !!post.image,
-            imageLength: post.image ? post.image.length : 0,
-            imageStart: post.image ? post.image.substring(0, 50) : 'null'
-        });
-        
         return `
         <article class="blog-card">
             <a class="blog-card__media" href="${routePrefix}blog-post.html?id=${post.id}">
@@ -494,11 +514,26 @@ async function renderHomeBlog() {
         return;
     }
 
-    console.log('📋 Container encontrado, buscando últimos 3 posts...');
-    const posts = await getPublishedPosts(3);
-    
-    console.log('🖼️  Renderizando', posts.length, 'posts na homepage...');
-    renderPostCards(container, posts);
+    // 1. Carregar do cache local ou DEFAULT_POSTS imediatamente (0ms delay)
+    let cachedPosts = getCachedHomePosts();
+    if (!cachedPosts || cachedPosts.length === 0) {
+        cachedPosts = DEFAULT_POSTS.slice(0, 3);
+    }
+
+    console.log('⚡ Renderizando posts da Home (0ms)...');
+    renderPostCards(container, cachedPosts);
+
+    // 2. Buscar da API em segundo plano se a API estiver disponível
+    if (USE_API) {
+        console.log('📋 Buscando últimos 3 posts atualizados da API...');
+        const freshPosts = await getPublishedPosts(3);
+
+        if (freshPosts && freshPosts.length > 0) {
+            console.log('🖼️ Renderizando posts atualizados na homepage...');
+            renderPostCards(container, freshPosts);
+            setCachedHomePosts(freshPosts);
+        }
+    }
 }
 
 async function renderBlogIndex() {
