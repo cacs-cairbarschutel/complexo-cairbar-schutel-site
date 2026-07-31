@@ -1,8 +1,37 @@
 const express = require('express');
+const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const { v2: cloudinary } = require('cloudinary');
 require('dotenv').config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'wtfqznv7',
+  api_key: process.env.CLOUDINARY_API_KEY || '995523526285398',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'I4i1k7SWy9otcDoeRIXOBElGKgs',
+});
+
+/**
+ * Faz upload de uma imagem (base64 ou buffer) para o Cloudinary.
+ * Retorna a URL segura ou null em caso de erro.
+ */
+async function uploadImageToCloudinary(source, publicId) {
+  try {
+    const result = await cloudinary.uploader.upload(source, {
+      public_id: publicId,
+      folder: 'cacs-blog',
+      overwrite: true,
+      resource_type: 'image',
+    });
+    return result.secure_url;
+  } catch (e) {
+    console.error('Erro ao fazer upload para Cloudinary:', e.message);
+    return null;
+  }
+}
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -52,6 +81,41 @@ const postsCache = {
   TTL: 60 * 1000 // 60 segundos
 };
 
+/**
+ * Converte uma imagem base64 para arquivo físico e retorna a URL pública.
+ * Se já for URL, retorna sem alteração.
+ */
+async function migrateBase64Image(postId, base64String) {
+  if (!base64String || !base64String.startsWith('data:')) return base64String;
+
+  try {
+    const matches = base64String.match(/^data:([a-zA-Z0-9+/]+\/[a-zA-Z0-9+/]+);base64,(.+)$/);
+    if (!matches) return base64String;
+
+    const mimeType = matches[1];
+    const data = matches[2];
+    const ext = mimeType.split('/')[1].replace('jpeg', 'jpg').replace('svg+xml', 'svg');
+
+    const uploadsDir = path.join(__dirname, '..', 'assets', 'img', 'uploads');
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+    const fileName = `post-${postId}-cover.${ext}`;
+    const filePath = path.join(uploadsDir, fileName);
+
+    fs.writeFileSync(filePath, Buffer.from(data, 'base64'));
+
+    const imageUrl = `/assets/img/uploads/${fileName}`;
+
+    // Atualizar no banco para não precisar migrar novamente
+    await pool.query('UPDATE posts SET image = ? WHERE id = ?', [imageUrl, postId]);
+
+    return imageUrl;
+  } catch (e) {
+    console.error(`Erro ao migrar imagem do post ${postId}:`, e.message);
+    return base64String;
+  }
+}
+
 // --- ROTAS DE POSTS ---
 
 app.get(['/api/posts', '/posts'], async (req, res) => {
@@ -70,13 +134,7 @@ app.get(['/api/posts', '/posts'], async (req, res) => {
   try {
     let selectCols = '*';
     if (fields === 'summary') {
-      // Para listagem: excluir content e truncar image se for base64
-      selectCols = `id, title, description,
-        CASE
-          WHEN image LIKE 'data:%' THEN NULL
-          ELSE image
-        END AS image,
-        author, status, created_at, published_at`;
+      selectCols = 'id, title, description, image, author, status, created_at, published_at';
     }
 
     let query = `SELECT ${selectCols} FROM posts`;
@@ -97,15 +155,41 @@ app.get(['/api/posts', '/posts'], async (req, res) => {
 
     const [rows] = await pool.query(query, params);
 
+    // Migrar imagens base64 para arquivos físicos (lazy migration)
+    // Faz em background para não bloquear a resposta
+    let processedRows = rows;
+    if (fields === 'summary') {
+      const needsMigration = rows.some(r => r.image && r.image.startsWith('data:'));
+      if (needsMigration) {
+        // Responder imediatamente com os dados atuais (base64)
+        res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
+        res.setHeader('X-Cache', 'MISS');
+        res.json(rows);
+
+        // Migrar em background
+        Promise.all(
+          rows
+            .filter(r => r.image && r.image.startsWith('data:'))
+            .map(r => migrateBase64Image(r.id, r.image))
+        ).then(() => {
+          // Invalidar cache para próximo request já ter URLs
+          postsCache.data = null;
+          postsCache.timestamp = 0;
+        }).catch(e => console.error('Erro na migração em background:', e));
+
+        return;
+      }
+    }
+
     // Salvar no cache se for a query padrão de posts publicados
     if (useCache) {
-      postsCache.data = rows;
+      postsCache.data = processedRows;
       postsCache.timestamp = now;
     }
 
     res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.setHeader('X-Cache', 'MISS');
-    res.json(rows);
+    res.json(processedRows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -131,23 +215,14 @@ app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
   // Determinar URL/imagem
   let imageUrl = null;
   if (req.file && req.file.buffer) {
-    // para uploads via multipart (multer memoryStorage), gerar nome e salvar em disco
-    try {
-      const path = require('path');
-      const fs = require('fs');
-      const uploadsDir = path.join(__dirname, '..', 'assets', 'img', 'uploads');
-      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-      const fileName = `${postId}-${Date.now()}-${req.file.originalname}`.replace(/\s+/g, '_');
-      const filePath = path.join(uploadsDir, fileName);
-      fs.writeFileSync(filePath, req.file.buffer);
-      imageUrl = `/assets/img/uploads/${fileName}`;
-    } catch (e) {
-      console.error('Erro ao salvar arquivo de upload:', e);
-      imageUrl = null;
-    }
+    const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    imageUrl = await uploadImageToCloudinary(dataUri, `post-${postId}-cover`);
   } else if (req.body.image) {
-    // imagem enviada como base64 no corpo
-    imageUrl = req.body.image;
+    if (req.body.image.startsWith('data:')) {
+      imageUrl = await uploadImageToCloudinary(req.body.image, `post-${postId}-cover`);
+    } else {
+      imageUrl = req.body.image;
+    }
   }
 
   try {
@@ -180,20 +255,14 @@ app.put(['/api/posts/:id', '/posts/:id'], upload.single('image'), async (req, re
     
     let imageUrl = existing.image;
     if (req.file && req.file.buffer) {
-      try {
-        const path = require('path');
-        const fs = require('fs');
-        const uploadsDir = path.join(__dirname, '..', 'assets', 'img', 'uploads');
-        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-        const fileName = `${id}-${Date.now()}-${req.file.originalname}`.replace(/\s+/g, '_');
-        const filePath = path.join(uploadsDir, fileName);
-        fs.writeFileSync(filePath, req.file.buffer);
-        imageUrl = `/assets/img/uploads/${fileName}`;
-      } catch (e) {
-        console.error('Erro ao salvar arquivo de upload:', e);
-      }
+      const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      imageUrl = await uploadImageToCloudinary(dataUri, `post-${id}-cover`) || existing.image;
     } else if (req.body.image !== undefined) {
-      imageUrl = req.body.image;
+      if (req.body.image.startsWith('data:')) {
+        imageUrl = await uploadImageToCloudinary(req.body.image, `post-${id}-cover`) || existing.image;
+      } else {
+        imageUrl = req.body.image;
+      }
     }
 
     await pool.query(
