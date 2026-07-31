@@ -1,7 +1,10 @@
 const express = require('express');
+const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -52,6 +55,41 @@ const postsCache = {
   TTL: 60 * 1000 // 60 segundos
 };
 
+/**
+ * Converte uma imagem base64 para arquivo físico e retorna a URL pública.
+ * Se já for URL, retorna sem alteração.
+ */
+async function migrateBase64Image(postId, base64String) {
+  if (!base64String || !base64String.startsWith('data:')) return base64String;
+
+  try {
+    const matches = base64String.match(/^data:([a-zA-Z0-9+/]+\/[a-zA-Z0-9+/]+);base64,(.+)$/);
+    if (!matches) return base64String;
+
+    const mimeType = matches[1];
+    const data = matches[2];
+    const ext = mimeType.split('/')[1].replace('jpeg', 'jpg').replace('svg+xml', 'svg');
+
+    const uploadsDir = path.join(__dirname, '..', 'assets', 'img', 'uploads');
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+    const fileName = `post-${postId}-cover.${ext}`;
+    const filePath = path.join(uploadsDir, fileName);
+
+    fs.writeFileSync(filePath, Buffer.from(data, 'base64'));
+
+    const imageUrl = `/assets/img/uploads/${fileName}`;
+
+    // Atualizar no banco para não precisar migrar novamente
+    await pool.query('UPDATE posts SET image = ? WHERE id = ?', [imageUrl, postId]);
+
+    return imageUrl;
+  } catch (e) {
+    console.error(`Erro ao migrar imagem do post ${postId}:`, e.message);
+    return base64String;
+  }
+}
+
 // --- ROTAS DE POSTS ---
 
 app.get(['/api/posts', '/posts'], async (req, res) => {
@@ -70,13 +108,7 @@ app.get(['/api/posts', '/posts'], async (req, res) => {
   try {
     let selectCols = '*';
     if (fields === 'summary') {
-      // Para listagem: excluir content e truncar image se for base64
-      selectCols = `id, title, description,
-        CASE
-          WHEN image LIKE 'data:%' THEN NULL
-          ELSE image
-        END AS image,
-        author, status, created_at, published_at`;
+      selectCols = 'id, title, description, image, author, status, created_at, published_at';
     }
 
     let query = `SELECT ${selectCols} FROM posts`;
@@ -97,15 +129,41 @@ app.get(['/api/posts', '/posts'], async (req, res) => {
 
     const [rows] = await pool.query(query, params);
 
+    // Migrar imagens base64 para arquivos físicos (lazy migration)
+    // Faz em background para não bloquear a resposta
+    let processedRows = rows;
+    if (fields === 'summary') {
+      const needsMigration = rows.some(r => r.image && r.image.startsWith('data:'));
+      if (needsMigration) {
+        // Responder imediatamente com os dados atuais (base64)
+        res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
+        res.setHeader('X-Cache', 'MISS');
+        res.json(rows);
+
+        // Migrar em background
+        Promise.all(
+          rows
+            .filter(r => r.image && r.image.startsWith('data:'))
+            .map(r => migrateBase64Image(r.id, r.image))
+        ).then(() => {
+          // Invalidar cache para próximo request já ter URLs
+          postsCache.data = null;
+          postsCache.timestamp = 0;
+        }).catch(e => console.error('Erro na migração em background:', e));
+
+        return;
+      }
+    }
+
     // Salvar no cache se for a query padrão de posts publicados
     if (useCache) {
-      postsCache.data = rows;
+      postsCache.data = processedRows;
       postsCache.timestamp = now;
     }
 
     res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     res.setHeader('X-Cache', 'MISS');
-    res.json(rows);
+    res.json(processedRows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
