@@ -5,7 +5,33 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { v2: cloudinary } = require('cloudinary');
 require('dotenv').config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'wtfqznv7',
+  api_key: process.env.CLOUDINARY_API_KEY || '995523526285398',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'I4i1k7SWy9otcDoeRIXOBElGKgs',
+});
+
+/**
+ * Faz upload de uma imagem (base64 ou buffer) para o Cloudinary.
+ * Retorna a URL segura ou null em caso de erro.
+ */
+async function uploadImageToCloudinary(source, publicId) {
+  try {
+    const result = await cloudinary.uploader.upload(source, {
+      public_id: publicId,
+      folder: 'cacs-blog',
+      overwrite: true,
+      resource_type: 'image',
+    });
+    return result.secure_url;
+  } catch (e) {
+    console.error('Erro ao fazer upload para Cloudinary:', e.message);
+    return null;
+  }
+}
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -189,23 +215,14 @@ app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
   // Determinar URL/imagem
   let imageUrl = null;
   if (req.file && req.file.buffer) {
-    // para uploads via multipart (multer memoryStorage), gerar nome e salvar em disco
-    try {
-      const path = require('path');
-      const fs = require('fs');
-      const uploadsDir = path.join(__dirname, '..', 'assets', 'img', 'uploads');
-      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-      const fileName = `${postId}-${Date.now()}-${req.file.originalname}`.replace(/\s+/g, '_');
-      const filePath = path.join(uploadsDir, fileName);
-      fs.writeFileSync(filePath, req.file.buffer);
-      imageUrl = `/assets/img/uploads/${fileName}`;
-    } catch (e) {
-      console.error('Erro ao salvar arquivo de upload:', e);
-      imageUrl = null;
-    }
+    const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    imageUrl = await uploadImageToCloudinary(dataUri, `post-${postId}-cover`);
   } else if (req.body.image) {
-    // imagem enviada como base64 no corpo
-    imageUrl = req.body.image;
+    if (req.body.image.startsWith('data:')) {
+      imageUrl = await uploadImageToCloudinary(req.body.image, `post-${postId}-cover`);
+    } else {
+      imageUrl = req.body.image;
+    }
   }
 
   try {
@@ -238,20 +255,14 @@ app.put(['/api/posts/:id', '/posts/:id'], upload.single('image'), async (req, re
     
     let imageUrl = existing.image;
     if (req.file && req.file.buffer) {
-      try {
-        const path = require('path');
-        const fs = require('fs');
-        const uploadsDir = path.join(__dirname, '..', 'assets', 'img', 'uploads');
-        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-        const fileName = `${id}-${Date.now()}-${req.file.originalname}`.replace(/\s+/g, '_');
-        const filePath = path.join(uploadsDir, fileName);
-        fs.writeFileSync(filePath, req.file.buffer);
-        imageUrl = `/assets/img/uploads/${fileName}`;
-      } catch (e) {
-        console.error('Erro ao salvar arquivo de upload:', e);
-      }
+      const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      imageUrl = await uploadImageToCloudinary(dataUri, `post-${id}-cover`) || existing.image;
     } else if (req.body.image !== undefined) {
-      imageUrl = req.body.image;
+      if (req.body.image.startsWith('data:')) {
+        imageUrl = await uploadImageToCloudinary(req.body.image, `post-${id}-cover`) || existing.image;
+      } else {
+        imageUrl = req.body.image;
+      }
     }
 
     await pool.query(
