@@ -3,14 +3,7 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const multer = require('multer');
-const { v2: cloudinary } = require('cloudinary');
 require('dotenv').config();
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'wtfqznv7',
-  api_key: process.env.CLOUDINARY_API_KEY || '995523526285398',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'I4i1k7SWy9otcDoeRIXOBElGKgs',
-});
 
 /**
  * Faz upload de uma imagem (base64 ou buffer) para o Cloudinary.
@@ -18,6 +11,12 @@ cloudinary.config({
  */
 async function uploadImageToCloudinary(source, publicId) {
   try {
+    const { v2: cloudinary } = require('cloudinary');
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'wtfqznv7',
+      api_key: process.env.CLOUDINARY_API_KEY || '995523526285398',
+      api_secret: process.env.CLOUDINARY_API_SECRET || 'I4i1k7SWy9otcDoeRIXOBElGKgs',
+    });
     const result = await cloudinary.uploader.upload(source, {
       public_id: publicId,
       folder: 'cacs-blog',
