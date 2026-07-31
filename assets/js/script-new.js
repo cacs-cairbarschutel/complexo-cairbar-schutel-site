@@ -43,26 +43,11 @@ async function initializeApiClient() {
 
         console.log('✅ Cliente da API criado com sucesso');
 
-        // Testar disponibilidade da API de forma não-bloqueante (timeout de 2.5s)
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2500);
-            const apiUrl = `${window.apiConfig?.API_BASE_URL || 'http://localhost:3000/api'}/posts?limit=1`;
-            const testRes = await fetch(apiUrl, { signal: controller.signal });
-            clearTimeout(timeoutId);
-
-            if (testRes.ok) {
-                USE_API = true;
-                API_INITIALIZED = true;
-                console.log('✅ API online e operacional!');
-                return true;
-            }
-        } catch (e) {
-            console.warn('⚠️ API não respondeu a tempo ou está offline. Usando fallback para dados padrão.');
-        }
-
-        USE_API = false;
-        return false;
+        // Marcar API como disponível — a própria busca de posts vai confirmar se funciona
+        USE_API = true;
+        API_INITIALIZED = true;
+        console.log('✅ API configurada e pronta!');
+        return true;
     } catch (error) {
         console.error('❌ Erro ao inicializar API:', error.message);
         console.error('Stack:', error.stack);
@@ -424,6 +409,7 @@ function renderStoredContent(content) {
 }
 
 const POSTS_HOME_CACHE_KEY = 'cacs_home_posts_cache';
+const POSTS_BLOG_CACHE_KEY = 'cacs_blog_posts_cache';
 
 function getCachedHomePosts() {
     try {
@@ -439,6 +425,23 @@ function setCachedHomePosts(posts) {
         localStorage.setItem(POSTS_HOME_CACHE_KEY, JSON.stringify(posts));
     } catch (e) {
         console.warn('Erro ao salvar cache de posts:', e);
+    }
+}
+
+function getCachedBlogPosts() {
+    try {
+        const raw = localStorage.getItem(POSTS_BLOG_CACHE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function setCachedBlogPosts(posts) {
+    try {
+        localStorage.setItem(POSTS_BLOG_CACHE_KEY, JSON.stringify(posts));
+    } catch (e) {
+        console.warn('Erro ao salvar cache do blog:', e);
     }
 }
 
@@ -536,6 +539,22 @@ async function renderHomeBlog() {
     }
 }
 
+function renderSkeletonCards(container, count = 6) {
+    const skeletonCard = `
+        <article class="blog-card blog-card--skeleton">
+            <div class="blog-card__media"></div>
+            <div class="blog-card__body">
+                <div class="skeleton-line skeleton-line--short"></div>
+                <div class="skeleton-line skeleton-line--title"></div>
+                <div class="skeleton-line skeleton-line--full"></div>
+                <div class="skeleton-line skeleton-line--full"></div>
+                <div class="skeleton-line skeleton-line--short"></div>
+            </div>
+        </article>
+    `;
+    container.innerHTML = skeletonCard.repeat(count);
+}
+
 async function renderBlogIndex() {
     console.log('🎨 renderBlogIndex() chamado');
     
@@ -546,11 +565,29 @@ async function renderBlogIndex() {
         return;
     }
 
-    console.log('📋 Container encontrado, buscando posts...');
-    const posts = await getPublishedPosts(999);
-    
-    console.log('🖼️  Renderizando', posts.length, 'posts no blog...');
-    renderPostCards(container, posts);
+    // 1. Mostrar cache imediatamente se existir
+    const cached = getCachedBlogPosts();
+    if (cached && cached.length > 0) {
+        console.log('⚡ Renderizando', cached.length, 'posts do cache...');
+        renderPostCards(container, cached);
+    }
+
+    // 2. Buscar os 6 primeiros posts rapidamente
+    console.log('📋 Buscando primeiros 6 posts...');
+    const firstPosts = await getPublishedPosts(6);
+    console.log('🖼️  Renderizando primeiros', firstPosts.length, 'posts...');
+    renderPostCards(container, firstPosts);
+
+    // 3. Buscar o restante em background sem bloquear
+    if (USE_API) {
+        getPublishedPosts(999).then(allPosts => {
+            if (allPosts.length > 6) {
+                console.log('🖼️  Renderizando todos os', allPosts.length, 'posts...');
+                renderPostCards(container, allPosts);
+                setCachedBlogPosts(allPosts);
+            }
+        }).catch(e => console.warn('⚠️ Erro ao carregar posts adicionais:', e));
+    }
 }
 
 async function renderPostDetail() {
@@ -1054,37 +1091,30 @@ function setupImpactObserver() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🎯 DOMContentLoaded disparado');
-    
-    // Inicializar API
-    console.log('⏳ Inicializando API...');
-    const apiReady = await initializeApiClient();
-    console.log('API pronta:', apiReady);
 
-    // Garantir que há posts padrão
-    console.log('⏳ Executando ensureSeedPosts...');
-    await ensureSeedPosts();
-
-    // Configurar interações
-    console.log('⏳ Configurando interações...');
     setupSmoothAnchors();
     setupCarousel();
     setupImpactObserver();
 
-    // Renderizar conteúdo
-    console.log('⏳ Renderizando conteúdo...');
-    await renderHomeBlog();
-    await renderBlogIndex();
-    await renderPostDetail();
-    renderAdminBlog();
-    
+    // Mostrar skeletons apenas se não houver cache (primeira visita)
+    const blogContainer = document.getElementById('blog-posts');
+    if (blogContainer && !getCachedBlogPosts()) {
+        renderSkeletonCards(blogContainer, 6);
+    }
+
+    // Inicializar cliente da API (sem health-check, instantâneo)
+    try { await initializeApiClient(); } catch(e) { console.error('❌ initializeApiClient falhou:', e); }
+
+    // Renderizar todas as seções
+    try { await renderHomeBlog(); } catch(e) { console.error('❌ renderHomeBlog falhou:', e); }
+    try { await renderBlogIndex(); } catch(e) { console.error('❌ renderBlogIndex falhou:', e); }
+    try { await renderPostDetail(); } catch(e) { console.error('❌ renderPostDetail falhou:', e); }
+    try { renderAdminBlog(); } catch(e) { console.error('❌ renderAdminBlog falhou:', e); }
+
     console.log('✅ Página carregada e renderizada');
 
-    // Ouvir mudanças no localStorage (fallback sincronização)
     window.addEventListener('storage', async (event) => {
-        if (event.key !== BLOG_STORAGE_KEY) {
-            return;
-        }
-
+        if (event.key !== BLOG_STORAGE_KEY) return;
         await renderHomeBlog();
         await renderBlogIndex();
         await renderPostDetail();

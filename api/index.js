@@ -45,14 +45,38 @@ app.get(['/api/health', '/health'], async (req, res) => {
   }
 });
 
+// Cache em memória para posts (evita query ao MySQL a cada request)
+const postsCache = {
+  data: null,
+  timestamp: 0,
+  TTL: 60 * 1000 // 60 segundos
+};
+
 // --- ROTAS DE POSTS ---
 
 app.get(['/api/posts', '/posts'], async (req, res) => {
   const { status, limit, fields } = req.query;
+  
+  // Usar cache apenas para a query mais comum (todos os posts publicados, sem limit específico)
+  const useCache = !limit && !fields && status === 'published';
+  const now = Date.now();
+
+  if (useCache && postsCache.data && (now - postsCache.timestamp) < postsCache.TTL) {
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
+    res.setHeader('X-Cache', 'HIT');
+    return res.json(postsCache.data);
+  }
+
   try {
     let selectCols = '*';
     if (fields === 'summary') {
-      selectCols = 'id, title, description, image, author, status, created_at, published_at';
+      // Para listagem: excluir content e truncar image se for base64
+      selectCols = `id, title, description,
+        CASE
+          WHEN image LIKE 'data:%' THEN NULL
+          ELSE image
+        END AS image,
+        author, status, created_at, published_at`;
     }
 
     let query = `SELECT ${selectCols} FROM posts`;
@@ -71,8 +95,16 @@ app.get(['/api/posts', '/posts'], async (req, res) => {
       params.push(parsedLimit);
     }
 
-    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     const [rows] = await pool.query(query, params);
+
+    // Salvar no cache se for a query padrão de posts publicados
+    if (useCache) {
+      postsCache.data = rows;
+      postsCache.timestamp = now;
+    }
+
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
+    res.setHeader('X-Cache', 'MISS');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
