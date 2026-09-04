@@ -130,7 +130,7 @@ app.get(['/api/posts', '/posts'], async (req, res) => {
   try {
     let selectCols = '*';
     if (fields === 'summary') {
-      selectCols = 'id, title, description, image, author, status, created_at, published_at';
+      selectCols = 'id, title, slug, description, image, author, status, created_at, published_at';
     }
 
     let query = `SELECT ${selectCols} FROM posts`;
