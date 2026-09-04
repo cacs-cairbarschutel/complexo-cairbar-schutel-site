@@ -5,6 +5,41 @@ const multer = require('multer');
 require('dotenv').config();
 
 /**
+ * Gera um slug SEO a partir de um texto.
+ * Ex: "Como o CACS ajuda crianças" → "como-o-cacs-ajuda-criancas"
+ */
+function slugify(text) {
+  return String(text || '')
+    .normalize('NFD')                        // decompõe acentos
+    .replace(/[\u0300-\u036f]/g, '')         // remove diacríticos
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')           // remove chars especiais
+    .replace(/[\s_]+/g, '-')                 // espaços e underscores → hífen
+    .replace(/-+/g, '-')                     // hífens múltiplos → um só
+    .replace(/^-+|-+$/g, '');               // remove hífens nas pontas
+}
+
+/**
+ * Garante que o slug seja único no banco.
+ * Se já existir, acrescenta -2, -3, etc.
+ */
+async function uniqueSlug(pool, baseSlug, excludeId = null) {
+  let slug = baseSlug;
+  let attempt = 1;
+  while (true) {
+    const query = excludeId
+      ? 'SELECT id FROM posts WHERE slug = ? AND id != ? LIMIT 1'
+      : 'SELECT id FROM posts WHERE slug = ? LIMIT 1';
+    const params = excludeId ? [slug, excludeId] : [slug];
+    const [rows] = await pool.query(query, params);
+    if (rows.length === 0) return slug;
+    attempt++;
+    slug = `${baseSlug}-${attempt}`;
+  }
+}
+
+/**
  * Faz upload de uma imagem (base64 ou buffer) para o Cloudinary.
  * Retorna a URL segura ou null em caso de erro.
  */
@@ -130,6 +165,20 @@ app.get(['/api/posts', '/posts'], async (req, res) => {
   }
 });
 
+// Rota por slug — deve vir ANTES da rota por :id para não conflitar
+app.get(['/api/posts/slug/:slug', '/posts/slug/:slug'], async (req, res) => {
+  const { slug } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM posts WHERE slug = ?', [slug]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Post não encontrado' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get(['/api/posts/:id', '/posts/:id'], async (req, res) => {
   const { id } = req.params;
   try {
@@ -147,6 +196,10 @@ app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
   const { title, description, content, author, status } = req.body;
   const postId = req.body.id || Date.now();
 
+  // Gerar slug único a partir do título
+  const baseSlug = slugify(title || `post-${postId}`);
+  const slug = await uniqueSlug(pool, baseSlug);
+
   // Determinar URL/imagem
   let imageUrl = null;
   if (req.file && req.file.buffer) {
@@ -162,8 +215,8 @@ app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
 
   try {
     await pool.query(
-      'INSERT INTO posts (id, title, description, content, image, author, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
-      [postId, title, description, content, imageUrl, author, status || 'draft']
+      'INSERT INTO posts (id, title, slug, description, content, image, author, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+      [postId, title, slug, description, content, imageUrl, author, status || 'draft']
     );
     
     const [newPost] = await pool.query('SELECT * FROM posts WHERE id = ?', [postId]);
@@ -187,6 +240,18 @@ app.put(['/api/posts/:id', '/posts/:id'], upload.single('image'), async (req, re
     const author = req.body.author !== undefined ? req.body.author : existing.author;
     const status = req.body.status !== undefined ? req.body.status : existing.status;
     const published_at = req.body.published_at !== undefined ? req.body.published_at : existing.published_at;
+
+    // Regenerar slug se o título mudou
+    let slug = existing.slug;
+    if (req.body.title !== undefined && req.body.title !== existing.title) {
+      const baseSlug = slugify(title || `post-${id}`);
+      slug = await uniqueSlug(pool, baseSlug, id);
+    }
+    // Gerar slug para posts antigos que ainda não têm slug
+    if (!slug) {
+      const baseSlug = slugify(title || `post-${id}`);
+      slug = await uniqueSlug(pool, baseSlug, id);
+    }
     
     let imageUrl = existing.image;
     if (req.file && req.file.buffer) {
@@ -201,8 +266,8 @@ app.put(['/api/posts/:id', '/posts/:id'], upload.single('image'), async (req, re
     }
 
     await pool.query(
-      'UPDATE posts SET title = ?, description = ?, content = ?, image = ?, author = ?, status = ?, published_at = ?, updated_at = NOW() WHERE id = ?',
-      [title, description, content, imageUrl, author, status, published_at, id]
+      'UPDATE posts SET title = ?, slug = ?, description = ?, content = ?, image = ?, author = ?, status = ?, published_at = ?, updated_at = NOW() WHERE id = ?',
+      [title, slug, description, content, imageUrl, author, status, published_at, id]
     );
 
     const [updatedPost] = await pool.query('SELECT * FROM posts WHERE id = ?', [id]);

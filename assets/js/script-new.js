@@ -280,6 +280,38 @@ async function getPostById(id) {
 }
 
 /**
+ * Obter post por slug (SEO-friendly)
+ */
+async function getPostBySlug(slug) {
+    console.log('🔍 getPostBySlug chamado para slug:', slug);
+
+    if (USE_API) {
+        try {
+            const API_BASE_URL = window.apiConfig?.API_BASE_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${API_BASE_URL}/posts/slug/${encodeURIComponent(slug)}`);
+            if (response.ok) {
+                const post = await response.json();
+                console.log('✅ Post encontrado por slug:', post.title);
+                return post;
+            }
+            if (response.status !== 404) {
+                console.error('❌ Erro inesperado ao buscar por slug:', response.status);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao buscar post por slug:', error.message);
+        }
+    }
+
+    // Fallback: buscar na lista local pelo campo slug
+    const posts = await getPosts();
+    const found = posts.find((post) => post.slug === slug);
+    if (found) {
+        console.log('✅ Post encontrado por slug (local):', found.title);
+    }
+    return found || null;
+}
+
+/**
  * Garantir que os posts padrão estejam na API
  */
 async function ensureSeedPosts() {
@@ -485,9 +517,12 @@ function renderPostCards(container, posts) {
     const routePrefix = getBlogRoutePrefix();
 
     const html = posts.map((post, index) => {
+        const postHref = post.slug
+            ? `${routePrefix}blog-post.html?slug=${encodeURIComponent(post.slug)}`
+            : `${routePrefix}blog-post.html?id=${post.id}`;
         return `
         <article class="blog-card">
-            <a class="blog-card__media" href="${routePrefix}blog-post.html?id=${post.id}">
+            <a class="blog-card__media" href="${postHref}">
                 <img src="${escapeHtml(normalizeImagePath(post.image))}" alt="${escapeHtml(post.title)}">
             </a>
             <div class="blog-card__body">
@@ -497,7 +532,7 @@ function renderPostCards(container, posts) {
                 </div>
                 <h3>${escapeHtml(post.title)}</h3>
                 <p>${escapeHtml(post.description)}</p>
-                <a class="blog-card__link" href="${routePrefix}blog-post.html?id=${post.id}">Ler artigo →</a>
+                <a class="blog-card__link" href="${postHref}">Ler artigo →</a>
             </div>
         </article>
     `
@@ -600,15 +635,30 @@ async function renderPostDetail() {
     }
 
     const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
     const id = params.get('id');
-    console.log('🆔 ID do post na URL:', id);
-    
-    if (!id) {
-        console.warn('⚠️ Nenhum ID de post fornecido na URL');
+    console.log('🔍 Parâmetros da URL — slug:', slug, '| id:', id);
+
+    if (!slug && !id) {
+        console.warn('⚠️ Nenhum slug ou ID de post fornecido na URL');
         return;
     }
 
-    const post = await getPostById(id);
+    let post = null;
+
+    // Buscar por slug primeiro (SEO); fallback para id
+    if (slug) {
+        console.log('🐌 Buscando post por slug:', slug);
+        post = await getPostBySlug(slug);
+        if (!post) {
+            console.warn('⚠️ Post não encontrado por slug, tentando fallback por id...');
+        }
+    }
+
+    if (!post && id) {
+        console.log('🆔 Buscando post por ID:', id);
+        post = await getPostById(id);
+    }
 
     if (!post) {
         console.error('❌ Post não encontrado para o ID:', id);
