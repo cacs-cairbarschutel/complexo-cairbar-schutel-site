@@ -51,6 +51,8 @@ async function run() {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
+    supportBigNumbers: true,
+    bigNumberStrings: true,   // IDs retornam como string, sem perda de precisão
   });
 
   console.log('✅ Conectado ao banco MySQL.');
