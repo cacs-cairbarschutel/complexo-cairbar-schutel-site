@@ -324,7 +324,19 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 app.get(['/api/home-content', '/home-content'], async (req, res) => {
   try {
     res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
-    const [rows] = await pool.query('SELECT * FROM home_content');
+    const { sections } = req.query;
+    let rows;
+    if (sections) {
+      const keys = sections.split(',').map(s => s.trim()).filter(Boolean);
+      if (keys.length) {
+        const placeholders = keys.map(() => '?').join(',');
+        [rows] = await pool.query(`SELECT * FROM home_content WHERE section IN (${placeholders})`, keys);
+      } else {
+        [rows] = await pool.query('SELECT * FROM home_content');
+      }
+    } else {
+      [rows] = await pool.query('SELECT * FROM home_content');
+    }
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
