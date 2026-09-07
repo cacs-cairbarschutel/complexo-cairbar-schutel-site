@@ -611,9 +611,25 @@
         }
 
         /* ─────────────────────────────────────────────────────────────
+           UPLOAD DE IMAGEM para /upload (Cloudinary)
+        ───────────────────────────────────────────────────────────── */
+        async function uploadImage(file) {
+            const base = getApiBase();
+            const formData = new FormData();
+            formData.append('image', file);
+            const res = await fetch(base.replace('/api', '') + '/upload', {
+                method: 'POST',
+                body: formData
+            });
+            if (!res.ok) throw new Error('Erro no upload da imagem');
+            const json = await res.json();
+            return json.data && json.data.publicUrl ? json.data.publicUrl : null;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
            COLLECT FIELD VALUES FROM A CARD
         ───────────────────────────────────────────────────────────── */
-        function collectCardPayload(cardEl, sectionCfg) {
+        async function collectCardPayload(cardEl, sectionCfg) {
             const payload = { section: sectionCfg.key };
 
             if (sectionCfg.fields.includes('title')) {
@@ -625,8 +641,15 @@
                 payload.description = el ? el.value.trim() : '';
             }
             if (sectionCfg.fields.includes('image_url')) {
-                const el = cardEl.querySelector('[data-field="image_url"]');
-                payload.image_url = el ? el.value.trim() : '';
+                const fileInput = cardEl.querySelector('[data-field="image_url"]');
+                const hiddenUrl = cardEl.querySelector('[id$="-image_url_current"]');
+                const file = fileInput && fileInput.files && fileInput.files[0];
+                if (file) {
+                    const uploaded = await uploadImage(file);
+                    payload.image_url = uploaded || (hiddenUrl ? hiddenUrl.value : '');
+                } else {
+                    payload.image_url = hiddenUrl ? hiddenUrl.value : '';
+                }
             }
 
             return payload;
@@ -753,43 +776,46 @@
                 const label = document.createElement('label');
                 const inputId = sectionCfg.key + '-image_url';
                 label.setAttribute('for', inputId);
-                label.textContent = 'URL da imagem';
+                label.textContent = 'Imagem';
+
+                // Input file
                 const input = document.createElement('input');
-                input.type = 'url';
+                input.type = 'file';
                 input.id = inputId;
                 input.dataset.field = 'image_url';
-                input.placeholder = 'https://exemplo.com/imagem.jpg';
-                input.value = data.image_url || '';
+                input.accept = 'image/*';
 
-                input.addEventListener('input', function () {
-                    const url = this.value.trim();
-                    const previewEl = document.getElementById(sectionCfg.key + '-new-img');
-                    if (!previewEl) return;
-                    if (url) {
+                // Campo oculto que guarda a URL atual
+                const hiddenUrl = document.createElement('input');
+                hiddenUrl.type = 'hidden';
+                hiddenUrl.id = sectionCfg.key + '-image_url_current';
+                hiddenUrl.value = data.image_url || '';
+
+                // Ao selecionar arquivo, mostrar preview "como vai ficar"
+                input.addEventListener('change', function () {
+                    const file = this.files && this.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const previewEl = document.getElementById(sectionCfg.key + '-new-img');
+                        if (!previewEl) return;
                         if (previewEl.tagName === 'IMG') {
-                            previewEl.src = url;
+                            previewEl.src = e.target.result;
                         } else {
-                            // Trocar div por img
                             const img = document.createElement('img');
                             img.className = 'page-editor-compare__img';
                             img.id = sectionCfg.key + '-new-img';
-                            img.src = url;
+                            img.src = e.target.result;
                             img.alt = '';
                             previewEl.parentNode.replaceChild(img, previewEl);
                         }
-                    } else {
-                        if (previewEl.tagName === 'IMG') {
-                            const div = document.createElement('div');
-                            div.className = 'page-editor-compare__no-img';
-                            div.id = sectionCfg.key + '-new-img';
-                            div.textContent = 'Nenhuma imagem';
-                            previewEl.parentNode.replaceChild(div, previewEl);
-                        }
-                    }
+                    };
+                    reader.readAsDataURL(file);
                 });
 
                 group.appendChild(label);
                 group.appendChild(input);
+                group.appendChild(hiddenUrl);
                 fields.appendChild(group);
             }
 
@@ -810,7 +836,7 @@
                 saveBtn.disabled = true;
 
                 try {
-                    const payload = collectCardPayload(card, sectionCfg);
+                    const payload = await collectCardPayload(card, sectionCfg);
                     await saveSection(sectionCfg.key, payload);
 
                     // Após salvar, atualizar painel "Como está agora"
@@ -896,7 +922,11 @@
                 card.classList.add('is-saving');
                 const payload = collectCardPayload(card, sectionCfg);
 
-                return saveSection(sectionCfg.key, payload)
+                return saveSection(sectionCfg.key, null)
+                    .then(async function () {
+                        const payload = await collectCardPayload(card, sectionCfg);
+                        return saveSection(sectionCfg.key, payload);
+                    })
                     .then(function () {
                         successCount++;
                         card.classList.remove('is-saving');
