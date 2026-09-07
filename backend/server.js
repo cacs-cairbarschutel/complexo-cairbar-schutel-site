@@ -142,7 +142,7 @@ app.delete('/api/posts/:id', async (req, res) => {
 
 // --- ROTAS DE HOME CONTENT ---
 
-app.get('/api/home-content', async (req, res) => {
+app.get(['/api/home-content', '/home-content', '/api/api/home-content'], async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM home_content');
     res.json(rows);
@@ -151,7 +151,7 @@ app.get('/api/home-content', async (req, res) => {
   }
 });
 
-app.post('/api/home-content', upload.single('image'), async (req, res) => {
+app.post(['/api/home-content', '/home-content', '/api/api/home-content'], upload.single('image'), async (req, res) => {
   const { section, title, description } = req.body;
   const imageUrl = req.file ? `/assets/img/uploads/${req.file.filename}` : req.body.image_url;
 
