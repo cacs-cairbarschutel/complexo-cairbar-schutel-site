@@ -581,22 +581,57 @@
 
         function getApiBase() {
             if (window.apiConfig && window.apiConfig.API_BASE_URL) {
-                return window.apiConfig.API_BASE_URL;
+                return window.apiConfig.API_BASE_URL.replace(/\/+$/, '');
             }
             // Fallback: detect environment
             const hostname = window.location.hostname;
             if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                return 'http://localhost:3000';
+                return 'http://localhost:3000/api';
             }
-            return '';
+            return '/api';
+        }
+
+        function apiUrl(pathAndQuery) {
+            const base = getApiBase();
+            const parts = pathAndQuery.split('?');
+            const path = parts[0];
+            const query = parts[1] !== undefined ? '?' + parts[1] : '';
+            const cleanPath = path.startsWith('/') ? path : '/' + path;
+
+            if (base.endsWith('/api') && cleanPath.startsWith('/api/')) {
+                return base + cleanPath.slice(4) + query;
+            }
+            if (!base.endsWith('/api') && !cleanPath.startsWith('/api/')) {
+                return base + '/api' + cleanPath + query;
+            }
+            return base + cleanPath + query;
+        }
+
+        function updateComparePanel(sectionKey, payload) {
+            const curTitle = document.getElementById(sectionKey + '-cur-title');
+            const curDesc  = document.getElementById(sectionKey + '-cur-desc');
+            const curImg   = document.getElementById(sectionKey + '-cur-img');
+            if (curTitle && payload.title !== undefined) curTitle.textContent = payload.title || '';
+            if (curDesc && payload.description !== undefined) curDesc.textContent  = payload.description || '';
+            if (curImg && payload.image_url) {
+                if (curImg.tagName === 'IMG') {
+                    curImg.src = payload.image_url;
+                } else {
+                    const img = document.createElement('img');
+                    img.className = 'page-editor-compare__img';
+                    img.id = sectionKey + '-cur-img';
+                    img.src = payload.image_url;
+                    img.alt = '';
+                    curImg.parentNode.replaceChild(img, curImg);
+                }
+            }
         }
 
         /* ─────────────────────────────────────────────────────────────
            SAVE A SINGLE SECTION
         ───────────────────────────────────────────────────────────── */
         async function saveSection(sectionKey, payload) {
-            const base = getApiBase();
-            const response = await fetch(base + '/api/home-content', {
+            const response = await fetch(apiUrl('/home-content'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -614,13 +649,19 @@
            UPLOAD DE IMAGEM para /upload (Cloudinary)
         ───────────────────────────────────────────────────────────── */
         async function uploadImage(file) {
-            const base = getApiBase();
             const formData = new FormData();
             formData.append('image', file);
-            const res = await fetch(base.replace('/api', '') + '/upload', {
+            let res = await fetch(apiUrl('/upload'), {
                 method: 'POST',
                 body: formData
             });
+            if (!res.ok) {
+                const base = getApiBase().replace(/\/api\/?$/, '');
+                res = await fetch((base || '') + '/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+            }
             if (!res.ok) throw new Error('Erro no upload da imagem');
             const json = await res.json();
             return json.data && json.data.publicUrl ? json.data.publicUrl : null;
@@ -840,23 +881,7 @@
                     await saveSection(sectionCfg.key, payload);
 
                     // Após salvar, atualizar painel "Como está agora"
-                    const curTitle = document.getElementById(sectionCfg.key + '-cur-title');
-                    const curDesc  = document.getElementById(sectionCfg.key + '-cur-desc');
-                    const curImg   = document.getElementById(sectionCfg.key + '-cur-img');
-                    if (curTitle) curTitle.textContent = payload.title || '';
-                    if (curDesc)  curDesc.textContent  = payload.description || '';
-                    if (curImg && payload.image_url) {
-                        if (curImg.tagName === 'IMG') {
-                            curImg.src = payload.image_url;
-                        } else {
-                            const img = document.createElement('img');
-                            img.className = 'page-editor-compare__img';
-                            img.id = sectionCfg.key + '-cur-img';
-                            img.src = payload.image_url;
-                            img.alt = '';
-                            curImg.parentNode.replaceChild(img, curImg);
-                        }
-                    }
+                    updateComparePanel(sectionCfg.key, payload);
 
                     showToast('✓ "' + sectionCfg.label + '" salvo com sucesso!', 'success');
                 } catch (err) {
@@ -915,27 +940,22 @@
             let successCount = 0;
             let errorCount = 0;
 
-            const promises = pageCfg.sections.map(function (sectionCfg, i) {
+            const promises = pageCfg.sections.map(async function (sectionCfg, i) {
                 const card = cards[i];
-                if (!card) return Promise.resolve();
+                if (!card) return;
 
                 card.classList.add('is-saving');
-                const payload = collectCardPayload(card, sectionCfg);
-
-                return saveSection(sectionCfg.key, null)
-                    .then(async function () {
-                        const payload = await collectCardPayload(card, sectionCfg);
-                        return saveSection(sectionCfg.key, payload);
-                    })
-                    .then(function () {
-                        successCount++;
-                        card.classList.remove('is-saving');
-                    })
-                    .catch(function (err) {
-                        errorCount++;
-                        card.classList.remove('is-saving');
-                        showToast('✗ Erro em "' + sectionCfg.label + '": ' + err.message, 'error');
-                    });
+                try {
+                    const payload = await collectCardPayload(card, sectionCfg);
+                    await saveSection(sectionCfg.key, payload);
+                    updateComparePanel(sectionCfg.key, payload);
+                    successCount++;
+                    card.classList.remove('is-saving');
+                } catch (err) {
+                    errorCount++;
+                    card.classList.remove('is-saving');
+                    showToast('✗ Erro em "' + sectionCfg.label + '": ' + err.message, 'error');
+                }
             });
 
             await Promise.all(promises);
@@ -994,12 +1014,11 @@
 
             // Fetch existing content
             const sectionKeys = pageCfg.sections.map(function (s) { return s.key; }).join(',');
-            const base = getApiBase();
 
             let existingMap = {};
 
             try {
-                const url = base + '/api/home-content?sections=' + encodeURIComponent(sectionKeys);
+                const url = apiUrl('/home-content?sections=' + encodeURIComponent(sectionKeys));
                 const res = await fetch(url);
 
                 if (res.ok) {

@@ -477,10 +477,17 @@
                     showToast('Enviando imagem...', 'success');
                     const formData = new FormData();
                     formData.append('image', file);
-                    const uploadRes = await fetch(API_BASE.replace('/api', '') + '/upload', {
+                    const uploadEndpoint = API_BASE.endsWith('/api') ? `${API_BASE}/upload` : `${API_BASE}/api/upload`;
+                    let uploadRes = await fetch(uploadEndpoint, {
                         method: 'POST',
                         body: formData
                     });
+                    if (!uploadRes.ok) {
+                        uploadRes = await fetch(API_BASE.replace(/\/api\/?$/, '') + '/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+                    }
                     if (uploadRes.ok) {
                         const uploadJson = await uploadRes.json();
                         if (uploadJson.data && uploadJson.data.publicUrl) {

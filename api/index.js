@@ -293,12 +293,19 @@ app.delete(['/api/posts/:id', '/posts/:id'], async (req, res) => {
 
 
 // Rota para upload de imagens (compatibilidade com frontend storage.upload)
-app.post('/upload', upload.single('image'), async (req, res) => {
+app.post(['/api/upload', '/upload'], upload.single('image'), async (req, res) => {
   if (!req.file || !req.file.buffer) {
     return res.status(400).json({ error: 'Nenhum arquivo enviado' });
   }
 
   try {
+    // Tenta upload para o Cloudinary primeiro (suporta ambiente serverless sem disco gravável)
+    const base64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    const cloudUrl = await uploadImageToCloudinary(base64, `upload-${Date.now()}`);
+    if (cloudUrl) {
+      return res.json({ data: { publicUrl: cloudUrl }, error: null });
+    }
+
     const path = require('path');
     const fs = require('fs');
     const uploadsDir = path.join(__dirname, '..', 'assets', 'img', 'uploads');
@@ -321,7 +328,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 
 // --- ROTAS DE HOME CONTENT ---
 
-app.get(['/api/home-content', '/home-content'], async (req, res) => {
+app.get(['/api/home-content', '/home-content', '/api/api/home-content'], async (req, res) => {
   try {
     res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     const { sections } = req.query;
@@ -343,7 +350,11 @@ app.get(['/api/home-content', '/home-content'], async (req, res) => {
   }
 });
 
-app.post(['/api/home-content', '/home-content'], upload.single('image'), async (req, res) => {
+app.post(['/api/home-content', '/home-content', '/api/api/home-content'], upload.single('image'), async (req, res) => {
+  if (!req.body || !req.body.section) {
+    return res.status(400).json({ error: 'Campo "section" é obrigatório' });
+  }
+
   const { section, title, description } = req.body;
   const imageUrl = req.body.image_url || null;
 
