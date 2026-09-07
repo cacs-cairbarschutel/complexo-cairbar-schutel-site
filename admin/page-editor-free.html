@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Páginas - CACS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="https://cacs-cairbarschutel.org.br/wp-content/uploads/2024/09/fav-1.png">
+    <style>
+        .admin-page { background: #f5f7fb; }
+        .admin-main { min-height: calc(100vh - 80px); padding: 48px 0 80px; }
+
+        .editor-hero {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: #fff;
+            border-radius: 20px;
+            padding: 40px 36px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .editor-hero h1 { margin: 0 0 8px; font-size: 1.9rem; }
+        .editor-hero p  { margin: 0; opacity: 0.9; }
+
+        .editor-hero__actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .editor-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+            margin-bottom: 24px;
+        }
+
+        .editor-card h2 {
+            margin: 0 0 20px;
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            border-bottom: 1px solid #efefef;
+            padding-bottom: 12px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 7px;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #dde3ee;
+            border-radius: 8px;
+            font-size: 0.97rem;
+            font-family: inherit;
+            background: #fafbfd;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            background: #fff;
+        }
+
+        .form-group textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .image-preview-box {
+            margin-top: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f0f0f0;
+            max-height: 200px;
+            display: none;
+        }
+
+        .image-preview-box img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Painel de comparação */
+        .compare-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .compare-panel__box {
+            background: #fafafa;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 16px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .compare-panel__box--new {
+            background: #f0f7ff;
+            border-color: #c3d9f5;
+        }
+
+        .compare-panel__label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+        }
+
+        .compare-panel__box--new .compare-panel__label {
+            color: var(--secondary-color);
+        }
+
+        .compare-panel__title {
+            font-weight: 700;
+            color: var(--secondary-color);
+            font-size: 1rem;
+            line-height: 1.3;
+            min-height: 1.3em;
+        }
+
+        .compare-panel__desc {
+            font-size: 0.87rem;
+            color: #555;
+            line-height: 1.5;
+            min-height: 1em;
+        }
+
+        .compare-panel__img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .compare-panel__no-img {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+
+        @media (max-width: 640px) {
+            .compare-panel { grid-template-columns: 1fr; }
+        }
+        .ql-container { font-size: 1rem; font-family: 'Roboto', sans-serif; }
+        .ql-editor { min-height: 420px; line-height: 1.8; }
+        .ql-toolbar { border-radius: 8px 8px 0 0; border-color: #dde3ee !important; background: #fafbfd; }
+        .ql-container { border-radius: 0 0 8px 8px; border-color: #dde3ee !important; }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .status-badge--published { background: #d4edda; color: #155724; }
+        .status-badge--draft     { background: #fff3cd; color: #856404; }
+
+        /* Slug preview */
+        .slug-preview {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 6px;
+        }
+        .slug-preview span { color: var(--secondary-color); font-weight: 600; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            padding: 14px 22px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 9999;
+            transform: translateY(80px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast--success { background: #28a745; }
+        .toast--error   { background: #dc3545; }
+
+        /* Loading overlay */
+        .editor-loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .editor-hero { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body class="admin-page" data-admin-area="pages">
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <img src="../assets/img/Logo-Cairbar-Branco.png" alt="CACS Logo">
+                </a>
+            </div>
+            <nav class="main-nav admin-nav">
+                <ul>
+                    <li><a href="pages-hub.html">← Hub de páginas</a></li>
+                    <li><a href="../index.html" target="_blank">Ver site</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="container" id="editor-container">
+            <div class="editor-loading">Carregando editor...</div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="../assets/js/api-config.js"></script>
+    <script src="../assets/js/admin-access.js"></script>
+    <script>
+    (function () {
+        const isLocal =
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname.startsWith('192.168.') ||
+            window.location.protocol === 'file:';
+
+        const API_BASE = isLocal
+            ? 'http://localhost:3000/api'
+            : 'https://complexo-cairbar-schutel-site.vercel.app/api';
+
+        const params  = new URLSearchParams(window.location.search);
+        const pageId  = params.get('id');   // editar existente
+        const isNew   = !pageId;
+
+        let quill = null;
+        let currentPage = null;
+        let saving = false;
+
+        // ── Slug automático ──────────────────────────────────────────────
+        function slugify(text) {
+            return String(text || '')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase().trim()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/[\s_]+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
+        // ── Toast ────────────────────────────────────────────────────────
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast toast--${type} show`;
+            setTimeout(() => { t.classList.remove('show'); }, 3500);
+        }
+
+        // ── Renderizar o formulário ──────────────────────────────────────
+        function renderEditor(page) {
+            const container = document.getElementById('editor-container');
+            const title  = page ? page.title       : '';
+            const desc   = page ? page.description : '';
+            const img    = page ? (page.image || '') : '';
+            const status = page ? page.status      : 'draft';
+            const slug   = page ? page.slug        : '';
+
+            const heroLabel = isNew ? 'Nova página' : `Editando: ${title}`;
+            const publicUrl = slug
+                ? `../pages/page.html?slug=${encodeURIComponent(slug)}`
+                : '#';
+
+            container.innerHTML = `
+                <div class="editor-hero fade-in-up">
+                    <div>
+                        <h1>📄 ${heroLabel}</h1>
+                        <p>Use o editor abaixo para escrever o conteúdo completo da página.</p>
+                    </div>
+                    <div class="editor-hero__actions">
+                        ${!isNew ? `<a href="${publicUrl}" target="_blank" class="btn btn-secondary">Ver página ↗</a>` : ''}
+                        <button id="btn-save" class="btn btn-primary">Salvar</button>
+                        <button id="btn-publish" class="btn btn-secondary" style="background:#28a745;color:#fff;border-color:#28a745;">
+                            ${status === 'published' ? 'Despublicar' : 'Publicar'}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="editor-card fade-in-up">
+                    <h2>Informações da página</h2>
+                    <div class="compare-panel">
+                        <div class="compare-panel__box compare-panel__box--current">
+                            <div class="compare-panel__label">Como está agora</div>
+                            <div class="compare-panel__title" id="cmp-cur-title">${escHtml(title)}</div>
+                            <div class="compare-panel__desc"  id="cmp-cur-desc">${escHtml(desc)}</div>
+                            ${img ? '<img class="compare-panel__img" id="cmp-cur-img" src="' + escHtml(img) + '" alt="">' : '<div class="compare-panel__no-img" id="cmp-cur-img">Sem imagem de capa</div>'}
+                        </div>
+                        <div class="compare-panel__box compare-panel__box--new">
+                            <div class="compare-panel__label">Como vai ficar</div>
+                            <div class="compare-panel__title" id="cmp-new-title">${escHtml(title)}</div>
+                            <div class="compare-panel__desc"  id="cmp-new-desc">${escHtml(desc)}</div>
+                            ${img ? '<img class="compare-panel__img" id="cmp-new-img" src="' + escHtml(img) + '" alt="">' : '<div class="compare-panel__no-img" id="cmp-new-img">Sem imagem de capa</div>'}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="field-title">Título da página *</label>
+                            <input type="text" id="field-title" value="${escHtml(title)}" placeholder="Ex: Seja Voluntário">
+                            <div class="slug-preview">URL: pages/page.html?slug=<span id="slug-preview-val">${escHtml(slug || slugify(title))}</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="field-status">Status</label>
+                            <select id="field-status">
+                                <option value="draft"     ${status === 'draft'     ? 'selected' : ''}>Rascunho</option>
+                                <option value="published" ${status === 'published' ? 'selected' : ''}>Publicado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="field-description">Subtítulo / descrição (aparece no hero e no SEO)</label>
+                        <textarea id="field-description" rows="2" placeholder="Breve descrição da página">${escHtml(desc)}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="field-image">URL da imagem de capa (opcional)</label>
+                        <input type="url" id="field-image" value="${escHtml(img)}" placeholder="https://...">
+                        <div class="image-preview-box" id="img-preview-box">
+                            <img id="img-preview-el" src="" alt="Pré-visualização">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="editor-card fade-in-up">
+                    <h2>Conteúdo da página</h2>
+                    <div id="quill-editor"></div>
+                    <input type="hidden" id="field-content">
+                </div>
+            `;
+
+            // Inicializar Quill
+            quill = new Quill('#quill-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ color: [] }, { background: [] }],
+                        [{ list: 'ordered' }, { list: 'bullet' }],
+                        [{ align: [] }],
+                        ['link', 'image', 'blockquote'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            if (page && page.content) {
+                quill.root.innerHTML = page.content;
+            }
+
+            // Preview de imagem
+            const imgInput = document.getElementById('field-image');
+            const imgBox   = document.getElementById('img-preview-box');
+            const imgEl    = document.getElementById('img-preview-el');
+
+            function updateImgPreview(url) {
+                if (url) {
+                    imgEl.src = url;
+                    imgBox.style.display = 'block';
+                } else {
+                    imgBox.style.display = 'none';
+                }
+            }
+            updateImgPreview(img);
+            imgInput.addEventListener('input', () => {
+                const url = imgInput.value.trim();
+                updateImgPreview(url);
+                const cmpImg = document.getElementById('cmp-new-img');
+                if (!cmpImg) return;
+                if (url) {
+                    if (cmpImg.tagName === 'IMG') {
+                        cmpImg.src = url;
+                    } else {
+                        const el = document.createElement('img');
+                        el.className = 'compare-panel__img';
+                        el.id = 'cmp-new-img';
+                        el.src = url; el.alt = '';
+                        cmpImg.parentNode.replaceChild(el, cmpImg);
+                    }
+                } else {
+                    if (cmpImg.tagName === 'IMG') {
+                        const el = document.createElement('div');
+                        el.className = 'compare-panel__no-img';
+                        el.id = 'cmp-new-img';
+                        el.textContent = 'Sem imagem de capa';
+                        cmpImg.parentNode.replaceChild(el, cmpImg);
+                    }
+                }
+            });
+
+            // Slug preview ao digitar título + atualizar painel
+            const titleInput = document.getElementById('field-title');
+            const slugPreview = document.getElementById('slug-preview-val');
+            titleInput.addEventListener('input', () => {
+                if (isNew) slugPreview.textContent = slugify(titleInput.value);
+                const cmpTitle = document.getElementById('cmp-new-title');
+                if (cmpTitle) cmpTitle.textContent = titleInput.value;
+            });
+
+            // Descrição → painel "como vai ficar"
+            const descInput = document.getElementById('field-description');
+            descInput.addEventListener('input', () => {
+                const cmpDesc = document.getElementById('cmp-new-desc');
+                if (cmpDesc) cmpDesc.textContent = descInput.value;
+            });
+
+            document.getElementById('btn-save').addEventListener('click', () => savePage(false));
+            document.getElementById('btn-publish').addEventListener('click', () => {
+                const newStatus = (document.getElementById('field-status').value === 'published') ? 'draft' : 'published';
+                document.getElementById('field-status').value = newStatus;
+                savePage(true);
+            });
+        }
+
+        // ── Salvar ───────────────────────────────────────────────────────
+        async function savePage(togglePublish) {
+            if (saving) return;
+            saving = true;
+
+            const btn = document.getElementById('btn-save');
+            if (btn) btn.disabled = true;
+
+            const title       = document.getElementById('field-title').value.trim();
+            const description = document.getElementById('field-description').value.trim();
+            const image       = document.getElementById('field-image').value.trim();
+            const status      = document.getElementById('field-status').value;
+            const content     = quill ? quill.root.innerHTML : '';
+
+            if (!title) {
+                showToast('O título é obrigatório.', 'error');
+                saving = false;
+                if (btn) btn.disabled = false;
+                return;
+            }
+
+            const payload = { title, description, content, image: image || null, status };
+
+            try {
+                const url    = isNew ? `${API_BASE}/site-pages` : `${API_BASE}/site-pages/${pageId}`;
+                const method = isNew ? 'POST' : 'PUT';
+
+                const res  = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Erro ao salvar');
+                }
+
+                const saved = await res.json();
+                currentPage = saved;
+
+                // Se criou novo, redirecionar para a URL de edição com o id
+                if (isNew) {
+                    showToast('Página criada com sucesso!');
+                    setTimeout(() => {
+                        window.location.href = `page-editor-free.html?id=${saved.id}`;
+                    }, 1200);
+                    return;
+                }
+
+                showToast(togglePublish
+                    ? (saved.status === 'published' ? 'Página publicada!' : 'Página despublicada.')
+                    : 'Salvo com sucesso!');
+
+                // Atualizar botão publicar
+                const btnPub = document.getElementById('btn-publish');
+                if (btnPub) btnPub.textContent = saved.status === 'published' ? 'Despublicar' : 'Publicar';
+                document.getElementById('field-status').value = saved.status;
+
+            } catch (e) {
+                showToast(e.message, 'error');
+            } finally {
+                saving = false;
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        // ── Escapar HTML ─────────────────────────────────────────────────
+        function escHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // ── Inicializar ──────────────────────────────────────────────────
+        async function init() {
+            if (isNew) {
+                renderEditor(null);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/site-pages/${pageId}`);
+                if (!res.ok) throw new Error('Página não encontrada');
+                currentPage = await res.json();
+                renderEditor(currentPage);
+            } catch (e) {
+                document.getElementById('editor-container').innerHTML = `
+                    <div style="text-align:center;padding:60px 20px;">
+                        <p style="color:#c00;">Não foi possível carregar a página.</p>
+                        <a href="pages-hub.html" class="btn btn-secondary" style="margin-top:16px;">Voltar ao hub</a>
+                    </div>`;
+            }
+        }
+
+        init();
+    })();
+    </script>
+</body>
+</html>

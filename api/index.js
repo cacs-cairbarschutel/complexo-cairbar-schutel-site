@@ -348,6 +348,143 @@ app.post(['/api/home-content', '/home-content'], upload.single('image'), async (
   }
 });
 
+// --- ROTAS DE PÁGINAS LIVRES (site_pages) ---
+
+// Inicializa a tabela site_pages se não existir
+async function ensureSitePagesTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS site_pages (
+        id BIGINT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        slug VARCHAR(255) NOT NULL UNIQUE,
+        description TEXT,
+        content LONGTEXT,
+        image VARCHAR(500),
+        status ENUM('draft','published') DEFAULT 'draft',
+        created_at DATETIME DEFAULT NOW(),
+        updated_at DATETIME DEFAULT NOW() ON UPDATE NOW()
+      ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+    `);
+  } catch (e) {
+    console.error('Erro ao criar tabela site_pages:', e.message);
+  }
+}
+ensureSitePagesTable();
+
+// GET /api/site-pages — lista todas as páginas
+app.get(['/api/site-pages', '/site-pages'], async (req, res) => {
+  try {
+    const { status } = req.query;
+    let query = 'SELECT id, title, slug, description, image, status, created_at, updated_at FROM site_pages';
+    const params = [];
+    if (status) { query += ' WHERE status = ?'; params.push(status); }
+    query += ' ORDER BY created_at DESC';
+    const [rows] = await pool.query(query, params);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/site-pages/slug/:slug — busca página pelo slug
+app.get(['/api/site-pages/slug/:slug', '/site-pages/slug/:slug'], async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM site_pages WHERE slug = ?', [req.params.slug]);
+    if (!rows.length) return res.status(404).json({ error: 'Página não encontrada' });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/site-pages/:id — busca página pelo id
+app.get(['/api/site-pages/:id', '/site-pages/:id'], async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM site_pages WHERE id = ?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Página não encontrada' });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/site-pages — criar nova página
+app.post(['/api/site-pages', '/site-pages'], async (req, res) => {
+  const { title, description, content, image, status } = req.body;
+  const id = Date.now();
+  const baseSlug = slugify(title || `pagina-${id}`);
+  const slug = await uniqueSlugForPages(pool, baseSlug);
+  try {
+    await pool.query(
+      'INSERT INTO site_pages (id, title, slug, description, content, image, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [id, title, slug, description || '', content || '', image || null, status || 'draft']
+    );
+    const [row] = await pool.query('SELECT * FROM site_pages WHERE id = ?', [id]);
+    res.status(201).json(row[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/site-pages/:id — atualizar página
+app.put(['/api/site-pages/:id', '/site-pages/:id'], async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM site_pages WHERE id = ?', [id]);
+    if (!rows.length) return res.status(404).json({ error: 'Página não encontrada' });
+    const existing = rows[0];
+    const title = req.body.title !== undefined ? req.body.title : existing.title;
+    const description = req.body.description !== undefined ? req.body.description : existing.description;
+    const content = req.body.content !== undefined ? req.body.content : existing.content;
+    const image = req.body.image !== undefined ? req.body.image : existing.image;
+    const status = req.body.status !== undefined ? req.body.status : existing.status;
+
+    // Regenerar slug se título mudou
+    let slug = existing.slug;
+    if (req.body.title !== undefined && req.body.title !== existing.title) {
+      slug = await uniqueSlugForPages(pool, slugify(title), id);
+    }
+
+    await pool.query(
+      'UPDATE site_pages SET title = ?, slug = ?, description = ?, content = ?, image = ?, status = ?, updated_at = NOW() WHERE id = ?',
+      [title, slug, description, content, image, status, id]
+    );
+    const [updated] = await pool.query('SELECT * FROM site_pages WHERE id = ?', [id]);
+    res.json(updated[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/site-pages/:id
+app.delete(['/api/site-pages/:id', '/site-pages/:id'], async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT id FROM site_pages WHERE id = ?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Página não encontrada' });
+    await pool.query('DELETE FROM site_pages WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Página removida', id: req.params.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Slug único para site_pages (separado de posts)
+async function uniqueSlugForPages(pool, baseSlug, excludeId = null) {
+  let slug = baseSlug;
+  let attempt = 1;
+  while (true) {
+    const query = excludeId
+      ? 'SELECT id FROM site_pages WHERE slug = ? AND id != ? LIMIT 1'
+      : 'SELECT id FROM site_pages WHERE slug = ? LIMIT 1';
+    const params = excludeId ? [slug, excludeId] : [slug];
+    const [rows] = await pool.query(query, params);
+    if (!rows.length) return slug;
+    attempt++;
+    slug = `${baseSlug}-${attempt}`;
+  }
+}
+
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
     console.log(`🚀 Servidor MySQL rodando em http://localhost:${port}`);

@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Página - CACS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="https://cacs-cairbarschutel.org.br/wp-content/uploads/2024/09/fav-1.png">
+    <style>
+        .admin-page {
+            background-color: #f5f7fb;
+        }
+
+        .admin-main {
+            min-height: calc(100vh - 80px);
+            padding: 60px 0;
+        }
+
+        /* Back link */
+        .page-editor-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--secondary-color);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            transition: opacity 0.2s ease;
+        }
+
+        .page-editor-back:hover {
+            opacity: 0.7;
+        }
+
+        /* Hero */
+        .page-editor-hero {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: #fff;
+            border-radius: 20px;
+            padding: 48px 36px;
+            margin-bottom: 32px;
+        }
+
+        .page-editor-hero__emoji {
+            font-size: 2.5rem;
+            line-height: 1;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .page-editor-hero h1 {
+            margin: 0 0 12px;
+            font-size: 2.25rem;
+            line-height: 1.15;
+        }
+
+        .page-editor-hero p {
+            margin: 0;
+            max-width: 760px;
+            line-height: 1.7;
+            opacity: 0.95;
+        }
+
+        /* Toolbar */
+        .page-editor-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .page-editor-toolbar__info h2 {
+            margin: 0 0 4px;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .page-editor-toolbar__info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .page-editor-toolbar__actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Section cards grid */
+        .page-editor-sections {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* Section card */
+        .page-editor-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .page-editor-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #ececec;
+        }
+
+        .page-editor-card__eyebrow {
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .page-editor-card__header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+        }
+
+        .page-editor-card__key {
+            font-size: 0.78rem;
+            color: #999;
+            background: #f3f4f6;
+            border-radius: 6px;
+            padding: 3px 8px;
+            white-space: nowrap;
+            font-family: monospace;
+        }
+
+        /* Fields */
+        .page-editor-card__fields {
+            display: grid;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .page-editor-card__fields .form-group {
+            display: grid;
+            gap: 6px;
+        }
+
+        .page-editor-card__fields label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .page-editor-card__fields input[type="text"],
+        .page-editor-card__fields input[type="url"],
+        .page-editor-card__fields textarea {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .page-editor-card__fields textarea {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        /* Image preview */
+        .page-editor-card__img-preview {
+            margin-top: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+        }
+
+        .page-editor-card__img-preview img {
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .page-editor-card__img-preview--empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+
+        /* Card footer */
+        .page-editor-card__footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 4px;
+        }
+
+        /* Status / toast */
+        .page-editor-toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .page-editor-toast__item {
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.14);
+            pointer-events: auto;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            max-width: 340px;
+        }
+
+        .page-editor-toast__item.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .page-editor-toast__item--success {
+            background: #edf9f0;
+            color: #1f7a3d;
+            border-left: 4px solid #27ae60;
+        }
+
+        .page-editor-toast__item--error {
+            background: #fff1f0;
+            color: #b42318;
+            border-left: 4px solid #e74c3c;
+        }
+
+        /* Loading state */
+        .page-editor-loading {
+            text-align: center;
+            padding: 60px 0;
+            color: #888;
+        }
+
+        .page-editor-loading__spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(196, 24, 52, 0.2);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error state */
+        .page-editor-error {
+            background: #fff1f0;
+            color: #b42318;
+            border-radius: 12px;
+            padding: 24px 28px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .page-editor-error h2 {
+            margin: 0 0 8px;
+            font-size: 1.15rem;
+        }
+
+        .page-editor-error p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Saving overlay on card */
+        .page-editor-card.is-saving {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Painel de comparação atual vs novo */
+        .page-editor-compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .page-editor-compare__panel {
+            background: #fafafa;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 14px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .page-editor-compare__panel h3 {
+            margin: 0;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+        }
+
+        .page-editor-compare__panel--new h3 {
+            color: var(--secondary-color);
+        }
+
+        .page-editor-compare__title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--secondary-color);
+            line-height: 1.3;
+            min-height: 1.2em;
+        }
+
+        .page-editor-compare__desc {
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.5;
+            min-height: 1em;
+        }
+
+        .page-editor-compare__img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #eee;
+            display: block;
+        }
+
+        .page-editor-compare__no-img {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #bbb;
+        }
+
+        @media (max-width: 600px) {
+            .page-editor-compare { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 960px) {
+            .page-editor-sections {
+                grid-template-columns: 1fr;
+            }
+
+            .page-editor-hero {
+                padding: 32px 24px;
+            }
+
+            .page-editor-hero h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="admin-page" data-admin-area="page-editor">
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <img src="../assets/img/Logo-Cairbar-Branco.png" alt="CACS Logo">
+                </a>
+            </div>
+
+            <nav class="main-nav admin-nav">
+                <ul>
+                    <li><a href="pages-hub.html">Editor de páginas</a></li>
+                    <li><a href="painel.html">Painel</a></li>
+                    <li><a href="../index.html">Abrir site</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <section class="container">
+            <a href="pages-hub.html" class="page-editor-back">← Voltar ao hub</a>
+
+            <!-- Hero (populated by JS) -->
+            <div class="page-editor-hero fade-in-up" id="page-editor-hero">
+                <span class="page-editor-hero__emoji" id="page-hero-emoji"></span>
+                <span class="blog-kicker" id="page-hero-kicker">Editor de página</span>
+                <h1 id="page-hero-title">Carregando...</h1>
+                <p id="page-hero-desc"></p>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="page-editor-toolbar">
+                <div class="page-editor-toolbar__info">
+                    <h2>Seções editáveis</h2>
+                    <p id="toolbar-subtitle">Edite cada seção individualmente ou salve tudo de uma vez.</p>
+                </div>
+                <div class="page-editor-toolbar__actions">
+                    <a id="btn-view-page" href="#" target="_blank" rel="noopener" class="btn btn-secondary">Ver página ↗</a>
+                    <button type="button" id="btn-save-all" class="btn btn-primary">Salvar tudo</button>
+                </div>
+            </div>
+
+            <!-- Sections container -->
+            <div id="sections-container">
+                <div class="page-editor-loading" id="loading-state">
+                    <div class="page-editor-loading__spinner"></div>
+                    <p>Carregando conteúdo da página...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast container -->
+    <div class="page-editor-toast" id="toast-container" aria-live="polite"></div>
+
+    <script src="../assets/js/api-config.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        /* ─────────────────────────────────────────────────────────────
+           PAGE CONFIG — one entry per editable page
+        ───────────────────────────────────────────────────────────── */
+        const PAGE_CONFIG = {
+            cdi: {
+                label: 'CDI — Centro Dia para Idosos',
+                emoji: '🏠',
+                publicUrl: '../pages/cdi.html',
+                sections: [
+                    { key: 'cdi--hero',  label: 'Hero (topo da página)',  fields: ['title', 'description', 'image_url'] },
+                    { key: 'cdi--sobre', label: 'Sobre o Programa',       fields: ['title', 'description', 'image_url'] }
+                ]
+            },
+            bilingue: {
+                label: 'CACS Bilíngue',
+                emoji: '🗣️',
+                publicUrl: '../pages/bilingue.html',
+                sections: [
+                    { key: 'bilingue--hero',  label: 'Hero (topo da página)', fields: ['title', 'description', 'image_url'] },
+                    { key: 'bilingue--sobre', label: 'Sobre o Programa',      fields: ['title', 'description', 'image_url'] }
+                ]
+            },
+            florescer: {
+                label: 'CACS Florescer',
+                emoji: '🌸',
+                publicUrl: '../pages/florescer.html',
+                sections: [
+                    { key: 'florescer--hero',  label: 'Hero (topo da página)', fields: ['title', 'description', 'image_url'] },
+                    { key: 'florescer--sobre', label: 'Sobre o Programa',      fields: ['title', 'description', 'image_url'] }
+                ]
+            },
+            brecho: {
+                label: 'Brechó Solidário',
+                emoji: '👗',
+                publicUrl: '../pages/brecho.html',
+                sections: [
+                    { key: 'brecho--hero',  label: 'Hero (topo da página)', fields: ['title', 'description', 'image_url'] },
+                    { key: 'brecho--sobre', label: 'Sobre o Brechó',        fields: ['title', 'description', 'image_url'] }
+                ]
+            },
+            cedesp: {
+                label: 'CEDESP',
+                emoji: '🎓',
+                publicUrl: '../pages/cedesp.html',
+                sections: [
+                    { key: 'cedesp--hero',  label: 'Hero (topo da página)', fields: ['title', 'description', 'image_url'] },
+                    { key: 'cedesp--sobre', label: 'Sobre o Programa',      fields: ['title', 'description', 'image_url'] }
+                ]
+            },
+            acolhimento: {
+                label: 'Acolhimento Psicológico',
+                emoji: '🤝',
+                publicUrl: '../pages/acolhimento.html',
+                sections: [
+                    { key: 'acolhimento--hero',  label: 'Hero (topo da página)', fields: ['title', 'description', 'image_url'] },
+                    { key: 'acolhimento--sobre', label: 'Sobre o Programa',      fields: ['title', 'description', 'image_url'] }
+                ]
+            },
+            'campanha-fome': {
+                label: 'Campanha Contra a Fome',
+                emoji: '🍽️',
+                publicUrl: '../pages/campanha-fome.html',
+                sections: [
+                    { key: 'campanha-fome--hero',  label: 'Hero (topo da página)', fields: ['title', 'description', 'image_url'] },
+                    { key: 'campanha-fome--sobre', label: 'Sobre a Campanha',      fields: ['title', 'description', 'image_url'] }
+                ]
+            },
+            cacs: {
+                label: 'O CACS (institucional)',
+                emoji: '🏛️',
+                publicUrl: '../pages/cacs.html',
+                sections: [
+                    { key: 'cacs--hero',     label: 'Hero (topo da página)', fields: ['title', 'description'] },
+                    { key: 'cacs--historia', label: 'Nossa História',        fields: ['title', 'description', 'image_url'] }
+                ]
+            }
+        };
+
+        /* ─────────────────────────────────────────────────────────────
+           HELPERS
+        ───────────────────────────────────────────────────────────── */
+
+        function esc(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function showToast(message, type) {
+            const container = document.getElementById('toast-container');
+            const item = document.createElement('div');
+            item.className = 'page-editor-toast__item page-editor-toast__item--' + (type || 'success');
+            item.textContent = message;
+            container.appendChild(item);
+
+            // Trigger animation
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    item.classList.add('is-visible');
+                });
+            });
+
+            // Auto-remove after 4s
+            setTimeout(function () {
+                item.classList.remove('is-visible');
+                setTimeout(function () {
+                    if (item.parentNode) item.parentNode.removeChild(item);
+                }, 350);
+            }, 4000);
+        }
+
+        function getApiBase() {
+            if (window.apiConfig && window.apiConfig.API_BASE_URL) {
+                return window.apiConfig.API_BASE_URL;
+            }
+            // Fallback: detect environment
+            const hostname = window.location.hostname;
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return 'http://localhost:3000';
+            }
+            return '';
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           SAVE A SINGLE SECTION
+        ───────────────────────────────────────────────────────────── */
+        async function saveSection(sectionKey, payload) {
+            const base = getApiBase();
+            const response = await fetch(base + '/api/home-content', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const text = await response.text().catch(function () { return ''; });
+                throw new Error('Erro ' + response.status + (text ? ': ' + text : ''));
+            }
+
+            return response.json();
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           COLLECT FIELD VALUES FROM A CARD
+        ───────────────────────────────────────────────────────────── */
+        function collectCardPayload(cardEl, sectionCfg) {
+            const payload = { section: sectionCfg.key };
+
+            if (sectionCfg.fields.includes('title')) {
+                const el = cardEl.querySelector('[data-field="title"]');
+                payload.title = el ? el.value.trim() : '';
+            }
+            if (sectionCfg.fields.includes('description')) {
+                const el = cardEl.querySelector('[data-field="description"]');
+                payload.description = el ? el.value.trim() : '';
+            }
+            if (sectionCfg.fields.includes('image_url')) {
+                const el = cardEl.querySelector('[data-field="image_url"]');
+                payload.image_url = el ? el.value.trim() : '';
+            }
+
+            return payload;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           BUILD A SECTION CARD
+        ───────────────────────────────────────────────────────────── */
+        function buildCard(sectionCfg, existingData) {
+            const data = existingData || {};
+            const hasImage = sectionCfg.fields.includes('image_url');
+
+            const card = document.createElement('article');
+            card.className = 'page-editor-card';
+            card.dataset.sectionKey = sectionCfg.key;
+
+            // Header
+            const header = document.createElement('div');
+            header.className = 'page-editor-card__header';
+            const headerLeft = document.createElement('div');
+            const eyebrow = document.createElement('div');
+            eyebrow.className = 'page-editor-card__eyebrow';
+            eyebrow.textContent = sectionCfg.label;
+            const keyBadge = document.createElement('span');
+            keyBadge.className = 'page-editor-card__key';
+            keyBadge.textContent = sectionCfg.key;
+            headerLeft.appendChild(eyebrow);
+            header.appendChild(headerLeft);
+            header.appendChild(keyBadge);
+            card.appendChild(header);
+
+            // ── Painel de comparação ──────────────────────────────────
+            const compare = document.createElement('div');
+            compare.className = 'page-editor-compare';
+
+            // Painel "Como está agora"
+            const panelCurrent = document.createElement('div');
+            panelCurrent.className = 'page-editor-compare__panel page-editor-compare__panel--current';
+            panelCurrent.innerHTML = `
+                <h3>Como está agora</h3>
+                <div class="page-editor-compare__title" id="${sectionCfg.key}-cur-title">${esc(data.title || '')}</div>
+                <div class="page-editor-compare__desc"  id="${sectionCfg.key}-cur-desc">${esc(data.description || '')}</div>
+                ${hasImage
+                    ? (data.image_url
+                        ? `<img class="page-editor-compare__img" id="${sectionCfg.key}-cur-img" src="${esc(data.image_url)}" alt="">`
+                        : `<div class="page-editor-compare__no-img" id="${sectionCfg.key}-cur-img">Nenhuma imagem</div>`)
+                    : ''}
+            `;
+
+            // Painel "Como vai ficar"
+            const panelNew = document.createElement('div');
+            panelNew.className = 'page-editor-compare__panel page-editor-compare__panel--new';
+            panelNew.innerHTML = `
+                <h3>Como vai ficar</h3>
+                <div class="page-editor-compare__title" id="${sectionCfg.key}-new-title">${esc(data.title || '')}</div>
+                <div class="page-editor-compare__desc"  id="${sectionCfg.key}-new-desc">${esc(data.description || '')}</div>
+                ${hasImage
+                    ? (data.image_url
+                        ? `<img class="page-editor-compare__img" id="${sectionCfg.key}-new-img" src="${esc(data.image_url)}" alt="">`
+                        : `<div class="page-editor-compare__no-img" id="${sectionCfg.key}-new-img">Nenhuma imagem</div>`)
+                    : ''}
+            `;
+
+            compare.appendChild(panelCurrent);
+            compare.appendChild(panelNew);
+            card.appendChild(compare);
+
+            // ── Campos de edição ──────────────────────────────────────
+            const fields = document.createElement('div');
+            fields.className = 'page-editor-card__fields';
+
+            if (sectionCfg.fields.includes('title')) {
+                const group = document.createElement('div');
+                group.className = 'form-group';
+                const label = document.createElement('label');
+                const inputId = sectionCfg.key + '-title';
+                label.setAttribute('for', inputId);
+                label.textContent = 'Título';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = inputId;
+                input.dataset.field = 'title';
+                input.placeholder = 'Digite o título desta seção';
+                input.value = data.title || '';
+
+                // Atualizar preview "como vai ficar" em tempo real
+                input.addEventListener('input', function () {
+                    const el = document.getElementById(sectionCfg.key + '-new-title');
+                    if (el) el.textContent = this.value;
+                });
+
+                group.appendChild(label);
+                group.appendChild(input);
+                fields.appendChild(group);
+            }
+
+            if (sectionCfg.fields.includes('description')) {
+                const group = document.createElement('div');
+                group.className = 'form-group';
+                const label = document.createElement('label');
+                const inputId = sectionCfg.key + '-description';
+                label.setAttribute('for', inputId);
+                label.textContent = 'Descrição / Subtítulo';
+                const textarea = document.createElement('textarea');
+                textarea.id = inputId;
+                textarea.dataset.field = 'description';
+                textarea.placeholder = 'Digite a descrição ou subtítulo desta seção';
+                textarea.value = data.description || '';
+
+                textarea.addEventListener('input', function () {
+                    const el = document.getElementById(sectionCfg.key + '-new-desc');
+                    if (el) el.textContent = this.value;
+                });
+
+                group.appendChild(label);
+                group.appendChild(textarea);
+                fields.appendChild(group);
+            }
+
+            if (sectionCfg.fields.includes('image_url')) {
+                const group = document.createElement('div');
+                group.className = 'form-group';
+                const label = document.createElement('label');
+                const inputId = sectionCfg.key + '-image_url';
+                label.setAttribute('for', inputId);
+                label.textContent = 'URL da imagem';
+                const input = document.createElement('input');
+                input.type = 'url';
+                input.id = inputId;
+                input.dataset.field = 'image_url';
+                input.placeholder = 'https://exemplo.com/imagem.jpg';
+                input.value = data.image_url || '';
+
+                input.addEventListener('input', function () {
+                    const url = this.value.trim();
+                    const previewEl = document.getElementById(sectionCfg.key + '-new-img');
+                    if (!previewEl) return;
+                    if (url) {
+                        if (previewEl.tagName === 'IMG') {
+                            previewEl.src = url;
+                        } else {
+                            // Trocar div por img
+                            const img = document.createElement('img');
+                            img.className = 'page-editor-compare__img';
+                            img.id = sectionCfg.key + '-new-img';
+                            img.src = url;
+                            img.alt = '';
+                            previewEl.parentNode.replaceChild(img, previewEl);
+                        }
+                    } else {
+                        if (previewEl.tagName === 'IMG') {
+                            const div = document.createElement('div');
+                            div.className = 'page-editor-compare__no-img';
+                            div.id = sectionCfg.key + '-new-img';
+                            div.textContent = 'Nenhuma imagem';
+                            previewEl.parentNode.replaceChild(div, previewEl);
+                        }
+                    }
+                });
+
+                group.appendChild(label);
+                group.appendChild(input);
+                fields.appendChild(group);
+            }
+
+            card.appendChild(fields);
+
+            // Footer com botão salvar
+            const footer = document.createElement('div');
+            footer.className = 'page-editor-card__footer';
+            const saveBtn = document.createElement('button');
+            saveBtn.type = 'button';
+            saveBtn.className = 'btn btn-primary';
+            saveBtn.textContent = 'Salvar seção';
+            saveBtn.dataset.saveSection = sectionCfg.key;
+
+            saveBtn.addEventListener('click', async function () {
+                card.classList.add('is-saving');
+                saveBtn.textContent = 'Salvando...';
+                saveBtn.disabled = true;
+
+                try {
+                    const payload = collectCardPayload(card, sectionCfg);
+                    await saveSection(sectionCfg.key, payload);
+
+                    // Após salvar, atualizar painel "Como está agora"
+                    const curTitle = document.getElementById(sectionCfg.key + '-cur-title');
+                    const curDesc  = document.getElementById(sectionCfg.key + '-cur-desc');
+                    const curImg   = document.getElementById(sectionCfg.key + '-cur-img');
+                    if (curTitle) curTitle.textContent = payload.title || '';
+                    if (curDesc)  curDesc.textContent  = payload.description || '';
+                    if (curImg && payload.image_url) {
+                        if (curImg.tagName === 'IMG') {
+                            curImg.src = payload.image_url;
+                        } else {
+                            const img = document.createElement('img');
+                            img.className = 'page-editor-compare__img';
+                            img.id = sectionCfg.key + '-cur-img';
+                            img.src = payload.image_url;
+                            img.alt = '';
+                            curImg.parentNode.replaceChild(img, curImg);
+                        }
+                    }
+
+                    showToast('✓ "' + sectionCfg.label + '" salvo com sucesso!', 'success');
+                } catch (err) {
+                    showToast('✗ Erro ao salvar "' + sectionCfg.label + '": ' + err.message, 'error');
+                } finally {
+                    card.classList.remove('is-saving');
+                    saveBtn.textContent = 'Salvar seção';
+                    saveBtn.disabled = false;
+                }
+            });
+
+            footer.appendChild(saveBtn);
+            card.appendChild(footer);
+
+            return card;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           RENDER ALL SECTION CARDS
+        ───────────────────────────────────────────────────────────── */
+        function renderSections(pageCfg, existingMap) {
+            const container = document.getElementById('sections-container');
+            container.innerHTML = '';
+
+            const grid = document.createElement('div');
+            grid.className = 'page-editor-sections';
+
+            pageCfg.sections.forEach(function (sectionCfg) {
+                const data = existingMap[sectionCfg.key] || null;
+                const card = buildCard(sectionCfg, data);
+                grid.appendChild(card);
+            });
+
+            container.appendChild(grid);
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           SHOW ERROR STATE
+        ───────────────────────────────────────────────────────────── */
+        function renderError(message) {
+            const container = document.getElementById('sections-container');
+            container.innerHTML = '<div class="page-editor-error"><h2>Erro ao carregar</h2><p>' + esc(message) + '</p></div>';
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           SAVE ALL SECTIONS
+        ───────────────────────────────────────────────────────────── */
+        async function saveAll(pageCfg) {
+            const btn = document.getElementById('btn-save-all');
+            btn.disabled = true;
+            btn.textContent = 'Salvando...';
+
+            const container = document.getElementById('sections-container');
+            const cards = container.querySelectorAll('.page-editor-card');
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            const promises = pageCfg.sections.map(function (sectionCfg, i) {
+                const card = cards[i];
+                if (!card) return Promise.resolve();
+
+                card.classList.add('is-saving');
+                const payload = collectCardPayload(card, sectionCfg);
+
+                return saveSection(sectionCfg.key, payload)
+                    .then(function () {
+                        successCount++;
+                        card.classList.remove('is-saving');
+                    })
+                    .catch(function (err) {
+                        errorCount++;
+                        card.classList.remove('is-saving');
+                        showToast('✗ Erro em "' + sectionCfg.label + '": ' + err.message, 'error');
+                    });
+            });
+
+            await Promise.all(promises);
+
+            btn.disabled = false;
+            btn.textContent = 'Salvar tudo';
+
+            if (errorCount === 0) {
+                showToast('✓ Todas as ' + successCount + ' seções foram salvas com sucesso!', 'success');
+            } else if (successCount > 0) {
+                showToast(successCount + ' seção(ões) salvas, ' + errorCount + ' com erro.', 'error');
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           INIT
+        ───────────────────────────────────────────────────────────── */
+        async function init() {
+            // Read ?page= from URL
+            const params = new URLSearchParams(window.location.search);
+            const pageKey = params.get('page');
+
+            if (!pageKey || !PAGE_CONFIG[pageKey]) {
+                document.getElementById('page-hero-title').textContent = 'Página não encontrada';
+                document.getElementById('page-hero-desc').textContent =
+                    'O parâmetro "page" está ausente ou inválido. Volte ao hub e selecione uma página.';
+                document.getElementById('sections-container').innerHTML =
+                    '<div class="page-editor-error"><h2>Parâmetro inválido</h2><p>Use <code>?page=cdi</code>, <code>?page=bilingue</code>, etc.</p></div>';
+                document.getElementById('btn-save-all').disabled = true;
+                return;
+            }
+
+            const pageCfg = PAGE_CONFIG[pageKey];
+
+            // Update <title>
+            document.title = 'Editar ' + pageCfg.label + ' — CACS';
+
+            // Populate hero
+            document.getElementById('page-hero-emoji').textContent = pageCfg.emoji;
+            document.getElementById('page-hero-kicker').textContent = 'Editor de página';
+            document.getElementById('page-hero-title').textContent = pageCfg.label;
+            document.getElementById('page-hero-desc').textContent =
+                'Edite as seções desta página. As alterações são aplicadas ao conteúdo dinâmico — a estrutura HTML da página permanece igual.';
+
+            // Update toolbar subtitle
+            document.getElementById('toolbar-subtitle').textContent =
+                pageCfg.sections.length + ' seção(ões) editável(eis) nesta página.';
+
+            // Update "Ver página" link
+            document.getElementById('btn-view-page').href = pageCfg.publicUrl;
+
+            // Wire up "Salvar tudo"
+            document.getElementById('btn-save-all').addEventListener('click', function () {
+                saveAll(pageCfg);
+            });
+
+            // Fetch existing content
+            const sectionKeys = pageCfg.sections.map(function (s) { return s.key; }).join(',');
+            const base = getApiBase();
+
+            let existingMap = {};
+
+            try {
+                const url = base + '/api/home-content?sections=' + encodeURIComponent(sectionKeys);
+                const res = await fetch(url);
+
+                if (res.ok) {
+                    const json = await res.json();
+                    // API may return array or object; normalise to map keyed by section
+                    const items = Array.isArray(json) ? json : (json.data || json.content || []);
+                    items.forEach(function (item) {
+                        if (item && item.section) {
+                            existingMap[item.section] = item;
+                        }
+                    });
+                }
+                // If 404 or empty, just render empty fields
+            } catch (err) {
+                // Non-fatal: render empty fields and show a warning toast
+                showToast('Aviso: não foi possível carregar o conteúdo existente. Os campos estarão em branco.', 'error');
+            }
+
+            renderSections(pageCfg, existingMap);
+        }
+
+        // Run after api-config.js has loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+    }());
+    </script>
+    <script src="../assets/js/admin-access.js"></script>
+</body>
+</html>

@@ -73,14 +73,14 @@
     <main>
         <section class="page-header" style="background-color: var(--secondary-color); color: #fff; padding: 60px 0; text-align: center;">
             <div class="container fade-in-up">
-                <h1 style="font-size: 3rem; margin-bottom: 10px; color: var(--primary-color);">CDI - Centro Dia para Idosos</h1>
+                <h1 data-content="hero-title" style="font-size: 3rem; margin-bottom: 10px; color: var(--primary-color);">CDI - Centro Dia para Idosos</h1>
             </div>
         </section>
 
         <section style="padding: 60px 0; background-color: var(--bg-white);">
             <div class="container split-layout">
                 <div class="text-wrapper fade-in-up">
-                    <h2 style="color: var(--secondary-color); margin-bottom: 20px;">Sobre o Programa</h2>
+                    <h2 data-content="sobre-title" style="color: var(--secondary-color); margin-bottom: 20px;">Sobre o Programa</h2>
                     <p style="font-size: 1.1rem; line-height: 1.8; color: #555; text-align: justify; margin-bottom: 15px;">O Centro Dia para Idosos Dr. Ricardo é um equipamento de proteção social especializada que funciona há dez anos como referência em cuidado integral, envelhecimento ativo e inclusão social para idosos em situação de vulnerabilidade nas comunidades do Jardim Colombo, Vila Morse e entorno de São Paulo. Inaugurado em 1º de abril de 2016, o CDI atende até 30 idosos diariamente, oferecendo um espaço acolhedor onde a fragilidade encontra força, a solidão encontra convivência e a invisibilidade social encontra protagonismo.</p>
                     <p style="font-size: 1.1rem; line-height: 1.8; color: #555; text-align: justify; margin-bottom: 15px;">Operando sob o conceito de envelhecimento ativo reconhecido pela Organização Mundial da Saúde, o CDI oferece proteção social especializada, estimulação cognitiva contínua, nutrição balanceada, acompanhamento multidisciplinar e coordenação com a rede pública de saúde. Cada idoso que chega ao CDI é recebido não apenas como beneficiário, mas como pessoa digna de cuidado integral, respeito genuíno e oportunidades reais de participação social. Com uma equipe dedicada de cuidadores, psicólogos, nutricionistas, gerontólogos e assistentes sociais, o CDI garante que cada dia seja uma oportunidade de fortalecimento de vínculos, recuperação de autonomia e celebração da vida.</p>
                     <div style="margin-top: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 10px; border-left: 4px solid var(--primary-color);">
@@ -94,7 +94,7 @@
                     </div>
                 </div>
                 <div class="image-wrapper fade-in-up" style="transition-delay: 0.2s; align-self: stretch; display: flex; margin-bottom: 0;">
-                    <img src="../assets/img/8. CDI.png" alt="CDI - Centro Dia para Idosos" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; height: 100%; object-fit: cover;">
+                    <img data-content="sobre-image" src="../assets/img/8. CDI.png" alt="CDI - Centro Dia para Idosos" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; height: 100%; object-fit: cover;">
                 </div>
             </div>
         </section>
@@ -326,6 +326,8 @@
         </div>
     </footer>
     <script src="../assets/js/script.js"></script>
+    <script>window.PAGE_KEY = 'cdi';</script>
+    <script src="../assets/js/page-content.js"></script>
 </body>
 </html>
 
