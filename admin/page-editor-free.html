@@ -356,10 +356,11 @@
                         <textarea id="field-description" rows="2" placeholder="Breve descrição da página">${escHtml(desc)}</textarea>
                     </div>
                     <div class="form-group">
-                        <label for="field-image">URL da imagem de capa (opcional)</label>
-                        <input type="url" id="field-image" value="${escHtml(img)}" placeholder="https://...">
-                        <div class="image-preview-box" id="img-preview-box">
-                            <img id="img-preview-el" src="" alt="Pré-visualização">
+                        <label for="field-image">Imagem de capa (opcional)</label>
+                        <input type="file" id="field-image" accept="image/*">
+                        <input type="hidden" id="field-image-url" value="${escHtml(img)}">
+                        <div class="image-preview-box" id="img-preview-box" style="${img ? 'display:block' : 'display:none'}">
+                            <img id="img-preview-el" src="${escHtml(img)}" alt="Pré-visualização">
                         </div>
                     </div>
                 </div>
@@ -391,44 +392,35 @@
                 quill.root.innerHTML = page.content;
             }
 
-            // Preview de imagem
-            const imgInput = document.getElementById('field-image');
-            const imgBox   = document.getElementById('img-preview-box');
-            const imgEl    = document.getElementById('img-preview-el');
+            // Preview de imagem via FileReader
+            const imgInput   = document.getElementById('field-image');
+            const imgUrlHidden = document.getElementById('field-image-url');
+            const imgBox     = document.getElementById('img-preview-box');
+            const imgEl      = document.getElementById('img-preview-el');
 
-            function updateImgPreview(url) {
-                if (url) {
-                    imgEl.src = url;
+            imgInput.addEventListener('change', () => {
+                const file = imgInput.files && imgInput.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imgEl.src = e.target.result;
                     imgBox.style.display = 'block';
-                } else {
-                    imgBox.style.display = 'none';
-                }
-            }
-            updateImgPreview(img);
-            imgInput.addEventListener('input', () => {
-                const url = imgInput.value.trim();
-                updateImgPreview(url);
-                const cmpImg = document.getElementById('cmp-new-img');
-                if (!cmpImg) return;
-                if (url) {
-                    if (cmpImg.tagName === 'IMG') {
-                        cmpImg.src = url;
-                    } else {
-                        const el = document.createElement('img');
-                        el.className = 'compare-panel__img';
-                        el.id = 'cmp-new-img';
-                        el.src = url; el.alt = '';
-                        cmpImg.parentNode.replaceChild(el, cmpImg);
+                    // Atualizar painel "como vai ficar"
+                    const cmpImg = document.getElementById('cmp-new-img');
+                    if (cmpImg) {
+                        if (cmpImg.tagName === 'IMG') {
+                            cmpImg.src = e.target.result;
+                        } else {
+                            const el = document.createElement('img');
+                            el.className = 'compare-panel__img';
+                            el.id = 'cmp-new-img';
+                            el.src = e.target.result;
+                            el.alt = '';
+                            cmpImg.parentNode.replaceChild(el, cmpImg);
+                        }
                     }
-                } else {
-                    if (cmpImg.tagName === 'IMG') {
-                        const el = document.createElement('div');
-                        el.className = 'compare-panel__no-img';
-                        el.id = 'cmp-new-img';
-                        el.textContent = 'Sem imagem de capa';
-                        cmpImg.parentNode.replaceChild(el, cmpImg);
-                    }
-                }
+                };
+                reader.readAsDataURL(file);
             });
 
             // Slug preview ao digitar título + atualizar painel
@@ -465,7 +457,8 @@
 
             const title       = document.getElementById('field-title').value.trim();
             const description = document.getElementById('field-description').value.trim();
-            const image       = document.getElementById('field-image').value.trim();
+            const imgFileInput = document.getElementById('field-image');
+            const imgUrlHidden = document.getElementById('field-image-url');
             const status      = document.getElementById('field-status').value;
             const content     = quill ? quill.root.innerHTML : '';
 
@@ -476,7 +469,34 @@
                 return;
             }
 
-            const payload = { title, description, content, image: image || null, status };
+            // Upload de imagem se um arquivo foi selecionado
+            let imageUrl = imgUrlHidden ? imgUrlHidden.value : '';
+            const file = imgFileInput && imgFileInput.files && imgFileInput.files[0];
+            if (file) {
+                try {
+                    showToast('Enviando imagem...', 'success');
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    const uploadRes = await fetch(API_BASE.replace('/api', '') + '/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (uploadRes.ok) {
+                        const uploadJson = await uploadRes.json();
+                        if (uploadJson.data && uploadJson.data.publicUrl) {
+                            imageUrl = uploadJson.data.publicUrl;
+                            if (imgUrlHidden) imgUrlHidden.value = imageUrl;
+                        }
+                    }
+                } catch (e) {
+                    showToast('Erro no upload da imagem: ' + e.message, 'error');
+                    saving = false;
+                    if (btn) btn.disabled = false;
+                    return;
+                }
+            }
+
+            const payload = { title, description, content, image: imageUrl || null, status };
 
             try {
                 const url    = isNew ? `${API_BASE}/site-pages` : `${API_BASE}/site-pages/${pageId}`;
