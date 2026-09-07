@@ -444,6 +444,28 @@
         'use strict';
 
         /* ─────────────────────────────────────────────────────────────
+           DEFAULTS — valores exibidos quando não há dados no banco
+        ───────────────────────────────────────────────────────────── */
+        const PAGE_DEFAULTS = {
+            'cdi--hero':    { title: 'CDI - Centro Dia para Idosos', description: '', image_url: '../assets/img/8. CDI.png' },
+            'cdi--sobre':   { title: 'Sobre o Programa', description: 'O Centro Dia para Idosos Dr. Ricardo oferece proteção social integral, estimulação cognitiva e convivência para idosos em vulnerabilidade social em São Paulo.', image_url: '../assets/img/8. CDI.png' },
+            'bilingue--hero':  { title: 'CACS Bilíngue', description: 'O CACS Bilíngue oferece aulas gratuitas de inglês para crianças e adolescentes em situação de vulnerabilidade social em São Paulo.', image_url: '../assets/img/IMG-20251122-WA0023.jpg' },
+            'bilingue--sobre': { title: 'Sobre o Programa', description: 'O CACS Bilíngue oferece aulas gratuitas de inglês para crianças e adolescentes em situação de vulnerabilidade social em São Paulo.', image_url: '../assets/img/IMG-20251122-WA0023.jpg' },
+            'florescer--hero':  { title: 'CACS Florescer', description: 'O CACS Florescer oferece capacitação em costura criativa e upcycling para mulheres em situação de vulnerabilidade social em São Paulo.', image_url: '../assets/img/9. CACS Florescer.png' },
+            'florescer--sobre': { title: 'Sobre o Programa', description: 'O CACS Florescer oferece capacitação em costura criativa e upcycling para mulheres em situação de vulnerabilidade social em São Paulo.', image_url: '../assets/img/9. CACS Florescer.png' },
+            'brecho--hero':  { title: 'Brechó Solidário', description: 'Consumo consciente e solidariedade a favor das causas sociais do Complexo Assistencial Cairbar Schutel.', image_url: '../assets/img/brecho01.JPG' },
+            'brecho--sobre': { title: 'Sobre o Brechó', description: 'Nosso brechó é uma das principais fontes de recursos para a manutenção dos nossos projetos sociais.', image_url: '../assets/img/brecho01.JPG' },
+            'cedesp--hero':  { title: 'CEDESP', description: 'O CEDESP será um centro de capacitação profissional dedicado ao desenvolvimento social e produtivo de adolescentes e jovens.', image_url: '../assets/img/predioazul1.png' },
+            'cedesp--sobre': { title: 'Sobre o Programa', description: 'O CEDESP será um centro de capacitação profissional dedicado ao desenvolvimento social e produtivo de adolescentes e jovens.', image_url: '../assets/img/predioazul1.png' },
+            'acolhimento--hero':  { title: 'Programa de Acolhimento', description: 'Oferecemos acolhimento e suporte integral para pessoas em situação de vulnerabilidade.', image_url: '../assets/img/7. Acolhimento Psicológico.png' },
+            'acolhimento--sobre': { title: 'Sobre o Programa', description: 'O Acolhimento Psicológico oferece atendimento gratuito para pessoas em situação de vulnerabilidade social em São Paulo.', image_url: '../assets/img/7. Acolhimento Psicológico.png' },
+            'campanha-fome--hero':  { title: 'Campanha Contra a Fome', description: 'A Campanha Contra a Fome oferece segurança alimentar integral para famílias em situação de vulnerabilidade social em São Paulo.', image_url: '../assets/img/Cópia de 14. Campanha contra a Fome (2).jpg' },
+            'campanha-fome--sobre': { title: 'Sobre a Campanha', description: 'A Campanha Contra a Fome distribui alimentos essenciais e promove dignidade através do acesso ao direito fundamental de se alimentar.', image_url: '../assets/img/Cópia de 14. Campanha contra a Fome (2).jpg' },
+            'cacs--hero':     { title: 'Sobre nós', description: 'Descubra como surgiu essa causa pela qual somos apaixonados!', image_url: '' },
+            'cacs--historia': { title: 'Nossa História', description: 'O CACS foi fundado em 17 de janeiro de 1963, movido pela busca de uma sociedade mais justa.', image_url: '../assets/img/Nossa-historia-1-300x177.jpeg' }
+        };
+
+        /* ─────────────────────────────────────────────────────────────
            PAGE CONFIG — one entry per editable page
         ───────────────────────────────────────────────────────────── */
         const PAGE_CONFIG = {
@@ -614,7 +636,8 @@
            BUILD A SECTION CARD
         ───────────────────────────────────────────────────────────── */
         function buildCard(sectionCfg, existingData) {
-            const data = existingData || {};
+            const defaults = PAGE_DEFAULTS[sectionCfg.key] || {};
+            const data = Object.assign({}, defaults, existingData || {});
             const hasImage = sectionCfg.fields.includes('image_url');
 
             const card = document.createElement('article');
