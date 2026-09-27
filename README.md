@@ -2,6 +2,8 @@
 
 Site institucional do Complexo Assistencial Cairbar Schutel, com páginas públicas, blog, área administrativa e backend em Node.js consumindo MySQL na HostGator.
 
+Acesse: https://cacs-cairbarschutel.org.br/
+
 ## Visão Geral
 
 O projeto reúne o site principal da instituição, páginas de campanhas e serviços, blog com posts dinâmicos, área administrativa protegida e uma API que conversa com o banco de dados da HostGator.
