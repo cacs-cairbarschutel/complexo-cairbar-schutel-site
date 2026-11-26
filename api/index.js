@@ -202,12 +202,15 @@ app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
 
   // Determinar URL/imagem
   let imageUrl = null;
+  let imageUploadFailed = false;
   if (req.file && req.file.buffer) {
     const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     imageUrl = await uploadImageToCloudinary(dataUri, `post-${postId}-cover`);
-  } else if (req.body.image) {
+    if (!imageUrl) imageUploadFailed = true;
+  } else if (typeof req.body.image === 'string' && req.body.image) {
     if (req.body.image.startsWith('data:')) {
       imageUrl = await uploadImageToCloudinary(req.body.image, `post-${postId}-cover`);
+      if (!imageUrl) imageUploadFailed = true;
     } else {
       imageUrl = req.body.image;
     }
@@ -220,7 +223,7 @@ app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
     );
     
     const [newPost] = await pool.query('SELECT * FROM posts WHERE id = ?', [postId]);
-    res.status(201).json(newPost[0]);
+    res.status(201).json(imageUploadFailed ? { ...newPost[0], imageUploadFailed: true } : newPost[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -254,14 +257,17 @@ app.put(['/api/posts/:id', '/posts/:id'], upload.single('image'), async (req, re
     }
     
     let imageUrl = existing.image;
+    let imageUploadFailed = false;
     if (req.file && req.file.buffer) {
       const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-      imageUrl = await uploadImageToCloudinary(dataUri, `post-${id}-cover`) || existing.image;
+      const uploaded = await uploadImageToCloudinary(dataUri, `post-${id}-cover`);
+      if (uploaded) imageUrl = uploaded; else imageUploadFailed = true;
     } else if (req.body.image !== undefined) {
-      if (req.body.image.startsWith('data:')) {
-        imageUrl = await uploadImageToCloudinary(req.body.image, `post-${id}-cover`) || existing.image;
+      if (typeof req.body.image === 'string' && req.body.image.startsWith('data:')) {
+        const uploaded = await uploadImageToCloudinary(req.body.image, `post-${id}-cover`);
+        if (uploaded) imageUrl = uploaded; else imageUploadFailed = true;
       } else {
-        imageUrl = req.body.image;
+        imageUrl = req.body.image || null;
       }
     }
 
@@ -271,7 +277,7 @@ app.put(['/api/posts/:id', '/posts/:id'], upload.single('image'), async (req, re
     );
 
     const [updatedPost] = await pool.query('SELECT * FROM posts WHERE id = ?', [id]);
-    res.json(updatedPost[0]);
+    res.json(imageUploadFailed ? { ...updatedPost[0], imageUploadFailed: true } : updatedPost[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -230,6 +230,21 @@ function handleDrop(e) {
 // GERENCIAMENTO DE POSTS
 // ============================================================================
 
+// Avisa quando o post foi salvo mas a imagem nao chegou ao servidor.
+function avisarSeImagemFalhou(result, enviouImagem) {
+    if (!enviouImagem || !result) return false;
+    if (result.imageUploadFailed || !result.image) {
+        showNotification(
+            '⚠️ O post foi salvo, mas a IMAGEM NÃO FOI ENVIADA. O post ficará sem capa até que isso seja corrigido. ' +
+            'Use o campo "Endereço de uma imagem já publicada" ou avise a equipe técnica.',
+            'error'
+        );
+        console.error('❌ Imagem não persistida. Resposta da API:', result);
+        return true;
+    }
+    return false;
+}
+
 async function handleSubmitForm(e) {
     e.preventDefault();
 
@@ -257,9 +272,14 @@ async function handleSubmitForm(e) {
     try {
         // Preparar URL/dados da imagem
         let imageData = null;
+        const imageUrlField = form.querySelector('[name="imageUrl"]');
+        const imageUrlValue = imageUrlField ? imageUrlField.value.trim() : '';
 
-        // Se tiver imagem, guardar como base64 direto no banco (mais simples que RLS)
-        if (selectedImageData) {
+        if (imageUrlValue) {
+            console.log('🔗 Usando endereço de imagem informado:', imageUrlValue);
+            imageData = imageUrlValue;
+            showNotification('⏳ Salvando post com a imagem informada por endereço...', 'info');
+        } else if (selectedImageData) {
             console.log('📷 Preparando imagem (base64 no banco)...');
             console.log('📊 Tamanho da imagem:', (selectedImageData.length / 1024).toFixed(2), 'KB');
             imageData = selectedImageData;  // Guardar base64 direto
@@ -289,7 +309,9 @@ async function handleSubmitForm(e) {
             console.log('🔄 Modo: ATUALIZAR post ID:', editingPostId);
             const result = await window.postsApi.updatePost(editingPostId, post);
             console.log('✅ updatePost retornou:', result);
-            showNotification('✅ Post atualizado com sucesso!', 'success');
+            if (!avisarSeImagemFalhou(result, !!imageData)) {
+                showNotification('✅ Post atualizado com sucesso!', 'success');
+            }
         } else {
             console.log('✍️ Modo: CRIAR novo post');
             const result = await window.postsApi.createPost(post);
@@ -297,7 +319,9 @@ async function handleSubmitForm(e) {
             
             if (result) {
                 console.log('✅ Post criado! Novo ID:', result.id);
-                showNotification('✅ Post criado com sucesso!', 'success');
+                if (!avisarSeImagemFalhou(result, !!imageData)) {
+                    showNotification('✅ Post criado com sucesso!', 'success');
+                }
             } else {
                 console.error('❌ createPost retornou null/falso');
                 showNotification('❌ Erro ao criar post (desconhecido)', 'error');
@@ -331,6 +355,10 @@ async function editPost(postId) {
         form.querySelector('[name="status"]').value = post.status;
 
         // Mostrar imagem
+        const imageUrlFieldEdit = form.querySelector('[name="imageUrl"]');
+        if (imageUrlFieldEdit) {
+            imageUrlFieldEdit.value = (post.image && !String(post.image).startsWith('data:')) ? post.image : '';
+        }
         if (post.image) {
             selectedImageData = post.image;
             imagePreviewImg.src = post.image;
