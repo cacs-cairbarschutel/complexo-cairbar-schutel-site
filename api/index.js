@@ -112,6 +112,79 @@ const postsCache = {
   TTL: 60 * 1000 // 60 segundos
 };
 
+// --- AUTENTICACAO ADMINISTRATIVA ---
+// Credenciais vivem apenas em variaveis de ambiente. Sem elas, as rotas de
+// escrita respondem 503 em vez de ficarem abertas.
+const crypto = require('crypto');
+
+const ADMIN_ID = process.env.ADMIN_ID || 'ADM-CA01';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const ADMIN_TOKEN_SECRET = process.env.ADMIN_TOKEN_SECRET || '';
+const ADMIN_TOKEN_TTL_MS = 8 * 60 * 60 * 1000;
+
+function adminAuthConfigurada() {
+  return Boolean(ADMIN_PASSWORD && ADMIN_TOKEN_SECRET);
+}
+
+// Compara via digest para que o tempo de resposta nao revele o tamanho do segredo.
+function comparaSegredo(a, b) {
+  const ha = crypto.createHash('sha256').update(String(a == null ? '' : a)).digest();
+  const hb = crypto.createHash('sha256').update(String(b == null ? '' : b)).digest();
+  return crypto.timingSafeEqual(ha, hb);
+}
+
+function assinaToken(adminId) {
+  const payload = Buffer.from(JSON.stringify({ adminId, exp: Date.now() + ADMIN_TOKEN_TTL_MS })).toString('base64url');
+  const assinatura = crypto.createHmac('sha256', ADMIN_TOKEN_SECRET).update(payload).digest('base64url');
+  return `${payload}.${assinatura}`;
+}
+
+function verificaToken(token) {
+  if (!token || typeof token !== 'string' || token.indexOf('.') === -1) return null;
+  const [payload, assinatura] = token.split('.');
+  const esperada = crypto.createHmac('sha256', ADMIN_TOKEN_SECRET).update(payload).digest('base64url');
+  if (!comparaSegredo(assinatura, esperada)) return null;
+  try {
+    const dados = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    if (!dados.exp || dados.exp < Date.now()) return null;
+    return dados;
+  } catch (e) {
+    return null;
+  }
+}
+
+function requireAdmin(req, res, next) {
+  if (!adminAuthConfigurada()) {
+    return res.status(503).json({
+      error: 'Autenticacao administrativa nao configurada no servidor. Defina ADMIN_PASSWORD e ADMIN_TOKEN_SECRET nas variaveis de ambiente.'
+    });
+  }
+  const cabecalho = req.headers.authorization || '';
+  const token = cabecalho.startsWith('Bearer ') ? cabecalho.slice(7) : null;
+  const dados = verificaToken(token);
+  if (!dados) {
+    return res.status(401).json({ error: 'Sessao administrativa invalida ou expirada. Entre novamente no painel.' });
+  }
+  req.admin = dados;
+  next();
+}
+
+app.post(['/api/admin/login', '/admin/login'], async (req, res) => {
+  if (!adminAuthConfigurada()) {
+    return res.status(503).json({
+      error: 'Autenticacao administrativa nao configurada no servidor. Defina ADMIN_PASSWORD e ADMIN_TOKEN_SECRET nas variaveis de ambiente.'
+    });
+  }
+  const id = (req.body && req.body.id) || '';
+  const password = (req.body && req.body.password) || '';
+  const idConfere = comparaSegredo(String(id).trim().toUpperCase(), String(ADMIN_ID).trim().toUpperCase());
+  const senhaConfere = comparaSegredo(password, ADMIN_PASSWORD);
+  if (!idConfere || !senhaConfere) {
+    return res.status(401).json({ error: 'ID ou senha incorretos.' });
+  }
+  res.json({ token: assinaToken(ADMIN_ID), adminId: ADMIN_ID, expiresIn: ADMIN_TOKEN_TTL_MS });
+});
+
 // --- ROTAS DE POSTS ---
 
 app.get(['/api/posts', '/posts'], async (req, res) => {
@@ -192,7 +265,7 @@ app.get(['/api/posts/:id', '/posts/:id'], async (req, res) => {
   }
 });
 
-app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
+app.post(['/api/posts', '/posts'], requireAdmin, upload.single('image'), async (req, res) => {
   const { title, description, content, author, status } = req.body;
   const postId = req.body.id || Date.now();
 
@@ -226,7 +299,7 @@ app.post(['/api/posts', '/posts'], upload.single('image'), async (req, res) => {
   }
 });
 
-app.put(['/api/posts/:id', '/posts/:id'], upload.single('image'), async (req, res) => {
+app.put(['/api/posts/:id', '/posts/:id'], requireAdmin, upload.single('image'), async (req, res) => {
   const { id } = req.params;
   try {
     const [rows] = await pool.query('SELECT * FROM posts WHERE id = ?', [id]);
@@ -277,7 +350,7 @@ app.put(['/api/posts/:id', '/posts/:id'], upload.single('image'), async (req, re
   }
 });
 
-app.delete(['/api/posts/:id', '/posts/:id'], async (req, res) => {
+app.delete(['/api/posts/:id', '/posts/:id'], requireAdmin, async (req, res) => {
   const { id } = req.params;
   try {
     const [rows] = await pool.query('SELECT * FROM posts WHERE id = ?', [id]);
@@ -293,7 +366,7 @@ app.delete(['/api/posts/:id', '/posts/:id'], async (req, res) => {
 
 
 // Rota para upload de imagens (compatibilidade com frontend storage.upload)
-app.post(['/api/upload', '/upload'], upload.single('image'), async (req, res) => {
+app.post(['/api/upload', '/upload'], requireAdmin, upload.single('image'), async (req, res) => {
   if (!req.file || !req.file.buffer) {
     return res.status(400).json({ error: 'Nenhum arquivo enviado' });
   }
@@ -350,7 +423,7 @@ app.get(['/api/home-content', '/home-content', '/api/api/home-content'], async (
   }
 });
 
-app.post(['/api/home-content', '/home-content', '/api/api/home-content'], upload.single('image'), async (req, res) => {
+app.post(['/api/home-content', '/home-content', '/api/api/home-content'], requireAdmin, upload.single('image'), async (req, res) => {
   if (!req.body || !req.body.section) {
     return res.status(400).json({ error: 'Campo "section" é obrigatório' });
   }
@@ -433,7 +506,7 @@ app.get(['/api/site-pages/:id', '/site-pages/:id'], async (req, res) => {
 });
 
 // POST /api/site-pages — criar nova página
-app.post(['/api/site-pages', '/site-pages'], async (req, res) => {
+app.post(['/api/site-pages', '/site-pages'], requireAdmin, async (req, res) => {
   const { title, description, content, image, status } = req.body;
   const id = Date.now();
   const baseSlug = slugify(title || `pagina-${id}`);
@@ -451,7 +524,7 @@ app.post(['/api/site-pages', '/site-pages'], async (req, res) => {
 });
 
 // PUT /api/site-pages/:id — atualizar página
-app.put(['/api/site-pages/:id', '/site-pages/:id'], async (req, res) => {
+app.put(['/api/site-pages/:id', '/site-pages/:id'], requireAdmin, async (req, res) => {
   const { id } = req.params;
   try {
     const [rows] = await pool.query('SELECT * FROM site_pages WHERE id = ?', [id]);
@@ -481,7 +554,7 @@ app.put(['/api/site-pages/:id', '/site-pages/:id'], async (req, res) => {
 });
 
 // DELETE /api/site-pages/:id
-app.delete(['/api/site-pages/:id', '/site-pages/:id'], async (req, res) => {
+app.delete(['/api/site-pages/:id', '/site-pages/:id'], requireAdmin, async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT id FROM site_pages WHERE id = ?', [req.params.id]);
     if (!rows.length) return res.status(404).json({ error: 'Página não encontrada' });

@@ -4,13 +4,8 @@ const ADMIN_AUTH_TARGET_KEY = 'cacs-admin-target';
 
 const ADMIN_SESSION_TTL_HOURS = 8;
 
-const ADMIN_CREDENTIALS = [
-    {
-        id: 'ADM-CA01',
-        password: 'Cacs@7mL9',
-        label: 'Administrador único',
-    },
-];
+// As credenciais ficam no servidor, em variáveis de ambiente.
+// Nenhuma senha é guardada neste arquivo, que é público.
 
 function getAdminTargetFromUrl() {
     const target = new URLSearchParams(window.location.search).get('target');
@@ -59,9 +54,8 @@ function normalizeAdminId(value) {
     return String(value || '').trim().toUpperCase();
 }
 
-function findAdminCredential(adminId) {
-    const normalizedAdminId = normalizeAdminId(adminId);
-    return ADMIN_CREDENTIALS.find((credential) => credential.id === normalizedAdminId) || null;
+function getApiBaseUrl() {
+    return (window.apiConfig && window.apiConfig.API_BASE_URL) || '';
 }
 
 function isAdminSessionValid(session) {
@@ -73,7 +67,7 @@ function isAdminSessionValid(session) {
         return false;
     }
 
-    return Boolean(findAdminCredential(session.adminId));
+    return true;
 }
 
 function readAdminSessionTarget() {
@@ -110,12 +104,13 @@ function updateLoginUiForTarget(target) {
     }
 }
 
-function buildAdminSession(adminId, target) {
+function buildAdminSession(adminId, target, token, expiresInMs) {
+    const duracao = expiresInMs || ADMIN_SESSION_TTL_HOURS * 60 * 60 * 1000;
     return {
-        token: generateSessionToken(),
+        token: token || generateSessionToken(),
         adminId,
         target,
-        expires_at: new Date(Date.now() + ADMIN_SESSION_TTL_HOURS * 60 * 60 * 1000).toISOString(),
+        expires_at: new Date(Date.now() + duracao).toISOString(),
     };
 }
 
@@ -127,7 +122,7 @@ function generateSessionToken() {
     return `cacs-${Date.now()}-${Math.random().toString(16).slice(2)}-${Math.random().toString(16).slice(2)}`;
 }
 
-function authenticateAdmin(target) {
+async function authenticateAdmin(target) {
     const adminIdInput = document.getElementById('admin-id');
     const passwordInput = document.getElementById('admin-password');
     const adminId = normalizeAdminId(adminIdInput?.value);
@@ -138,15 +133,34 @@ function authenticateAdmin(target) {
         return;
     }
 
-    const credential = findAdminCredential(adminId);
-
-    if (!credential || credential.password !== password) {
-        setLoginStatus('ID ou senha inválidos.', 'error');
+    const base = getApiBaseUrl();
+    if (!base) {
+        setLoginStatus('Não foi possível contatar o servidor. Recarregue a página.', 'error');
         return;
     }
 
-    const session = buildAdminSession(credential.id, target);
-    saveAdminSession(session);
+    setLoginStatus('Verificando credenciais...', 'info');
+
+    let resposta;
+    let dados;
+    try {
+        resposta = await fetch(`${base}/admin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: adminId, password }),
+        });
+        dados = await resposta.json().catch(() => ({}));
+    } catch (error) {
+        setLoginStatus('Falha de conexão com o servidor. Verifique a internet e tente novamente.', 'error');
+        return;
+    }
+
+    if (!resposta.ok || !dados.token) {
+        setLoginStatus(dados.error || 'ID ou senha inválidos.', 'error');
+        return;
+    }
+
+    saveAdminSession(buildAdminSession(dados.adminId || adminId, target, dados.token, dados.expiresIn));
 
     setLoginStatus('Acesso liberado. Redirecionando...', 'success');
     window.location.replace(getAdminPanelUrl());
@@ -194,7 +208,7 @@ function initLoginPage() {
             }
 
             try {
-                authenticateAdmin(target);
+                await authenticateAdmin(target);
             } catch (error) {
                 setLoginStatus(error.message, 'error');
             } finally {
@@ -247,3 +261,48 @@ window.adminAuth = {
     clearAdminSession,
     readAdminSession,
 };
+
+// Anexa o token administrativo a toda requisição de escrita dirigida à API.
+// Fica centralizado aqui porque este arquivo é carregado em todas as páginas
+// do painel, o que dispensa alterar cada ponto de chamada.
+(function interceptaEscritasAdministrativas() {
+    if (window.__adminFetchInterceptado) {
+        return;
+    }
+    window.__adminFetchInterceptado = true;
+
+    const fetchOriginal = window.fetch.bind(window);
+    const METODOS_DE_ESCRITA = ['POST', 'PUT', 'PATCH', 'DELETE'];
+
+    window.fetch = async function (input, init) {
+        const url = typeof input === 'string' ? input : (input && input.url) || '';
+        const metodo = String((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+        const base = getApiBaseUrl();
+
+        const ehEscritaNaApi = Boolean(base) && url.indexOf(base) === 0 && METODOS_DE_ESCRITA.indexOf(metodo) !== -1;
+        const ehLogin = url.indexOf('/admin/login') !== -1;
+
+        if (!ehEscritaNaApi || ehLogin) {
+            return fetchOriginal(input, init);
+        }
+
+        const sessao = readAdminSession();
+        const opcoes = Object.assign({}, init);
+        if (sessao && sessao.token) {
+            const cabecalhos = new Headers((init && init.headers) || (input && input.headers) || {});
+            cabecalhos.set('Authorization', `Bearer ${sessao.token}`);
+            opcoes.headers = cabecalhos;
+        }
+
+        const resposta = await fetchOriginal(input, opcoes);
+
+        if (resposta.status === 401) {
+            clearAdminSession();
+            alert('Sua sessão expirou. Entre novamente no painel para continuar.');
+            const area = getProtectedAdminArea() || 'blog';
+            window.location.replace(getAdminLoginPageUrl(area === 'home' ? 'home' : 'blog'));
+        }
+
+        return resposta;
+    };
+})();
