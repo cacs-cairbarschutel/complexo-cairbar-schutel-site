@@ -112,6 +112,75 @@ const postsCache = {
   TTL: 60 * 1000 // 60 segundos
 };
 
+// --- MAPA DO SITE (sitemap.xml) ---
+// Gerado a cada requisicao para que os artigos novos entrem sozinhos.
+// Paginas internas (painel, modelos, dashboard de SEO) ficam de fora.
+const SITE_BASE_URL = 'https://cacs-cairbarschutel.org.br';
+const PAGINAS_PUBLICAS = [
+  ['/', '1.0'],
+  ['/pages/cacs.html', '0.8'],
+  ['/pages/cdi.html', '0.8'],
+  ['/pages/acolhimento.html', '0.8'],
+  ['/pages/bilingue.html', '0.8'],
+  ['/pages/cedesp.html', '0.8'],
+  ['/pages/florescer.html', '0.8'],
+  ['/pages/brecho.html', '0.8'],
+  ['/pages/campanha-fome.html', '0.8'],
+  ['/pages/doacao.html', '0.9'],
+  ['/pages/nfp.html', '0.9'],
+  ['/pages/voluntario.html', '0.7'],
+  ['/pages/transparencia.html', '0.7'],
+  ['/pages/agenda.html', '0.6'],
+  ['/pages/blog.html', '0.9']
+];
+
+function escaparXml(valor) {
+  return String(valor)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function dataIso(valor) {
+  const d = valor ? new Date(valor) : null;
+  return d && !isNaN(d.getTime()) ? d.toISOString().slice(0, 10) : null;
+}
+
+app.get(['/sitemap.xml', '/api/sitemap.xml'], async (req, res) => {
+  const entradas = PAGINAS_PUBLICAS.map(([caminho, prioridade]) => ({
+    loc: SITE_BASE_URL + caminho,
+    prioridade,
+    lastmod: null
+  }));
+
+  try {
+    const [linhas] = await pool.query(
+      "SELECT slug, created_at, published_at FROM posts WHERE status = 'published' AND slug IS NOT NULL AND slug <> '' ORDER BY created_at DESC"
+    );
+    linhas.forEach((linha) => {
+      entradas.push({
+        loc: `${SITE_BASE_URL}/pages/blog-post.html?slug=${encodeURIComponent(linha.slug)}`,
+        prioridade: '0.7',
+        lastmod: dataIso(linha.published_at || linha.created_at)
+      });
+    });
+  } catch (error) {
+    // Sem os artigos o mapa ainda vale para as paginas fixas.
+    console.error('Sitemap: falha ao listar posts:', error.message);
+  }
+
+  const corpo = entradas.map((e) => {
+    const lastmod = e.lastmod ? `\n    <lastmod>${e.lastmod}</lastmod>` : '';
+    return `  <url>\n    <loc>${escaparXml(e.loc)}</loc>${lastmod}\n    <priority>${e.prioridade}</priority>\n  </url>`;
+  }).join('\n');
+
+  res.set('Content-Type', 'application/xml; charset=utf-8');
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${corpo}\n</urlset>\n`);
+});
+
 // --- ROTAS DE POSTS ---
 
 app.get(['/api/posts', '/posts'], async (req, res) => {

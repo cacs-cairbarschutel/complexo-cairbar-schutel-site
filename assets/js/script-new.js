@@ -636,6 +636,41 @@ async function renderBlogIndex() {
     }
 }
 
+// Cada artigo passa a ter título, descrição e endereço canônico próprios.
+// Antes, todas as páginas de artigo se apresentavam de forma idêntica aos
+// buscadores, que as tratavam como uma única página repetida.
+function definirTagDeCabecalho(seletor, atributo, valor, molde) {
+    let el = document.head.querySelector(seletor);
+    if (!el) {
+        el = document.createElement(molde.tag);
+        Object.keys(molde.attrs).forEach((k) => el.setAttribute(k, molde.attrs[k]));
+        document.head.appendChild(el);
+    }
+    el.setAttribute(atributo, valor);
+}
+
+function aplicarSeoDoPost(post) {
+    if (!post) return;
+
+    const titulo = `${post.title} | CACS`;
+    const descricao = String(post.description || '').trim().slice(0, 160);
+    const imagem = normalizeImagePath(post.image);
+    const endereco = post.slug
+        ? `https://cacs-cairbarschutel.org.br/pages/blog-post.html?slug=${encodeURIComponent(post.slug)}`
+        : window.location.href;
+
+    document.title = titulo;
+    definirTagDeCabecalho('meta[name="description"]', 'content', descricao, { tag: 'meta', attrs: { name: 'description' } });
+    definirTagDeCabecalho('link[rel="canonical"]', 'href', endereco, { tag: 'link', attrs: { rel: 'canonical' } });
+    definirTagDeCabecalho('meta[property="og:type"]', 'content', 'article', { tag: 'meta', attrs: { property: 'og:type' } });
+    definirTagDeCabecalho('meta[property="og:title"]', 'content', titulo, { tag: 'meta', attrs: { property: 'og:title' } });
+    definirTagDeCabecalho('meta[property="og:description"]', 'content', descricao, { tag: 'meta', attrs: { property: 'og:description' } });
+    definirTagDeCabecalho('meta[property="og:url"]', 'content', endereco, { tag: 'meta', attrs: { property: 'og:url' } });
+    if (imagem) {
+        definirTagDeCabecalho('meta[property="og:image"]', 'content', imagem, { tag: 'meta', attrs: { property: 'og:image' } });
+    }
+}
+
 async function renderPostDetail() {
     console.log('📖 renderPostDetail() chamado');
     const container = document.getElementById('post-detail');
@@ -686,6 +721,7 @@ async function renderPostDetail() {
     }
 
     console.log('✨ Renderizando detalhes do post:', post.title);
+    aplicarSeoDoPost(post);
     const content = renderStoredContent(post.content);
 
     container.innerHTML = `
