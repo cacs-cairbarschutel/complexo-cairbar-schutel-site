@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Áreas internas, fora do índice de busca
+Disallow: /admin/
+Disallow: /pages/seo-dashboard.html
+Disallow: /pages/page.html
+Disallow: /pages/blog-post-1.html
+Disallow: /pages/blog-post-2.html
+Disallow: /pages/blog-post-3.html
+
+Sitemap: https://cacs-cairbarschutel.org.br/sitemap.xml
