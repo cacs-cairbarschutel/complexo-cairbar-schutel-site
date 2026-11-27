@@ -111,7 +111,7 @@ const HOME_DEFAULT_CONTENT = {
         description: 'O CEDESP será um centro de capacitação profissional dedicado ao desenvolvimento social e produtivo de adolescentes e jovens a partir de 15 anos em situação de vulnerabilidade em São Paulo, com previsão de implantação em 2027.',
         image_url: 'assets/img/predioazul1.png'
     },
-    campanhaFome: {
+    'campanha-fome': {
         title: 'Campanha Contra a Fome',
         description: 'A Campanha Contra a Fome oferece segurança alimentar integral para famílias em situação de vulnerabilidade social em São Paulo, distribuindo alimentos essenciais e promovendo dignidade através do acesso ao direito fundamental de se alimentar.',
         image_url: 'assets/img/Cópia de 14. Campanha contra a Fome (2).jpg'
@@ -188,7 +188,9 @@ function readCachedHomeContent() {
 
 function applyHomeSectionContent(sectionName, content) {
     const config = HOME_CONTENT_SECTIONS[sectionName];
-    if (!config) {
+    if (!config || !content) {
+        // Sem configuração ou sem conteúdo, a seção mantém o que já está no HTML.
+        // O retorno evita que uma seção vazia interrompa as seguintes.
         return;
     }
 
