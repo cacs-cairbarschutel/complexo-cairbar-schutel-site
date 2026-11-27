@@ -443,38 +443,49 @@ function renderStoredContent(content) {
 const POSTS_HOME_CACHE_KEY = 'cacs_home_posts_cache';
 const POSTS_BLOG_CACHE_KEY = 'cacs_blog_posts_cache';
 
-function getCachedHomePosts() {
+// A cópia local serve para a primeira pintura da tela ser instantânea.
+// Sem prazo de validade, ela mantinha conteúdo antigo indefinidamente
+// sempre que a consulta à API demorava ou falhava.
+const POSTS_CACHE_TTL_MS = 15 * 60 * 1000;
+
+function lerCacheComValidade(chave) {
     try {
-        const raw = localStorage.getItem(POSTS_HOME_CACHE_KEY);
-        return raw ? JSON.parse(raw) : null;
+        const raw = localStorage.getItem(chave);
+        if (!raw) return null;
+        const guardado = JSON.parse(raw);
+        // Formato antigo (lista pura): descartado para forçar uma busca nova.
+        if (Array.isArray(guardado)) return null;
+        if (!guardado || !Array.isArray(guardado.posts)) return null;
+        if (Date.now() - (guardado.savedAt || 0) > POSTS_CACHE_TTL_MS) return null;
+        return guardado.posts;
     } catch (e) {
         return null;
     }
+}
+
+function gravarCacheComValidade(chave, posts) {
+    try {
+        localStorage.setItem(chave, JSON.stringify({ savedAt: Date.now(), posts }));
+    } catch (e) {
+        // Espaço esgotado ou modo restrito: seguir sem cópia local.
+    }
+}
+
+function getCachedHomePosts() {
+    return lerCacheComValidade(POSTS_HOME_CACHE_KEY);
 }
 
 function setCachedHomePosts(posts) {
-    try {
-        localStorage.setItem(POSTS_HOME_CACHE_KEY, JSON.stringify(posts));
-    } catch (e) {
-        console.warn('Erro ao salvar cache de posts:', e);
-    }
+    gravarCacheComValidade(POSTS_HOME_CACHE_KEY, posts);
 }
 
+
 function getCachedBlogPosts() {
-    try {
-        const raw = localStorage.getItem(POSTS_BLOG_CACHE_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch (e) {
-        return null;
-    }
+    return lerCacheComValidade(POSTS_BLOG_CACHE_KEY);
 }
 
 function setCachedBlogPosts(posts) {
-    try {
-        localStorage.setItem(POSTS_BLOG_CACHE_KEY, JSON.stringify(posts));
-    } catch (e) {
-        console.warn('Erro ao salvar cache do blog:', e);
-    }
+    gravarCacheComValidade(POSTS_BLOG_CACHE_KEY, posts);
 }
 
 async function getPublishedPosts(limit) {
